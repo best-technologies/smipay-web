@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 export default function Footer() {
   return (
     <footer className="mt-24 w-full bg-brand-text-primary text-white">
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
           <div>
             <div className="text-xl font-semibold">Smipay</div>

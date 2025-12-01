@@ -2,14 +2,14 @@ import Image from "next/image";
 
 const brands = [
   {
-    src: "/svgs/brands/accessible-publishers.svg",
+    src: "/svgs/brands/accessible.svg",
     alt: "Accessible Publishers",
   },
-  { src: "/svgs/brands/oxygen-fm.svg", alt: "Oxygen FM" },
+  { src: "/svgs/brands/oxygen.svg", alt: "Oxygen FM" },
   { src: "/svgs/brands/best-in-print.svg", alt: "Best in Print" },
   { src: "/svgs/brands/smart-edu-hub.svg", alt: "Smart Edu Hub" },
   { src: "/svgs/brands/buy-books.svg", alt: "Buy Books" },
-  { src: "/svgs/brands/zeno.svg", alt: "Zeno" },
+  { src: "/svgs/brands/besttech.svg", alt: "Best Tech" },
 ];
 
 export default function TrustMarquee() {

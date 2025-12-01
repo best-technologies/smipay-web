@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 export default function Header() {
   return (
     <header className="h-header w-full bg-brand-bg-primary text-white">
-      <div className="mx-auto flex h-header max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-6">
         <div className="text-xl font-semibold">Smipay</div>
         <nav className="flex items-center gap-8 text-sm">
           <Link href="#" className="hover:opacity-90">
