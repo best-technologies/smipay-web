@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
+import { useState } from "react";
 
 export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <header className="h-header w-full bg-brand-bg-primary text-white">
       <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-6">
         <div className="text-xl font-semibold">Smipay</div>
-        <nav className="flex items-center gap-8 text-sm">
+
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-8 text-sm lg:flex">
           <Link href="#" className="hover:opacity-90">
             Home
           </Link>
@@ -45,7 +50,36 @@ export default function Header() {
             Support
           </Link>
         </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="lg:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="bg-brand-bg-primary px-6 pb-6 lg:hidden">
+          <nav className="flex flex-col gap-4 text-sm">
+            <Link href="#" className="hover:opacity-90">
+              Home
+            </Link>
+            <Link href="#" className="hover:opacity-90">
+              Services
+            </Link>
+            <Link href="#" className="hover:opacity-90">
+              About Us
+            </Link>
+            <Link href="#" className="hover:opacity-90">
+              Support
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

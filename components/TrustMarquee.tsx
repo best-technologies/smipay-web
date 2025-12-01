@@ -17,7 +17,7 @@ export default function TrustMarquee() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center">
-        <h2 className="font-funnel text-xl font-semibold text-brand-primary">
+        <h2 className="lg:text-xl font-semibold text-brand-primary">
           Supporting Brands Behind Smipay
         </h2>
         <div className="marquee relative">
