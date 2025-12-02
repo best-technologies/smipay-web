@@ -99,7 +99,7 @@ function TestimonialCard({
       </div>
 
       {/* Card content */}
-      <div className="border border-gray-200 rounded-lg p-6 pt-8 bg-white shadow-sm mb-8 lg:mb-0">
+      <div className="border border-gray-200 rounded-sm p-6 pt-8 bg-white shadow-sm mb-8 lg:mb-0">
         {/* Quote */}
         <blockquote className="text-brand-text-secondary text-sm leading-relaxed mb-6 md:mb-4">
           &quot;{quote}&quot;
