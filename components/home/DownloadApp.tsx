@@ -4,7 +4,7 @@ import AppStoreButtons from "../AppStoreButtons";
 export default function DownloadApp() {
   return (
     <section className="bg-white mx-auto max-w-7xl px-4 md:px-6 py-16">
-      <div className="bg-brand-bg-primary border-b border-brand-bg-primary rounded-xl md:rounded-2xl h-[500px] md:h-[570px] lg:h-auto">
+      <div className="bg-brand-bg-primary border-b border-brand-bg-primary rounded-xl md:rounded-2xl h-[583px] min-[375px]:h-[522px] min-[425px]:h-[500px] md:h-[570px] lg:h-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left side - Text content and buttons */}
           <div className="px-6 sm:px-8 md:px-12 lg:pl-8 lg:pr-8 xl:px-16 py-8 md:py-12 lg:py-16">
