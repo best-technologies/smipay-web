@@ -1,6 +1,7 @@
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import TrustMarquee from "../components/TrustMarquee";
+import StackCard from "../components/home/StackCard";
 import WhyOurApp from "../components/home/WhyOurApp";
 import Testimonial from "../components/home/Testimonial";
 import Faq from "../components/home/Faq";
@@ -13,6 +14,7 @@ export default function Home() {
       <Header />
       <Hero />
       <TrustMarquee />
+      <StackCard />
       <WhyOurApp />
       <Testimonial />
       <Faq />
