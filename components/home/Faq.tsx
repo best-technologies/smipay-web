@@ -9,33 +9,34 @@ export default function Faq() {
   const faqs = [
     {
       id: 1,
-      question: "Where can I use my virtual dollar card?",
+      question: "What is Smipay and what can I do with the app?",
       answer:
-        "You can use your virtual dollar card for online payments anywhere international cards are accepted like e-commerce sites, subscription services, and digital platforms.",
+        "Smipay is an all-in-one lifestyle app that allows you to manage your finances seamlessly. You can pay electricity bills, buy airtime and data, renew cable TV subscriptions, pay for education services (JAMB/WAEC), and create Virtual Dollar or Naira cards for online shopping.",
     },
     {
       id: 2,
-      question: "Where can I use my virtual dollar card?",
+      question: "Is my money safe on Smipay?",
       answer:
-        "You can use your virtual dollar card for online payments anywhere international cards are accepted like e-commerce sites, subscription services, and digital platforms.",
+        "Yes. We use encryption and security protocols to ensure your personal information and funds are protected. You also have access to a complete transaction history to track every Kobo you spend in real-time.",
     },
     {
       id: 3,
-      question: "Where can I use my virtual dollar card?",
+      question: "Where can I use my Smipay Virtual Dollar Card?",
       answer:
-        "You can use your virtual dollar card for online payments anywhere international cards are accepted like e-commerce sites, subscription services, and digital platforms.",
+        "Your Virtual Dollar Card works globally on most international platforms. You can use it to pay for subscriptions like Netflix, Apple Music, and Spotify, or shop on websites like Amazon, AliExpress, and more.",
     },
     {
       id: 4,
-      question: "Where can I use my virtual dollar card?",
+      question: "How long does it take to receive my electricity token?",
       answer:
-        "You can use your virtual dollar card for online payments anywhere international cards are accepted like e-commerce sites, subscription services, and digital platforms.",
+        "It is instant. Once your payment is confirmed, the token is generated and displayed immediately on your screen. You can also view it later in your transaction history.",
     },
     {
       id: 5,
-      question: "Where can I use my virtual dollar card?",
+      question:
+        "What should I do if a transaction fails but my money was deducted?",
       answer:
-        "You can use your virtual dollar card for online payments anywhere international cards are accepted like e-commerce sites, subscription services, and digital platforms.",
+        "While transaction failures are rare, they can happen due to network issues. If this occurs, please contact our support team via the app or email support@smipay.com. We will verify the transaction and ensure your value is delivered or your money is refunded.",
     },
   ];
 
