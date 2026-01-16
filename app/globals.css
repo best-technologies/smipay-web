@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 
 :root {
-  --brand-bg-primary: #310a69;
-  --brand-text-primary: #041c4d;
+  --brand-bg-primary: #ff6600;
+  --brand-text-primary: #ff6600;
   --brand-text-secondary: #6b7280;
   --brand-black: #222222;
   --radius: 0.625rem;

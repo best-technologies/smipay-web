@@ -9,7 +9,7 @@ export default function Header() {
   const [isServicesOpen, setIsServicesOpen] = useState(false);
 
   return (
-    <header className="w-full bg-brand-bg-primary text-white">
+    <header className="w-full bg-[#F9FAFB] text-brand-text-primary">
       <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-6">
         <div className="text-xl font-semibold">Smipay</div>
 
