@@ -56,14 +56,14 @@ const cards = [
       "Shop and pay on international websites with ease. Your Dollar virtual card lets you make global purchases, manage online subscriptions, and handle foreign transactions confidently. Enjoy secure payments, flexible funding, and real-time tracking — all without needing a physical dollar account.",
     image: "/imgs/stack-card-06.png",
   },
-  {
-    bgColor: "bg-[#F6E4F0]",
-    badge: "Gift cards",
-    title: "Turn Gift Cards into Real Value",
-    description:
-      "Buy, sell, or redeem gift cards from top international brands at competitive rates. Whether you are sending a gift or converting unused cards into cash, the process is fast, secure, and straightforward. No hidden conditions — just real value in minutes.",
-    image: "/imgs/stack-card-07.png",
-  },
+  // {
+  //   bgColor: "bg-[#F6E4F0]",
+  //   badge: "Gift cards",
+  //   title: "Turn Gift Cards into Real Value",
+  //   description:
+  //     "Buy, sell, or redeem gift cards from top international brands at competitive rates. Whether you are sending a gift or converting unused cards into cash, the process is fast, secure, and straightforward. No hidden conditions — just real value in minutes.",
+  //   image: "/imgs/stack-card-07.png",
+  // },
 ];
 
 export default function StackCard() {
