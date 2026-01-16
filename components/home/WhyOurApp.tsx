@@ -36,7 +36,7 @@ export default function WhyOurApp() {
           <div className="relative">
             <div className="absolute inset-0 bg-brand-bg-primary rounded-full blur-3xl opacity-20 scale-75"></div>
             <Image
-              src="/imgs/smipay-mockup.svg"
+              src="/svgs/misc/smipay-mockup.svg"
               alt="Smipay App"
               width={400}
               height={400}
