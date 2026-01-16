@@ -5,26 +5,26 @@ export default function Testimonial() {
     {
       id: 1,
       quote:
-        "Fruitful kind bearing for. It doesn't fruit man open earth the our lights he one seas don't wherein one called, creature lesser spirit shall called.",
+        "I use Smipay to pay all my utilities. The app is fast annd user-friendly. Highly recommended!",
       name: "Oluwapelumi Akindele",
-      reviewPlace: "Play-store review",
-      avatar: "/imgs/avatar.jpg",
+      reviewPlace: "App-store review",
+      avatar: "/imgs/reviewer-01.jpg",
     },
     {
       id: 2,
       quote:
-        "Fruitful kind bearing for. It doesn't fruit man open earth the our lights he one seas don't wherein one called, creature lesser spirit shall called.",
-      name: "Oluwapelumi Akindele",
-      reviewPlace: "Play-store review",
-      avatar: "/imgs/avatar.jpg",
+        "Their save more, spend less feature helped me to save for my car without me noticing.",
+      name: "Mayowa Bernard",
+      reviewPlace: "App-store review",
+      avatar: "/imgs/reviewer-02.png",
     },
     {
       id: 3,
       quote:
-        "Fruitful kind bearing for. It doesn't fruit man open earth the our lights he one seas don't wherein one called, creature lesser spirit shall called.",
-      name: "Oluwapelumi Akindele",
+        "Smipay Virtual Card is a game-changer. Now, I am almost a shopping addict, smiles.",
+      name: "Esther O'Funmi",
       reviewPlace: "Play-store review",
-      avatar: "/imgs/avatar.jpg",
+      avatar: "/imgs/reviewer-03.jpg",
     },
   ];
 
