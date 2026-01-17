@@ -7,6 +7,9 @@ export interface UserProfile {
     last_name: string;
     email: string;
     is_verified: boolean;
+    is_email_verified: boolean;
+    is_phone_verified?: boolean;
+    account_status?: string;
     phone_number: string;
     profile_image: string;
     gender: string;
@@ -15,6 +18,9 @@ export interface UserProfile {
     totalCards: number;
     totalAccounts: number;
     wallet_balance: number;
+    smipay_tag: string;
+    role?: string;
+    isTransactionPinSetup?: boolean;
   };
   address: {
     id: string;

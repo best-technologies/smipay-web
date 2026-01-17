@@ -6,6 +6,7 @@
 import { backendApi } from "@/lib/api-client-backend";
 import { formatErrorMessage } from "@/lib/error-handler";
 import type { UserProfileResponse } from "@/types/user";
+import type { DashboardResponse } from "@/types/dashboard";
 
 export const userApi = {
   /**
@@ -73,6 +74,19 @@ export const userApi = {
   updateSettings: async (data: Record<string, any>) => {
     try {
       const response = await backendApi.put("/user/settings", data);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Get app homepage details
+   * Fetches user data, accounts, wallet, transactions, KYC, and tier information
+   */
+  getAppHomepageDetails: async () => {
+    try {
+      const response = await backendApi.get<DashboardResponse>("/user/fetch-app-homepage-details");
       return response.data;
     } catch (error) {
       throw new Error(formatErrorMessage(error));
