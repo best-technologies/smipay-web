@@ -1,9 +1,10 @@
 /**
  * Authentication API Service
- * Handles all authentication-related API calls
+ * Handles all authentication-related API calls with proper error handling
  */
 
 import { backendApi } from "@/lib/api-client-backend";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 export const authApi = {
   /**
@@ -11,11 +12,15 @@ export const authApi = {
    * @param email - User's email address
    */
   requestEmailOtp: async (email: string) => {
-    const response = await backendApi.post(
-      "/auth/minimal-register/request-email-otp",
-      { email }
-    );
-    return response.data;
+    try {
+      const response = await backendApi.post(
+        "/auth/minimal-register/request-email-otp",
+        { email }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -24,11 +29,15 @@ export const authApi = {
    * @param otp - 4-digit OTP code
    */
   verifyEmailOtp: async (email: string, otp: string) => {
-    const response = await backendApi.post(
-      "/auth/minimal-register/verify-email-otp",
-      { email, otp }
-    );
-    return response.data;
+    try {
+      const response = await backendApi.post(
+        "/auth/minimal-register/verify-email-otp",
+        { email, otp }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -43,11 +52,15 @@ export const authApi = {
     password: string;
     referral_code?: string;
   }) => {
-    const response = await backendApi.post(
-      "/auth/minimal-register/register",
-      data
-    );
-    return response.data;
+    try {
+      const response = await backendApi.post(
+        "/auth/minimal-register/register",
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -59,11 +72,15 @@ export const authApi = {
     phone_number?: string;
     password: string;
   }) => {
-    const response = await backendApi.post(
-      "/auth/minimal-register/login",
-      credentials
-    );
-    return response.data;
+    try {
+      const response = await backendApi.post(
+        "/auth/minimal-register/login",
+        credentials
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -71,10 +88,14 @@ export const authApi = {
    * @param email - User's email address
    */
   requestPasswordReset: async (email: string) => {
-    const response = await backendApi.post("/auth/request-password-reset", {
-      email,
-    });
-    return response.data;
+    try {
+      const response = await backendApi.post("/auth/request-password-reset", {
+        email,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -88,20 +109,28 @@ export const authApi = {
     otp: string,
     newPassword: string
   ) => {
-    const response = await backendApi.post("/auth/verify-password-reset-otp", {
-      email,
-      otp,
-      newPassword,
-    });
-    return response.data;
+    try {
+      const response = await backendApi.post("/auth/verify-password-reset-otp", {
+        email,
+        otp,
+        newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Logout user
    */
   logout: async () => {
-    const response = await backendApi.post("/auth/logout");
-    return response.data;
+    try {
+      const response = await backendApi.post("/auth/logout");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -109,8 +138,12 @@ export const authApi = {
    * @param refreshToken - Refresh token
    */
   refreshToken: async (refreshToken: string) => {
-    const response = await backendApi.post("/auth/refresh", { refreshToken });
-    return response.data;
+    try {
+      const response = await backendApi.post("/auth/refresh", { refreshToken });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -118,16 +151,23 @@ export const authApi = {
    * @param token - Email verification token
    */
   verifyEmail: async (token: string) => {
-    const response = await backendApi.post("/auth/verify-email", { token });
-    return response.data;
+    try {
+      const response = await backendApi.post("/auth/verify-email", { token });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Resend email verification
    */
   resendEmailVerification: async () => {
-    const response = await backendApi.post("/auth/resend-verification");
-    return response.data;
+    try {
+      const response = await backendApi.post("/auth/resend-verification");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 };
-

@@ -24,10 +24,16 @@ const USER_KEY = "smipay-user";
 
 /**
  * Save authentication token
+ * Saves to both localStorage and cookies for middleware access
  */
 export function saveToken(token: string): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
+    
+    // Also set cookie for middleware access (expires in 7 days)
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7);
+    document.cookie = `${TOKEN_KEY}=${token}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
   }
 }
 
@@ -43,10 +49,14 @@ export function getToken(): string | null {
 
 /**
  * Remove authentication token
+ * Removes from both localStorage and cookies
  */
 export function removeToken(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
+    
+    // Also remove cookie
+    document.cookie = `${TOKEN_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
   }
 }
 

@@ -1,92 +1,91 @@
 /**
  * Transfer API Service
- * Handles all money transfer-related API calls
+ * Handles money transfer operations with proper error handling
  */
 
 import { backendApi } from "@/lib/api-client-backend";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 export const transferApi = {
   /**
-   * Transfer to bank account
-   * @param data - Transfer data
+   * Transfer money to another user
+   * @param recipientId - Recipient's user ID or smipay tag
+   * @param amount - Amount to transfer
+   * @param note - Optional transfer note
    */
-  transferToBank: async (data: {
-    amount: number;
-    bank_code: string;
-    account_number: string;
-    account_name: string;
-    narration?: string;
-    pin: string;
-  }) => {
-    const response = await backendApi.post("/transfers/bank", data);
-    return response.data;
+  transferToUser: async (recipientId: string, amount: number, note?: string) => {
+    try {
+      const response = await backendApi.post("/transfer/user", {
+        recipientId,
+        amount,
+        note,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Transfer to another Smipay user
-   * @param data - Transfer data
+   * Transfer to bank account
+   * @param bankDetails - Bank transfer details
    */
-  transferToSmipayUser: async (data: {
+  transferToBank: async (bankDetails: {
+    accountNumber: string;
+    bankCode: string;
     amount: number;
-    recipient_tag: string;
     narration?: string;
-    pin: string;
   }) => {
-    const response = await backendApi.post("/transfers/smipay", data);
-    return response.data;
+    try {
+      const response = await backendApi.post("/transfer/bank", bankDetails);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Get list of supported banks
+   */
+  getBanks: async () => {
+    try {
+      const response = await backendApi.get("/transfer/banks");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Verify bank account
+   * @param accountNumber - Bank account number
    * @param bankCode - Bank code
-   * @param accountNumber - Account number
    */
-  verifyBankAccount: async (bankCode: string, accountNumber: string) => {
-    const response = await backendApi.post("/transfers/verify-account", {
-      bank_code: bankCode,
-      account_number: accountNumber,
-    });
-    return response.data;
-  },
-
-  /**
-   * Get list of banks
-   */
-  getBanks: async () => {
-    const response = await backendApi.get("/transfers/banks");
-    return response.data;
-  },
-
-  /**
-   * Lookup Smipay user by tag
-   * @param smipayTag - User's Smipay tag
-   */
-  lookupSmipayUser: async (smipayTag: string) => {
-    const response = await backendApi.get(`/transfers/lookup/${smipayTag}`);
-    return response.data;
+  verifyBankAccount: async (accountNumber: string, bankCode: string) => {
+    try {
+      const response = await backendApi.post("/transfer/verify-account", {
+        accountNumber,
+        bankCode,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Get transfer history
-   * @param params - Query parameters
+   * @param page - Page number
+   * @param limit - Items per page
    */
-  getTransferHistory: async (params?: {
-    page?: number;
-    limit?: number;
-    type?: "bank" | "smipay";
-    status?: string;
-  }) => {
-    const response = await backendApi.get("/transfers/history", { params });
-    return response.data;
-  },
-
-  /**
-   * Get single transfer details
-   * @param transferId - Transfer ID
-   */
-  getTransferDetails: async (transferId: string) => {
-    const response = await backendApi.get(`/transfers/${transferId}`);
-    return response.data;
+  getTransferHistory: async (page: number = 1, limit: number = 20) => {
+    try {
+      const response = await backendApi.get("/transfer/history", {
+        params: { page, limit },
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 };
-

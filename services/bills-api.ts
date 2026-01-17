@@ -1,147 +1,178 @@
 /**
- * Bills Payment API Service
- * Handles all bills payment-related API calls (Airtime, Data, Electricity, Cable, etc.)
+ * Bills API Service
+ * Handles bill payments (airtime, data, cable, electricity) with proper error handling
  */
 
 import { backendApi } from "@/lib/api-client-backend";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 export const billsApi = {
   /**
-   * Get available bill categories
+   * Buy airtime
+   * @param phoneNumber - Phone number
+   * @param amount - Amount
+   * @param network - Network provider (MTN, GLO, AIRTEL, 9MOBILE)
    */
-  getCategories: async () => {
-    const response = await backendApi.get("/bills/categories");
-    return response.data;
+  buyAirtime: async (phoneNumber: string, amount: number, network: string) => {
+    try {
+      const response = await backendApi.post("/bills/airtime", {
+        phoneNumber,
+        amount,
+        network,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get billers for a category
-   * @param categoryId - Category ID (airtime, data, electricity, cable, etc.)
+   * Buy data bundle
+   * @param phoneNumber - Phone number
+   * @param dataPlanId - Data plan ID
+   * @param network - Network provider
    */
-  getBillers: async (categoryId: string) => {
-    const response = await backendApi.get(`/bills/categories/${categoryId}/billers`);
-    return response.data;
+  buyData: async (phoneNumber: string, dataPlanId: string, network: string) => {
+    try {
+      const response = await backendApi.post("/bills/data", {
+        phoneNumber,
+        dataPlanId,
+        network,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get biller packages/plans
-   * @param billerId - Biller ID
+   * Get data plans for a network
+   * @param network - Network provider
    */
-  getBillerPackages: async (billerId: string) => {
-    const response = await backendApi.get(`/bills/billers/${billerId}/packages`);
-    return response.data;
-  },
-
-  /**
-   * Purchase airtime
-   * @param data - Airtime purchase data
-   */
-  purchaseAirtime: async (data: {
-    network: string;
-    phone_number: string;
-    amount: number;
-    pin: string;
-  }) => {
-    const response = await backendApi.post("/bills/airtime", data);
-    return response.data;
-  },
-
-  /**
-   * Purchase data bundle
-   * @param data - Data purchase data
-   */
-  purchaseData: async (data: {
-    network: string;
-    phone_number: string;
-    package_id: string;
-    pin: string;
-  }) => {
-    const response = await backendApi.post("/bills/data", data);
-    return response.data;
-  },
-
-  /**
-   * Pay electricity bill
-   * @param data - Electricity bill data
-   */
-  payElectricity: async (data: {
-    disco: string;
-    meter_number: string;
-    meter_type: string;
-    amount: number;
-    pin: string;
-  }) => {
-    const response = await backendApi.post("/bills/electricity", data);
-    return response.data;
+  getDataPlans: async (network: string) => {
+    try {
+      const response = await backendApi.get(`/bills/data/plans/${network}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Pay cable TV subscription
-   * @param data - Cable TV data
+   * @param smartCardNumber - Smart card number
+   * @param packageId - Package/bouquet ID
+   * @param provider - Cable provider (DSTV, GOTV, STARTIMES)
    */
-  payCableTv: async (data: {
-    provider: string;
-    smartcard_number: string;
-    package_id: string;
-    pin: string;
-  }) => {
-    const response = await backendApi.post("/bills/cable-tv", data);
-    return response.data;
-  },
-
-  /**
-   * Verify meter number
-   * @param disco - Distribution company
-   * @param meterNumber - Meter number
-   * @param meterType - Meter type (prepaid/postpaid)
-   */
-  verifyMeterNumber: async (
-    disco: string,
-    meterNumber: string,
-    meterType: string
+  payCableTV: async (
+    smartCardNumber: string,
+    packageId: string,
+    provider: string
   ) => {
-    const response = await backendApi.post("/bills/verify-meter", {
-      disco,
-      meter_number: meterNumber,
-      meter_type: meterType,
-    });
-    return response.data;
+    try {
+      const response = await backendApi.post("/bills/cable", {
+        smartCardNumber,
+        packageId,
+        provider,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Verify smartcard number
-   * @param provider - Cable TV provider
-   * @param smartcardNumber - Smartcard number
+   * Get cable TV packages
+   * @param provider - Cable provider
    */
-  verifySmartcard: async (provider: string, smartcardNumber: string) => {
-    const response = await backendApi.post("/bills/verify-smartcard", {
-      provider,
-      smartcard_number: smartcardNumber,
-    });
-    return response.data;
+  getCablePackages: async (provider: string) => {
+    try {
+      const response = await backendApi.get(`/bills/cable/packages/${provider}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get bills payment history
-   * @param params - Query parameters
+   * Verify cable smart card
+   * @param smartCardNumber - Smart card number
+   * @param provider - Cable provider
    */
-  getHistory: async (params?: {
-    page?: number;
-    limit?: number;
-    category?: string;
-    status?: string;
-  }) => {
-    const response = await backendApi.get("/bills/history", { params });
-    return response.data;
+  verifyCableCard: async (smartCardNumber: string, provider: string) => {
+    try {
+      const response = await backendApi.post("/bills/cable/verify", {
+        smartCardNumber,
+        provider,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get single bill transaction
-   * @param transactionId - Transaction ID
+   * Pay electricity bill
+   * @param meterNumber - Meter number
+   * @param amount - Amount
+   * @param meterType - Meter type (PREPAID, POSTPAID)
+   * @param provider - Electricity provider
    */
-  getTransaction: async (transactionId: string) => {
-    const response = await backendApi.get(`/bills/transactions/${transactionId}`);
-    return response.data;
+  payElectricity: async (
+    meterNumber: string,
+    amount: number,
+    meterType: string,
+    provider: string
+  ) => {
+    try {
+      const response = await backendApi.post("/bills/electricity", {
+        meterNumber,
+        amount,
+        meterType,
+        provider,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Verify electricity meter
+   * @param meterNumber - Meter number
+   * @param meterType - Meter type
+   * @param provider - Electricity provider
+   */
+  verifyMeter: async (
+    meterNumber: string,
+    meterType: string,
+    provider: string
+  ) => {
+    try {
+      const response = await backendApi.post("/bills/electricity/verify", {
+        meterNumber,
+        meterType,
+        provider,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Get bill payment history
+   * @param page - Page number
+   * @param limit - Items per page
+   */
+  getBillHistory: async (page: number = 1, limit: number = 20) => {
+    try {
+      const response = await backendApi.get("/bills/history", {
+        params: { page, limit },
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 };
-

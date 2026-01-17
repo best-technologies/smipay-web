@@ -1,17 +1,23 @@
 /**
  * User API Service
- * Handles all user-related API calls
+ * Handles user-related API calls with proper error handling
  */
 
 import { backendApi } from "@/lib/api-client-backend";
+import { formatErrorMessage } from "@/lib/error-handler";
+import type { UserProfileResponse } from "@/types/user";
 
 export const userApi = {
   /**
-   * Get current user profile
+   * Get full user profile with address, KYC, and wallet details
    */
   getProfile: async () => {
-    const response = await backendApi.get("/user/profile");
-    return response.data;
+    try {
+      const response = await backendApi.get<UserProfileResponse>("/user/fetch-user-profile");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -23,8 +29,12 @@ export const userApi = {
     last_name?: string;
     phone_number?: string;
   }) => {
-    const response = await backendApi.patch("/user/profile", data);
-    return response.data;
+    try {
+      const response = await backendApi.put("/user/profile", data);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -33,37 +43,39 @@ export const userApi = {
    * @param newPassword - New password
    */
   changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await backendApi.post("/user/change-password", {
-      currentPassword,
-      newPassword,
-    });
-    return response.data;
+    try {
+      const response = await backendApi.post("/user/change-password", {
+        currentPassword,
+        newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get user's devices
+   * Get user settings
    */
-  getDevices: async () => {
-    const response = await backendApi.get("/user/devices");
-    return response.data;
-  },
-
-  /**
-   * Remove a device
-   * @param deviceId - Device ID to remove
-   */
-  removeDevice: async (deviceId: string) => {
-    const response = await backendApi.delete(`/user/devices/${deviceId}`);
-    return response.data;
+  getSettings: async () => {
+    try {
+      const response = await backendApi.get("/user/settings");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Update user settings
-   * @param settings - User settings
+   * @param data - Settings to update
    */
-  updateSettings: async (settings: Record<string, any>) => {
-    const response = await backendApi.patch("/user/settings", settings);
-    return response.data;
+  updateSettings: async (data: Record<string, any>) => {
+    try {
+      const response = await backendApi.put("/user/settings", data);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 };
-

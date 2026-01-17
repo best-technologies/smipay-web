@@ -32,7 +32,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect to signin if accessing protected route without token
   if (isProtectedRoute && !token) {
-    const url = new URL("/auth/signin-new", request.url);
+    const url = new URL("/auth/signin", request.url);
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
   }

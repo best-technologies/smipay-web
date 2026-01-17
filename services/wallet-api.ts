@@ -1,30 +1,39 @@
 /**
  * Wallet API Service
- * Handles all wallet-related API calls
+ * Handles wallet-related API calls with proper error handling
  */
 
 import { backendApi } from "@/lib/api-client-backend";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 export const walletApi = {
   /**
-   * Get wallet balance
+   * Get wallet balance and details
    */
-  getBalance: async () => {
-    const response = await backendApi.get("/wallet/balance");
-    return response.data;
+  getWallet: async () => {
+    try {
+      const response = await backendApi.get("/wallet");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
    * Fund wallet
    * @param amount - Amount to fund
-   * @param paymentMethod - Payment method
+   * @param paymentMethod - Payment method (card, transfer, etc.)
    */
   fundWallet: async (amount: number, paymentMethod: string) => {
-    const response = await backendApi.post("/wallet/fund", {
-      amount,
-      paymentMethod,
-    });
-    return response.data;
+    try {
+      const response = await backendApi.post("/wallet/fund", {
+        amount,
+        paymentMethod,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
@@ -32,67 +41,50 @@ export const walletApi = {
    * @param amount - Amount to withdraw
    * @param bankDetails - Bank account details
    */
-  withdraw: async (
+  withdrawFromWallet: async (
     amount: number,
     bankDetails: {
-      bank_code: string;
-      account_number: string;
-      account_name: string;
+      accountNumber: string;
+      bankCode: string;
     }
   ) => {
-    const response = await backendApi.post("/wallet/withdraw", {
-      amount,
-      ...bankDetails,
-    });
-    return response.data;
+    try {
+      const response = await backendApi.post("/wallet/withdraw", {
+        amount,
+        ...bankDetails,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get wallet transactions
-   * @param params - Query parameters (page, limit, type, etc.)
+   * Get wallet transaction history
+   * @param page - Page number
+   * @param limit - Items per page
    */
-  getTransactions: async (params?: {
-    page?: number;
-    limit?: number;
-    type?: string;
-    startDate?: string;
-    endDate?: string;
-  }) => {
-    const response = await backendApi.get("/wallet/transactions", { params });
-    return response.data;
+  getTransactions: async (page: number = 1, limit: number = 20) => {
+    try {
+      const response = await backendApi.get("/wallet/transactions", {
+        params: { page, limit },
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 
   /**
-   * Get single transaction
+   * Get single transaction details
    * @param transactionId - Transaction ID
    */
-  getTransaction: async (transactionId: string) => {
-    const response = await backendApi.get(
-      `/wallet/transactions/${transactionId}`
-    );
-    return response.data;
-  },
-
-  /**
-   * Set transaction PIN
-   * @param pin - 4-digit PIN
-   */
-  setTransactionPin: async (pin: string) => {
-    const response = await backendApi.post("/wallet/set-pin", { pin });
-    return response.data;
-  },
-
-  /**
-   * Change transaction PIN
-   * @param oldPin - Old PIN
-   * @param newPin - New PIN
-   */
-  changeTransactionPin: async (oldPin: string, newPin: string) => {
-    const response = await backendApi.post("/wallet/change-pin", {
-      oldPin,
-      newPin,
-    });
-    return response.data;
+  getTransactionById: async (transactionId: string) => {
+    try {
+      const response = await backendApi.get(`/wallet/transactions/${transactionId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
   },
 };
-
