@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Header from "@/components/Header-new";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 
