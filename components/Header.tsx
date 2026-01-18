@@ -64,7 +64,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="bg-brand-bg-primary border-t border-white/10 lg:hidden">
+        <div className="bg-brand-bg-primary text-white border-t border-white/10 lg:hidden">
           <nav className="mx-auto max-w-7xl px-6 py-6 flex flex-col gap-4 text-sm">
             <Link
               href="#"
