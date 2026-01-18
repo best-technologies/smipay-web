@@ -43,12 +43,26 @@ backendApi.interceptors.request.use(
 backendApi.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Handle 401 Unauthorized - Clear token and redirect to login
+    // Handle 401 Unauthorized - Clear all auth data and redirect to login
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
+        // Clear localStorage
         localStorage.removeItem("smipay-access-token");
         localStorage.removeItem("smipay-user");
-        window.location.href = "/auth/signin";
+        localStorage.removeItem("smipay-last-activity");
+        localStorage.removeItem("smipay-token-expiry");
+        
+        // Clear cookies properly
+        document.cookie = "smipay-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+        
+        // Clear zustand store
+        localStorage.removeItem("smipay-auth");
+        
+        // Redirect to signin with message
+        const url = new URL("/auth/signin", window.location.origin);
+        url.searchParams.set("expired", "true");
+        url.searchParams.set("message", "Your session has expired. Please sign in again.");
+        window.location.href = url.toString();
       }
     }
 

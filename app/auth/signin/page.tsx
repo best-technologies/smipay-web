@@ -32,10 +32,16 @@ export default function SignInPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if user just registered
+  // Check for messages from URL params
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
       setSuccessMessage("Registration successful! Please sign in to continue.");
+    }
+    
+    // Check if session expired
+    if (searchParams.get("expired") === "true") {
+      const message = searchParams.get("message");
+      setServerError(message || "Your session has expired. Please sign in again.");
     }
   }, [searchParams]);
 
@@ -232,4 +238,5 @@ export default function SignInPage() {
     </div>
   );
 }
+
 
