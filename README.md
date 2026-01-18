@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smipay
 
-## Getting Started
+This repository contains the front-end app, UI components, and static assets used by the Smipay web presence.
 
-First, run the development server:
+**Tech stack:** Next.js (App Router), React, TypeScript, Tailwind CSS, Vercel-friendly.
+
+## Getting started
+
+Recommended package manager: `pnpm` (project contains `pnpm-lock.yaml`). Alternative: `npm`.
+
+Install dependencies:
 
 ```bash
-npm run dev
+pnpm install
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the development server:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+# or
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open http://localhost:3000 in your browser.
 
-## Learn More
+## Available scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `dev` — Runs the Next.js dev server.
+- `build` — Builds the production app.
+- `start` — Runs the production server after `build`.
+- `lint` — Runs ESLint.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run them with `pnpm <script>` or `npm run <script>`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Configuration & environment
 
-## Deploy on Vercel
+- Copy environment variables into a local `.env.local` file. Example variables are provided in `.env.example`.
+- Public runtime variables should be prefixed with `NEXT_PUBLIC_`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/` — Next.js App Router pages and layouts.
+- `components/` — Reusable UI components and shared design blocks.
+- `public/` — Static assets (images, svgs).
+- `lib/` — Utility helpers.
+
+## Styling & fonts
+
+- Tailwind CSS is used for styling. Global styles are in `app/globals.css`.
+- Fonts are loaded/optimized via `next/font` in the app layout.
+
+## Deployment
+
+This project is deployable to Vercel with zero-config. To deploy:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Or connect the repository to Vercel and use their automatic build/deploy flow.
+
+## Contributing
+
+Contributions are welcome. Typical workflow:
+
+1. Fork the repo and create a feature branch.
+2. Run the app locally and add tests where appropriate.
+3. Open a pull request describing your changes.
+
+## Troubleshooting
+
+- If ports are in use, run the dev server on a different port: `pnpm dev -- -p 3001`.
+- If types or imports fail, run `pnpm install` and ensure `node` and `pnpm` are recent.
+
+## License & credits
+
+Include license details here (e.g., MIT) and attribute libraries used.
+
+---
+
+Files changed: see the project root for `app/`, `components/`, and `public/` for implementation details.
