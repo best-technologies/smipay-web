@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -17,7 +17,7 @@ import { Loader2, Mail, Phone } from "lucide-react";
 
 type LoginMode = "email" | "phone";
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -70,7 +70,7 @@ export default function SignInPage() {
 
     if (!result.success) {
       const fieldErrors: Partial<LoginBackendData> = {};
-      result.error.errors.forEach((error) => {
+      result.error.issues.forEach((error) => {
         const path = error.path[0] as keyof LoginBackendData;
         fieldErrors[path] = error.message;
       });
@@ -236,6 +236,18 @@ export default function SignInPage() {
         </form>
       </AuthCard>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-bg-primary" />
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }
 

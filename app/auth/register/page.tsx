@@ -70,7 +70,7 @@ export default function RegisterNewPage() {
 
     if (!result.success) {
       const fieldErrors: Partial<Record<keyof RegistrationState, string>> = {};
-      result.error.errors.forEach((error) => {
+      result.error.issues.forEach((error) => {
         fieldErrors[error.path[0] as keyof RegistrationState] = error.message;
       });
       setErrors(fieldErrors);
@@ -115,7 +115,7 @@ export default function RegisterNewPage() {
 
     if (!result.success) {
       const fieldErrors: Partial<Record<keyof RegistrationState, string>> = {};
-      result.error.errors.forEach((error) => {
+      result.error.issues.forEach((error) => {
         fieldErrors[error.path[0] as keyof RegistrationState] = error.message;
       });
       setErrors(fieldErrors);
@@ -164,7 +164,7 @@ export default function RegisterNewPage() {
 
     if (!result.success) {
       const fieldErrors: Partial<Record<keyof RegistrationState, string>> = {};
-      result.error.errors.forEach((error) => {
+      result.error.issues.forEach((error) => {
         fieldErrors[error.path[0] as keyof RegistrationState] = error.message;
       });
       setErrors(fieldErrors);

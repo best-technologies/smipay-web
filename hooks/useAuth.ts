@@ -2,6 +2,7 @@
 
 import { useAuthStore } from "@/store/auth-store-backend";
 import { useEffect } from "react";
+import { isPaymentInProgress } from "@/lib/auth-storage";
 
 /**
  * Custom hook for authentication
@@ -23,8 +24,14 @@ export function useAuth() {
 
   // Initialize auth on mount
   useEffect(() => {
+    // If payment is in progress, don't redirect to login
+    if (isPaymentInProgress()) {
+      setLoading(false);
+      return;
+    }
+    
     initializeAuth();
-  }, [initializeAuth]);
+  }, [initializeAuth, setLoading]);
 
   return {
     user,

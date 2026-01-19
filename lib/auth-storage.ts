@@ -23,11 +23,13 @@ const TOKEN_KEY = "smipay-access-token";
 const USER_KEY = "smipay-user";
 const LAST_ACTIVITY_KEY = "smipay-last-activity";
 const TOKEN_EXPIRY_KEY = "smipay-token-expiry";
+const PAYMENT_IN_PROGRESS_KEY = "smipay-payment-in-progress";
 
-// Session timeout: 10 minutes of inactivity (fintech security standard)
-export const SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
-// Warning before timeout: 2 minutes before expiry
-export const SESSION_WARNING_TIME = 2 * 60 * 1000; // 2 minutes in milliseconds
+// Session timeout: 30 minutes of inactivity (fintech security standard)
+// Increased to 30 mins to accommodate external payment flows (Paystack, etc.)
+export const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+// Warning before timeout: 5 minutes before expiry
+export const SESSION_WARNING_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 /**
  * Save authentication token
@@ -67,6 +69,7 @@ export function removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(LAST_ACTIVITY_KEY);
     localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    localStorage.removeItem(PAYMENT_IN_PROGRESS_KEY);
     
     // Also remove cookie
     document.cookie = `${TOKEN_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
@@ -179,11 +182,61 @@ export function getTimeUntilExpiry(): number {
 }
 
 /**
+ * Mark that a payment is in progress (extends session)
+ */
+export function setPaymentInProgress(): void {
+  if (typeof window !== "undefined") {
+    const now = Date.now();
+    localStorage.setItem(PAYMENT_IN_PROGRESS_KEY, now.toString());
+    
+    // Also set a cookie for middleware to check
+    const expiryDate = new Date(now + 15 * 60 * 1000); // 15 minutes
+    document.cookie = `${PAYMENT_IN_PROGRESS_KEY}=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict; Secure`;
+    
+    // Extend session by SESSION_TIMEOUT to give time for payment
+    updateLastActivity();
+  }
+}
+
+/**
+ * Clear payment in progress flag
+ */
+export function clearPaymentInProgress(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(PAYMENT_IN_PROGRESS_KEY);
+    
+    // Also clear the cookie
+    document.cookie = `${PAYMENT_IN_PROGRESS_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
+  }
+}
+
+/**
+ * Check if payment is in progress
+ */
+export function isPaymentInProgress(): boolean {
+  if (typeof window !== "undefined") {
+    const paymentTime = localStorage.getItem(PAYMENT_IN_PROGRESS_KEY);
+    if (!paymentTime) return false;
+    
+    // Consider payment in progress if flag was set within last 15 minutes
+    const elapsed = Date.now() - parseInt(paymentTime, 10);
+    return elapsed < 15 * 60 * 1000; // 15 minutes
+  }
+  return false;
+}
+
+/**
  * Check if user is authenticated and session is valid
  */
 export function isAuthenticated(): boolean {
   const token = getToken();
   if (!token) return false;
+  
+  // If payment is in progress, extend session automatically
+  if (isPaymentInProgress()) {
+    updateLastActivity();
+    return true;
+  }
   
   // Check if session has expired
   if (isSessionExpired()) {

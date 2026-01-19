@@ -18,7 +18,7 @@ const authRoutes = [
 ];
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
   // Check if route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -26,15 +26,28 @@ export function middleware(request: NextRequest) {
   );
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
+  // Check if this is a payment callback (from Paystack, etc.)
+  const isPaymentCallback = searchParams.get("payment") === "callback";
+  const hasPaymentReference = searchParams.has("reference") || searchParams.has("trxref");
+
   // Get token from cookie or localStorage (handled client-side)
   // For server-side, we check if there's a token cookie
   const token = request.cookies.get("smipay-access-token")?.value;
+  
+  // Check for payment-in-progress flag in localStorage (via cookie)
+  const paymentInProgress = request.cookies.get("smipay-payment-in-progress")?.value;
 
-  // Redirect to signin if accessing protected route without token
-  if (isProtectedRoute && !token) {
+  // Allow payment callbacks through even without token
+  // The dashboard will handle verification and auth
+  if (isProtectedRoute && !token && !isPaymentCallback && !paymentInProgress) {
     const url = new URL("/auth/signin", request.url);
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
+  }
+  
+  // If payment callback or payment in progress, allow through and let client handle it
+  if ((isPaymentCallback || paymentInProgress) && isProtectedRoute) {
+    return NextResponse.next();
   }
 
   // Redirect to dashboard if accessing auth route with valid token

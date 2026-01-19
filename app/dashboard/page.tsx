@@ -1,30 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
 import { Wallet, TrendingUp, ArrowUpRight, ArrowDownLeft, CreditCard, Zap, Smartphone, Tv, FileText, Users, ChevronRight, Copy, Check, Loader2 } from "lucide-react";
 import { userApi } from "@/services/user-api";
 import type { DashboardData } from "@/types/dashboard";
 
 const QUICK_ACTIONS = [
-  { id: "airtime", name: "Buy Airtime", icon: Smartphone, color: "bg-blue-500", href: "/airtime" },
-  { id: "data", name: "Buy Data", icon: Zap, color: "bg-purple-500", href: "/data" },
-  { id: "cable", name: "Cable TV", icon: Tv, color: "bg-orange-500", href: "/cable" },
-  { id: "electricity", name: "Electricity", icon: Zap, color: "bg-green-500", href: "/electricity" },
-  { id: "transfer", name: "Transfer", icon: ArrowUpRight, color: "bg-indigo-500", href: "/transfer" },
-  { id: "transactions", name: "Transactions", icon: FileText, color: "bg-pink-500", href: "/transactions" },
+  { id: "airtime", name: "Buy Airtime", icon: Smartphone, color: "bg-blue-500", href: "/dashboard/airtime" },
+  { id: "data", name: "Buy Data", icon: Zap, color: "bg-purple-500", href: "/dashboard/data" },
+  { id: "cable", name: "Cable TV", icon: Tv, color: "bg-orange-500", href: "/dashboard/cable" },
+  { id: "electricity", name: "Electricity", icon: Zap, color: "bg-green-500", href: "/dashboard/electricity" },
+  { id: "transfer", name: "Transfer", icon: ArrowUpRight, color: "bg-indigo-500", href: "/dashboard/transfer" },
+  { id: "transactions", name: "Transactions", icon: FileText, color: "bg-pink-500", href: "/dashboard/transactions" },
 ];
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
+  const [paymentReference, setPaymentReference] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -47,6 +51,27 @@ export default function DashboardPage() {
 
     fetchDashboardData();
   }, []);
+
+  // Handle Paystack callback
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const reference = searchParams.get("reference") || searchParams.get("trxref");
+
+    if (payment === "callback" && reference) {
+      // User returned from Paystack, trigger verification
+      setPaymentReference(reference);
+      setIsFundWalletModalOpen(true);
+      
+      // Don't clean up URL immediately - wait for modal to open
+      setTimeout(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("payment");
+        url.searchParams.delete("reference");
+        url.searchParams.delete("trxref");
+        router.replace(url.pathname, { scroll: false });
+      }, 500);
+    }
+  }, [searchParams, router]);
 
   const copyAccountNumber = (accountNumber: string) => {
     navigator.clipboard.writeText(accountNumber);
@@ -118,7 +143,7 @@ export default function DashboardPage() {
             <div className="flex gap-3">
               <Button 
                 className="bg-brand-bg-primary hover:bg-brand-bg-primary/90"
-                onClick={() => router.push("/fund-wallet")}
+                onClick={() => setIsFundWalletModalOpen(true)}
               >
                 <ArrowDownLeft className="h-4 w-4 mr-2" />
                 Fund Wallet
@@ -339,7 +364,7 @@ export default function DashboardPage() {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => router.push("/transactions")}
+                onClick={() => router.push("/dashboard/transactions")}
                 className="text-brand-bg-primary hover:text-brand-bg-primary/80"
               >
                 View All
@@ -350,7 +375,11 @@ export default function DashboardPage() {
           <div className="divide-y divide-gray-100">
             {dashboardData.transaction_history.length > 0 ? (
               dashboardData.transaction_history.slice(0, 5).map((transaction) => (
-                <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div 
+                  key={transaction.id} 
+                  className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/dashboard/transactions/${transaction.id}`)}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       {transaction.icon ? (
@@ -387,7 +416,7 @@ export default function DashboardPage() {
                           ? "text-green-600" 
                           : "text-red-600"
                       }`}>
-                        {transaction.credit_debit === "credit" ? "+" : "-"}₦{Math.abs(transaction.amount).toLocaleString()}
+                        {transaction.credit_debit === "credit" ? "+" : "-"}₦{transaction.amount}
                       </p>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         transaction.status === "success" 
@@ -411,6 +440,29 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Fund Wallet Modal */}
+      <FundWalletModal
+        isOpen={isFundWalletModalOpen}
+        onClose={() => {
+          setIsFundWalletModalOpen(false);
+          setPaymentReference(null);
+        }}
+        bankAccounts={dashboardData.accounts}
+        initialReference={paymentReference}
+      />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-brand-bg-primary" />
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
