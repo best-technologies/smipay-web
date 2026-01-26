@@ -42,18 +42,18 @@ const cards = [
   },
   {
     bgColor: "bg-[#E9F2FE]",
-    badge: "Naira Virtual Card",
-    title: "Your Everyday Naira Card",
+    badge: "Travel Payments",
+    title: "Your Easy Way to Pay for Trips",
     description:
-      "Make secure online payments within Nigeria without exposing your main bank details. Your Naira virtual card gives you full control — set spending limits, track every transaction, and enjoy safe, seamless payments for shopping, bills, subscriptions, and services across local platforms.",
+      "Pay for flights, hotels, and travel services directly from the app without stress. Handle your travel expenses smoothly, whether you are booking locally or internationally. Enjoy secure payments, fast processing, and full transaction tracking — making every trip easier from planning to takeoff.",
     image: "/imgs/stack-card-05.png",
   },
   {
     bgColor: "bg-[#F0F7F6]",
-    badge: "Dollar Virtual Card",
-    title: "Your Card for Global Payments",
+    badge: "Betting Wallet Funding",
+    title: "Your Simple Way to Fund Your Betting Accounts",
     description:
-      "Shop and pay on international websites with ease. Your Dollar virtual card lets you make global purchases, manage online subscriptions, and handle foreign transactions confidently. Enjoy secure payments, flexible funding, and real-time tracking — all without needing a physical dollar account.",
+      "Fund your favorite betting platforms quickly and securely from one place. No delays, no failed payments, and no switching between apps. Enjoy fast top-ups, reliable processing, and clear transaction history — so you can focus on the game, not the payment.",
     image: "/imgs/stack-card-06.png",
   },
   // {
@@ -98,7 +98,7 @@ export default function StackCard() {
                     "h-full flex-col items-center py-6 md:py-8 lg:py-10 flex w-full rounded-lg mx-auto relative overflow-hidden gap-4 md:gap-6 lg:gap-8",
                     isImageRight
                       ? "sm:flex-row-reverse px-4 md:px-12 lg:px-20"
-                      : "sm:flex-row px-4 md:px-12 lg:px-20"
+                      : "sm:flex-row px-4 md:px-12 lg:px-20",
                   )}
                 >
                   {/* Text Content */}
@@ -120,7 +120,7 @@ export default function StackCard() {
                       "w-full sm:w-1/2 flex items-center mt-2 md:mt-6 sm:mt-0",
                       isImageRight
                         ? "justify-center sm:justify-start"
-                        : "justify-center sm:justify-end"
+                        : "justify-center sm:justify-end",
                     )}
                   >
                     <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-80 lg:w-[350px] lg:h-[350px]">
