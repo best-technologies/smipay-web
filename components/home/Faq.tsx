@@ -19,12 +19,12 @@ export default function Faq() {
       answer:
         "Yes. We use encryption and security protocols to ensure your personal information and funds are protected. You also have access to a complete transaction history to track every Kobo you spend in real-time.",
     },
-    {
-      id: 3,
-      question: "Where can I use my Smipay Virtual Dollar Card?",
-      answer:
-        "Your Virtual Dollar Card works globally on most international platforms. You can use it to pay for subscriptions like Netflix, Apple Music, and Spotify, or shop on websites like Amazon, AliExpress, and more.",
-    },
+    // {
+    //   id: 3,
+    //   question: "Where can I use my Smipay Virtual Dollar Card?",
+    //   answer:
+    //     "Your Virtual Dollar Card works globally on most international platforms. You can use it to pay for subscriptions like Netflix, Apple Music, and Spotify, or shop on websites like Amazon, AliExpress, and more.",
+    // },
     {
       id: 4,
       question: "How long does it take to receive my electricity token?",

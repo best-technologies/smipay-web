@@ -125,8 +125,8 @@ export default function PrivacyPolicyPage() {
               <li>Electricity meter details</li>
               <li>Airtime and data purchase details</li>
               <li>Cable subscription details</li>
-              <li>Virtual card transactions</li>
-              <li>Gift card trading information</li>
+              {/* <li>Virtual card transactions</li>
+              <li>Gift card trading information</li> */}
             </ul>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
