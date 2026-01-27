@@ -12,17 +12,17 @@ export default function CookiesPolicyPage() {
         {/* Desktop Banner (1440px) */}
         <div className="hidden xl:block relative h-60 w-full">
           <Image
-            src="/svgs/heros/policy-banner.svg"
+            src="/svgs/heros/banner.svg"
             alt="Cookies Policy Banner"
             fill
             className="object-cover"
             priority
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-6">
-            <h1 className="text-4xl lg:text-5xl font-bold text-center">
+            <h1 className="text-4xl lg:text-5xl text-brand-text-primary font-bold text-center">
               Cookies Policy
             </h1>
-            <p className="mt-3 text-sm text-white/90">
+            <p className="mt-3 text-sm text-[#9CA3AF]">
               Last updated: November 21, 2025
             </p>
           </div>
@@ -31,15 +31,17 @@ export default function CookiesPolicyPage() {
         {/* Laptop Banner (1024px) */}
         <div className="hidden lg:block xl:hidden relative h-[171px] w-full">
           <Image
-            src="/svgs/heros/policy-banner-laptop.svg"
+            src="/svgs/heros/small-laptop.svg"
             alt="Cookies Policy Banner"
             fill
             className="object-cover"
             priority
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-6">
-            <h1 className="text-3xl font-bold text-center">Cookies Policy</h1>
-            <p className="mt-3 text-sm text-white/90">
+            <h1 className="text-3xl font-bold text-center text-brand-text-primary">
+              Cookies Policy
+            </h1>
+            <p className="mt-3 text-sm text-[#9CA3AF]">
               Last updated: November 21, 2025
             </p>
           </div>
@@ -48,15 +50,17 @@ export default function CookiesPolicyPage() {
         {/* Tablet Banner (768px) */}
         <div className="hidden md:block lg:hidden relative h-32 w-full">
           <Image
-            src="/svgs/heros/policy-banner-tablet.svg"
+            src="/svgs/heros/tablet.svg"
             alt="Cookies Policy Banner"
             fill
             className="object-cover"
             priority
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-6">
-            <h1 className="text-2xl font-bold text-center">Cookies Policy</h1>
-            <p className="mt-2 text-xs text-white/90">
+            <h1 className="text-2xl font-bold text-center text-brand-text-primary">
+              Cookies Policy
+            </h1>
+            <p className="mt-2 text-xs text-[#9CA3AF]">
               Last updated: November 21, 2025
             </p>
           </div>
@@ -65,15 +69,17 @@ export default function CookiesPolicyPage() {
         {/* Mobile Banner */}
         <div className="md:hidden relative h-[167px] w-full">
           <Image
-            src="/svgs/heros/policy-banner-mobile.svg"
+            src="/svgs/heros/banner-mobile.svg"
             alt="Cookies Policy Banner"
             fill
             className="object-cover"
             priority
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-6">
-            <h1 className="text-2xl font-bold text-center">Cookies Policy</h1>
-            <p className="mt-2 text-xs text-white/90">
+            <h1 className="text-2xl font-bold text-center text-brand-text-primary">
+              Cookies Policy
+            </h1>
+            <p className="mt-2 text-xs text-[#9CA3AF]">
               Last updated: November 21, 2025
             </p>
           </div>
