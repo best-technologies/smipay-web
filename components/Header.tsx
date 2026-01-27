@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 
@@ -11,7 +12,15 @@ export default function Header() {
   return (
     <header className="w-full bg-[#F9FAFB] text-brand-text-primary">
       <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-6">
-        <div className="text-xl font-semibold">Smipay</div>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/smipay-logo.png"
+            alt="Smipay Logo"
+            width={118}
+            height={6}
+            className="object-contain"
+          />
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-8 text-sm lg:flex">
