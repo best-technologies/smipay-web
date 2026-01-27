@@ -14,8 +14,8 @@ const getProvider = () => {
 };
 
 // Dynamically import the provider component
-const VtpassAirtime = dynamic(
-  () => import("./vtpass/page"),
+const VtpassGotv = dynamic(
+  () => import("../vtpass/page"),
   { 
     loading: () => (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -28,8 +28,8 @@ const VtpassAirtime = dynamic(
   }
 );
 
-const SagecloudAirtime = dynamic(
-  () => import("./sagecloud/page"),
+const SagecloudGotv = dynamic(
+  () => import("../sagecloud/page"),
   { 
     loading: () => (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -42,14 +42,14 @@ const SagecloudAirtime = dynamic(
   }
 );
 
-export default function AirtimePage() {
+export default function GotvPage() {
   const provider = getProvider();
 
   // Conditionally render the appropriate provider component
   if (provider === "sagecloud") {
-    return <SagecloudAirtime />;
+    return <SagecloudGotv />;
   }
 
   // Default to vtpass
-  return <VtpassAirtime />;
+  return <VtpassGotv />;
 }

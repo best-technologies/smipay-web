@@ -14,7 +14,7 @@ const getProvider = () => {
 };
 
 // Dynamically import the provider component
-const VtpassAirtime = dynamic(
+const VtpassCabletv = dynamic(
   () => import("./vtpass/page"),
   { 
     loading: () => (
@@ -28,7 +28,7 @@ const VtpassAirtime = dynamic(
   }
 );
 
-const SagecloudAirtime = dynamic(
+const SagecloudCabletv = dynamic(
   () => import("./sagecloud/page"),
   { 
     loading: () => (
@@ -42,14 +42,14 @@ const SagecloudAirtime = dynamic(
   }
 );
 
-export default function AirtimePage() {
+export default function CabletvPage() {
   const provider = getProvider();
 
   // Conditionally render the appropriate provider component
   if (provider === "sagecloud") {
-    return <SagecloudAirtime />;
+    return <SagecloudCabletv />;
   }
 
   // Default to vtpass
-  return <VtpassAirtime />;
+  return <VtpassCabletv />;
 }

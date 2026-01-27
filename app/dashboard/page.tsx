@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
 import { Wallet, TrendingUp, ArrowUpRight, ArrowDownLeft, CreditCard, Zap, Smartphone, Tv, FileText, Users, ChevronRight, Copy, Check, Loader2 } from "lucide-react";
-import { userApi } from "@/services/user-api";
+import { useDashboard } from "@/hooks/useDashboard";
+import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { DashboardData } from "@/types/dashboard";
 
 const QUICK_ACTIONS = [
@@ -24,33 +25,9 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { dashboardData, isLoading: loading, error, refetch } = useDashboard();
   const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const response = await userApi.getAppHomepageDetails();
-        if (response.success) {
-          setDashboardData(response.data);
-          setError(null);
-        } else {
-          setError("Failed to load dashboard data");
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An error occurred";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
 
   // Handle Paystack callback
   useEffect(() => {
@@ -121,10 +98,6 @@ function DashboardContent() {
   }
 
   const primaryAccount = dashboardData.accounts[0];
-  const walletBalance = parseBalance(dashboardData.wallet_card.current_balance);
-  const totalFunding = parseBalance(dashboardData.wallet_card.all_time_fuunding);
-  const totalWithdrawn = parseBalance(dashboardData.wallet_card.all_time_withdrawn);
-  const transactionCount = dashboardData.transaction_history.length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -154,60 +127,8 @@ function DashboardContent() {
       </div>
 
       <div className="px-4 py-6 sm:px-6 lg:px-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {/* Wallet Balance */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Wallet className="h-5 w-5 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-sm text-brand-text-secondary mb-1">Wallet Balance</p>
-            <p className="text-2xl font-bold text-brand-text-primary">
-              ₦{walletBalance.toLocaleString()}
-            </p>
-          </div>
-
-          {/* Total Withdrawn */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-red-50 rounded-lg">
-                <ArrowUpRight className="h-5 w-5 text-red-600" />
-              </div>
-            </div>
-            <p className="text-sm text-brand-text-secondary mb-1">Total Withdrawn</p>
-            <p className="text-2xl font-bold text-brand-text-primary">
-              ₦{totalWithdrawn.toLocaleString()}
-            </p>
-          </div>
-
-          {/* Total Funding */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-              </div>
-            </div>
-            <p className="text-sm text-brand-text-secondary mb-1">Total Funding</p>
-            <p className="text-2xl font-bold text-brand-text-primary">
-              ₦{totalFunding.toLocaleString()}
-            </p>
-          </div>
-
-          {/* Transactions */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <FileText className="h-5 w-5 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-sm text-brand-text-secondary mb-1">Total Transactions</p>
-            <p className="text-2xl font-bold text-brand-text-primary">
-              {transactionCount}
-            </p>
-          </div>
-        </div>
+        {/* Wallet Analysis Cards - Global Component */}
+        <WalletAnalysisCards />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Virtual Account Card */}
@@ -447,8 +368,10 @@ function DashboardContent() {
         onClose={() => {
           setIsFundWalletModalOpen(false);
           setPaymentReference(null);
+          // Refresh dashboard data after closing modal (in case payment was successful)
+          refetch();
         }}
-        bankAccounts={dashboardData.accounts}
+        bankAccounts={dashboardData?.accounts || []}
         initialReference={paymentReference}
       />
     </div>

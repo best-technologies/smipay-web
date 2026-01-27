@@ -27,6 +27,10 @@ import {
   ChevronRight,
   Menu,
   X,
+  Phone,
+  Wifi,
+  Satellite,
+  Monitor,
 } from "lucide-react";
 
 interface MenuItem {
@@ -38,6 +42,7 @@ interface MenuItem {
     id: string;
     label: string;
     href: string;
+    icon?: any;
   }[];
 }
 
@@ -49,42 +54,31 @@ const menuItems: MenuItem[] = [
     href: "/dashboard",
   },
   {
-    id: "payments",
-    label: "Payments/Purchase",
-    icon: CreditCard,
+    id: "vtu",
+    label: "VTU",
+    icon: Phone,
     submenu: [
-      // { id: "wallet-balance", label: "Wallet Balance", href: "/dashboard/wallet" },
-      { id: "buy-airtime", label: "Buy Airtime", href: "/dashboard/airtime" },
-      // { id: "buy-data", label: "Buy Data", href: "/dashboard/data" },
-      // { id: "buy-bulk-data", label: "Buy Bulk Data", href: "/dashboard/bulk-data" },
-      // { id: "buy-data-card", label: "Buy Data Card", href: "/dashboard/data-card" },
-      // { id: "fetch-airtime-pin", label: "Fetch Airtime Pin", href: "/dashboard/airtime-pin" },
-      // { id: "fund-wallet", label: "Fund Wallet", href: "/dashboard/fund-wallet" },
-      // { id: "transactions", label: "Transactions", href: "/dashboard/transactions" },
+      { id: "buy-airtime", label: "Buy Airtime", href: "/dashboard/airtime", icon: Smartphone },
+      { id: "buy-data", label: "Buy Data", href: "/dashboard/data", icon: Wifi },
     ],
   },
-  // {
-  //   id: "data-menu",
-  //   label: "Data Menu",
-  //   icon: BarChart3,
-  //   submenu: [
-  //     { id: "data-pricing", label: "Data Pricing", href: "/dashboard/data-pricing" },
-  //     { id: "mtn-plans", label: "MTN Data Plans", href: "/dashboard/data-mtn" },
-  //     { id: "glo-plans", label: "Glo Data Plans", href: "/dashboard/data-glo" },
-  //     { id: "airtel-plans", label: "Airtel Data Plans", href: "/dashboard/data-airtel" },
-  //     { id: "9mobile-plans", label: "9Mobile Data Plans", href: "/dashboard/data-9mobile" },
-  //   ],
-  // },
+  {
+    id: "cable-tv",
+    label: "Cable TV",
+    icon: Tv,
+    submenu: [
+      { id: "dstv", label: "DSTV", href: "/dashboard/cabletv/dstv", icon: Satellite },
+      { id: "gotv", label: "GOTV", href: "/dashboard/cabletv/gotv", icon: Monitor },
+      // { id: "startimes", label: "STARTIMES", href: "/dashboard/cabletv/startimes", icon: Tv },
+    ],
+  },
   // {
   //   id: "pay-bills",
   //   label: "Pay Bills",
   //   icon: Receipt,
   //   submenu: [
-  //     { id: "dstv", label: "DSTV", href: "/dashboard/dstv" },
-  //     { id: "gotv", label: "GOTV", href: "/dashboard/gotv" },
-  //     { id: "startimes", label: "STARTIMES", href: "/dashboard/startimes" },
-  //     { id: "waec", label: "WAEC PIN", href: "/dashboard/waec" },
-  //     { id: "electricity", label: "ELECTRICITY", href: "/dashboard/electricity" },
+  //     { id: "electricity", label: "Electricity", href: "/dashboard/electricity", icon: Zap },
+  //     { id: "waec", label: "WAEC PIN", href: "/dashboard/waec", icon: FileText },
   //   ],
   // },
   // {
@@ -128,15 +122,22 @@ const otherMenuItems: MenuItem[] = [
   // },
 ];
 
-// Active routes - Dashboard, Buy Airtime, and Profile
+// Active routes - Dashboard, VTU (Airtime, Data), Cable TV (DSTV, GOTV), and Profile
 // When you need to enable a feature, uncomment it above and add its route here
-const ENABLED_ROUTES = ["/dashboard", "/dashboard/airtime", "/dashboard/settings-profile"];
+const ENABLED_ROUTES = [
+  "/dashboard",
+  "/dashboard/airtime",
+  "/dashboard/data",
+  "/dashboard/cabletv/dstv",
+  "/dashboard/cabletv/gotv",
+  "/dashboard/settings-profile",
+];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [openMenus, setOpenMenus] = useState<string[]>(["payments", "account-settings"]);
+  const [openMenus, setOpenMenus] = useState<string[]>(["vtu", "cable-tv", "account-settings"]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMenu = (menuId: string) => {
@@ -203,26 +204,29 @@ export default function Sidebar() {
                       <div className="ml-8 mt-1 space-y-1">
                         {item.submenu.map((subitem) => {
                           const enabled = isRouteEnabled(subitem.href);
+                          const SubIcon = subitem.icon;
                           return enabled ? (
                             <Link
                               key={subitem.id}
                               href={subitem.href}
                               onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
+                              className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                                 pathname === subitem.href
                                   ? "bg-brand-bg-primary/10 text-brand-bg-primary font-medium"
                                   : "text-brand-text-secondary hover:bg-gray-100 hover:text-brand-text-primary"
                               }`}
                             >
-                              {subitem.label}
+                              {SubIcon && <SubIcon className="h-4 w-4" />}
+                              <span>{subitem.label}</span>
                             </Link>
                           ) : (
                             <div
                               key={subitem.id}
                               className="relative group"
                             >
-                              <div className="block px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
-                                {subitem.label}
+                              <div className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                                {SubIcon && <SubIcon className="h-4 w-4" />}
+                                <span>{subitem.label}</span>
                               </div>
                               <div className="absolute left-full top-0 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
                                 Coming Soon
@@ -291,26 +295,29 @@ export default function Sidebar() {
                     <div className="ml-8 mt-1 space-y-1">
                       {item.submenu.map((subitem) => {
                         const enabled = isRouteEnabled(subitem.href);
+                        const SubIcon = subitem.icon;
                         return enabled ? (
                           <Link
                             key={subitem.id}
                             href={subitem.href}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
+                            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                               pathname === subitem.href
                                 ? "bg-brand-bg-primary/10 text-brand-bg-primary font-medium"
                                 : "text-brand-text-secondary hover:bg-gray-100 hover:text-brand-text-primary"
                             }`}
                           >
-                            {subitem.label}
+                            {SubIcon && <SubIcon className="h-4 w-4" />}
+                            <span>{subitem.label}</span>
                           </Link>
                         ) : (
                           <div
                             key={subitem.id}
                             className="relative group"
                           >
-                            <div className="block px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
-                              {subitem.label}
+                            <div className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                              {SubIcon && <SubIcon className="h-4 w-4" />}
+                              <span>{subitem.label}</span>
                             </div>
                             <div className="absolute left-full top-0 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
                               Coming Soon
