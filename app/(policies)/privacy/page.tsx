@@ -190,7 +190,7 @@ export default function PrivacyPolicyPage() {
               <li>Payment processors</li>
               <li>Banks and financial institutions</li>
               <li>Utility providers (electricity, cable, telecoms)</li>
-              <li>Gift card partners</li>
+              {/* <li>Gift card partners</li> */}
               <li>Identity verification services</li>
               <li>Analytics and security providers</li>
             </ul>
