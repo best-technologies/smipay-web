@@ -1,4 +1,4 @@
-import Header from "../components/Header";
+import Header from "../components/Header-new";
 import Hero from "../components/Hero";
 import TrustMarquee from "../components/TrustMarquee";
 import StackCard from "../components/home/StackCard";
