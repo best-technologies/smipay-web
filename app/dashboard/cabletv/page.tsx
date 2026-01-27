@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 // Get provider from env, default to 'vtpass'
 const getProvider = () => {
-  const provider = (process.env.NEXT_PUBLIC_AIRTIME_PROVIDER || "vtpass")
+  const provider = (process.env.NEXT_PUBLIC_CABLE_PROVIDER || "vtpass")
     .toLowerCase()
     .trim();
   

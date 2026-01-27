@@ -3,13 +3,13 @@
 import { X, CheckCircle2, Clock, AlertCircle, Loader2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import type { VtpassPurchaseResponse } from "@/services/vtpass/vtu/vtpass-airtime-api";
+import type { VtpassDataPurchaseResponse } from "@/types/vtpass/vtu/vtpass-data";
 
 interface TransactionStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   status: "success" | "processing" | "error";
-  transactionData?: VtpassPurchaseResponse;
+  transactionData?: VtpassDataPurchaseResponse;
   errorMessage?: string;
   onRetry?: () => void;
 }
@@ -44,8 +44,8 @@ export function TransactionStatusModal({
           iconColor: "text-green-600",
           bgColor: "bg-green-50",
           borderColor: "border-green-200",
-          title: "Airtime Purchase Successful!",
-          description: "Your airtime has been successfully credited to the phone number.",
+          title: "Data Purchase Successful!",
+          description: "Your data bundle has been successfully credited to the phone number.",
         };
       case "processing":
         return {
@@ -99,52 +99,50 @@ export function TransactionStatusModal({
               <Icon className={`h-16 w-16 ${config.iconColor}`} />
             )}
           </div>
-          <h2 className="text-2xl font-bold text-brand-text-primary mb-2">
+          <h2 className={`text-2xl font-bold ${config.iconColor.replace("text-", "text-")} mb-2`}>
             {config.title}
           </h2>
-          <p className="text-sm text-brand-text-secondary">{config.description}</p>
+          <p className="text-gray-600 text-sm">{config.description}</p>
         </div>
 
         {/* Content */}
         <div className="p-6 space-y-4">
           {status === "success" && transactionData?.content?.transactions && (
-            <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Phone Number:</span>
-                <span className="font-semibold text-brand-text-primary">
+                <span className="text-sm text-gray-600">Product:</span>
+                <span className="font-semibold text-gray-900">
+                  {transactionData.content.transactions.product_name}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Phone Number:</span>
+                <span className="font-semibold text-gray-900 font-mono">
                   {transactionData.content.transactions.unique_element}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Amount:</span>
-                <span className="font-semibold text-brand-text-primary">
-                  ₦{parseFloat(transactionData.content.transactions.amount).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Product:</span>
-                <span className="font-semibold text-brand-text-primary">
-                  {transactionData.content.transactions.product_name}
+                <span className="text-sm text-gray-600">Amount:</span>
+                <span className="font-semibold text-gray-900">
+                  ₦{parseFloat(String(transactionData.content.transactions.amount)).toLocaleString()}
                 </span>
               </div>
               {transactionId && (
                 <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                  <span className="text-sm text-brand-text-secondary">
-                    Transaction ID:
-                  </span>
+                  <span className="text-sm text-gray-600">Transaction ID:</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-brand-text-primary">
-                      {transactionId.slice(0, 12)}...
+                    <span className="font-mono text-xs text-gray-700 truncate max-w-[120px]">
+                      {transactionId}
                     </span>
                     <button
                       onClick={copyTransactionId}
                       className="p-1 hover:bg-gray-200 rounded transition-colors"
-                      title="Copy transaction ID"
+                      title="Copy Transaction ID"
                     >
                       {copied ? (
                         <Check className="h-4 w-4 text-green-600" />
                       ) : (
-                        <Copy className="h-4 w-4 text-brand-text-secondary" />
+                        <Copy className="h-4 w-4 text-gray-600" />
                       )}
                     </button>
                   </div>
@@ -154,20 +152,11 @@ export function TransactionStatusModal({
           )}
 
           {status === "processing" && transactionData && (
-            <div className="space-y-3 bg-gray-50 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Request ID:</span>
-                <span className="font-mono text-xs text-brand-text-primary">
-                  {transactionData.requestId}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Amount:</span>
-                <span className="font-semibold text-brand-text-primary">
-                  ₦{transactionData.amount.toLocaleString()}
-                </span>
-              </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800 mb-2">
+                <strong>Request ID:</strong> {transactionData.requestId}
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
                 <p className="text-xs text-blue-800">
                   <strong>Note:</strong> You can close this window and continue using the app. 
                   You'll receive a notification once the transaction is completed.
@@ -176,26 +165,15 @@ export function TransactionStatusModal({
             </div>
           )}
 
-          {status === "error" && (
+          {status === "error" && errorMessage && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-800">{config.description}</p>
-              {errorMessage?.includes("Insufficient") && (
-                <Button
-                  onClick={() => {
-                    onClose();
-                    // Navigate to fund wallet - you might want to pass a callback
-                    window.location.href = "/dashboard";
-                  }}
-                  className="mt-3 w-full bg-brand-bg-primary hover:bg-brand-bg-primary/90"
-                >
-                  Fund Wallet
-                </Button>
-              )}
+              <p className="text-sm text-red-800 font-medium mb-1">Error Details:</p>
+              <p className="text-sm text-red-700">{errorMessage}</p>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-2">
             {status === "error" && onRetry && (
               <Button
                 variant="outline"
@@ -207,13 +185,7 @@ export function TransactionStatusModal({
             )}
             <Button
               onClick={onClose}
-              className={`flex-1 ${
-                status === "success"
-                  ? "bg-brand-bg-primary hover:bg-brand-bg-primary/90"
-                  : status === "processing"
-                  ? "bg-brand-bg-primary hover:bg-brand-bg-primary/90"
-                  : "bg-brand-bg-primary hover:bg-brand-bg-primary/90"
-              }`}
+              className={status === "error" && onRetry ? "flex-1" : "w-full"}
             >
               {status === "processing" ? "Close & Continue" : "Close"}
             </Button>

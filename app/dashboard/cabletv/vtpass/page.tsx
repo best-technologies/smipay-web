@@ -1,6 +1,6 @@
 "use client";
 
-import { WalletAnalysisCard } from "@/components/dashboard/WalletAnalysisCard";
+import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import { Tv, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ export default function VtpassCabletvPage() {
             <div>
               <h1 className="text-2xl font-bold text-brand-text-primary flex items-center gap-2">
                 <Tv className="h-6 w-6" />
-                Cable TV - VTPass
+                Cable TV
               </h1>
               <p className="text-sm text-brand-text-secondary mt-1">
                 Pay cable TV bills using VTPass provider
@@ -38,9 +38,10 @@ export default function VtpassCabletvPage() {
 
       {/* Content */}
       <div className="px-4 py-6 sm:px-6 lg:px-8">
+        {/* Wallet Analysis Cards - Global Component */}
+        <WalletAnalysisCards />
+        
         <div className="max-w-4xl">
-          {/* Wallet Analysis Card */}
-          <WalletAnalysisCard />
 
           {/* Provider Content */}
           <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">

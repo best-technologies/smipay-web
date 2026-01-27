@@ -1,15 +1,16 @@
 import { create } from "zustand";
-import { vtpassAirtimeApi, type VtpassService } from "@/services/vtpass-airtime-api";
+import { vtpassDataApi } from "@/services/vtpass/vtu/vtpass-data-api";
+import type { VtpassDataService } from "@/types/vtpass/vtu/vtpass-data";
 
-interface VtpassAirtimeState {
-  serviceIds: VtpassService[] | null;
+interface VtpassDataState {
+  serviceIds: VtpassDataService[] | null;
   isLoading: boolean;
   error: string | null;
   lastFetched: number | null;
   
   // Actions
   fetchServiceIds: (forceRefresh?: boolean) => Promise<void>;
-  setServiceIds: (services: VtpassService[]) => void;
+  setServiceIds: (services: VtpassDataService[]) => void;
   clearServiceIds: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -18,7 +19,7 @@ interface VtpassAirtimeState {
 // Cache duration: 5 minutes (service IDs don't change often)
 const CACHE_DURATION = 5 * 60 * 1000;
 
-export const useVtpassAirtimeStore = create<VtpassAirtimeState>((set, get) => ({
+export const useVtpassDataStore = create<VtpassDataState>((set, get) => ({
   serviceIds: null,
   isLoading: false,
   error: null,
@@ -43,7 +44,7 @@ export const useVtpassAirtimeStore = create<VtpassAirtimeState>((set, get) => ({
 
     try {
       set({ isLoading: true, error: null });
-      const response = await vtpassAirtimeApi.getServiceIds();
+      const response = await vtpassDataApi.getServiceIds();
       
       if (response.success && response.data) {
         set({
@@ -87,4 +88,3 @@ export const useVtpassAirtimeStore = create<VtpassAirtimeState>((set, get) => ({
   
   setError: (error) => set({ error }),
 }));
-

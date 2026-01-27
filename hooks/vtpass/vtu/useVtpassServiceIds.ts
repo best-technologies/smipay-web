@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useVtpassAirtimeStore } from "@/store/vtpass-airtime-store";
+import { useVtpassAirtimeStore } from "@/store/vtpass/vtu/vtpass-airtime-store";
 
 /**
  * Custom hook for VTPass airtime service IDs

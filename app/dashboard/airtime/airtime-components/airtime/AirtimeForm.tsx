@@ -7,9 +7,9 @@ import { PhoneNumberInput } from "./PhoneNumberInput";
 import { AmountInput } from "./AmountInput";
 import { FormError } from "@/components/auth/FormError";
 import { Loader2 } from "lucide-react";
-import { useVtpassServiceIds } from "@/hooks/useVtpassServiceIds";
-import { vtpassAirtimeApi } from "@/services/vtpass-airtime-api";
-import type { VtpassService } from "@/services/vtpass-airtime-api";
+import { useVtpassServiceIds } from "@/hooks/vtpass/vtu/useVtpassServiceIds";
+import { vtpassAirtimeApi } from "@/services/vtpass/vtu/vtpass-airtime-api";
+import type { VtpassService } from "@/services/vtpass/vtu/vtpass-airtime-api";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
 
 interface AirtimeFormProps {

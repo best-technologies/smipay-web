@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useDashboard } from "@/hooks/useDashboard";
-import type { VtpassPurchaseResponse } from "@/services/vtpass-airtime-api";
+import type { VtpassPurchaseResponse } from "@/services/vtpass/vtu/vtpass-airtime-api";
 import { Loader2 } from "lucide-react";
 
 export default function VtpassAirtimePage() {

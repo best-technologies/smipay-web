@@ -4,25 +4,60 @@
  */
 
 export const NETWORK_LOGOS: Record<string, string> = {
+  // Airtime service IDs
   mtn: "/vtu-logo/mtn-logo.jpg",
   glo: "/vtu-logo/glo-logo.png",
   airtel: "/vtu-logo/airtel-logo.svg",
   etisalat: "/vtu-logo/9mobile-logo.png",
   "9-mobile": "/vtu-logo/9mobile-logo.png",
   "foreign-airtime": "/vtu-logo/9mobile-logo.png", // Using 9mobile as fallback for international
+  
+  // Data service IDs
+  "mtn-data": "/vtu-logo/mtn-logo.jpg",
+  "glo-data": "/vtu-logo/glo-logo.png",
+  "airtel-data": "/vtu-logo/airtel-logo.svg",
+  "etisalat-data": "/vtu-logo/9mobile-logo.png",
+  "glo-sme-data": "/vtu-logo/glo-logo.png",
+  "smile-direct": "/vtu-logo/glo-logo.png", // Fallback - add smile logo if available
+  "spectranet": "/vtu-logo/glo-logo.png", // Fallback - add spectranet logo if available
 };
 
 /**
  * Get local logo path for a service ID
  * Returns null if logo not found
+ * Supports both airtime and data service IDs
  */
 export function getNetworkLogo(serviceID: string): string | null {
   // Normalize service ID to lowercase
   const normalizedId = serviceID.toLowerCase().trim();
   
-  // Return mapped logo or null if not found
-  const logo = NETWORK_LOGOS[normalizedId];
-  return logo ?? null;
+  // First, try exact match
+  let logo = NETWORK_LOGOS[normalizedId];
+  if (logo) {
+    return logo;
+  }
+  
+  // For data service IDs, try extracting the network name
+  // e.g., "mtn-data" -> "mtn", "glo-data" -> "glo"
+  if (normalizedId.includes("-data")) {
+    const networkName = normalizedId.replace("-data", "").replace("-sme", "");
+    logo = NETWORK_LOGOS[networkName];
+    if (logo) {
+      return logo;
+    }
+  }
+  
+  // For airtime service IDs, try extracting network name
+  // e.g., "mtn-airtime" -> "mtn"
+  if (normalizedId.includes("-airtime")) {
+    const networkName = normalizedId.replace("-airtime", "");
+    logo = NETWORK_LOGOS[networkName];
+    if (logo) {
+      return logo;
+    }
+  }
+  
+  return null;
 }
 
 /**

@@ -2,11 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import { getNetworkLogo } from "@/lib/network-logos";
-import type { VtpassService } from "@/services/vtpass/vtu/vtpass-airtime-api";
+import type { VtpassDataService } from "@/types/vtpass/vtu/vtpass-data";
 import Image from "next/image";
 
 interface NetworkSelectorProps {
-  services: VtpassService[];
+  services: VtpassDataService[];
   selectedServiceId: string | null;
   onSelect: (serviceId: string) => void;
   isLoading?: boolean;
@@ -64,8 +64,8 @@ export function NetworkSelector({
               "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-bg-primary focus:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               isSelected
-                ? "border-brand-bg-primary bg-brand-bg-primary/5 shadow-md"
-                : "border-gray-200 hover:border-brand-bg-primary/50 bg-white"
+                ? "border-brand-bg-primary bg-brand-bg-primary/5 shadow-md ring-2 ring-brand-bg-primary/20"
+                : "border-gray-200 hover:border-gray-300 bg-white"
             )}
           >
             <div className="flex flex-col items-center text-center">
@@ -93,10 +93,10 @@ export function NetworkSelector({
                   <span className="text-2xl">📱</span>
                 </div>
               )}
-              <p className="font-semibold text-sm text-brand-text-primary">
-                {service.name.replace(" Airtime", "")}
+              <p className="font-semibold text-sm text-slate-800">
+                {service.name.replace(" Data", "").replace(" (SME)", "")}
               </p>
-              <p className="text-xs text-brand-text-secondary mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 ₦{minAmount.toLocaleString()} - ₦{maxAmount.toLocaleString()}
               </p>
             </div>
