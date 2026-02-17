@@ -31,6 +31,7 @@ import {
   Wifi,
   Satellite,
   Monitor,
+  GraduationCap,
 } from "lucide-react";
 
 interface MenuItem {
@@ -67,10 +68,17 @@ const menuItems: MenuItem[] = [
     label: "Cable TV",
     icon: Tv,
     submenu: [
-      { id: "dstv", label: "DSTV", href: "/dashboard/cabletv/dstv", icon: Satellite },
-      { id: "gotv", label: "GOTV", href: "/dashboard/cabletv/gotv", icon: Monitor },
-      // { id: "startimes", label: "STARTIMES", href: "/dashboard/cabletv/startimes", icon: Tv },
+      { id: "dstv", label: "DSTV", href: "/dashboard/cabletv?provider=dstv", icon: Satellite },
+      { id: "gotv", label: "GOTV", href: "/dashboard/cabletv?provider=gotv", icon: Monitor },
+      { id: "startimes", label: "STARTIMES", href: "/dashboard/cabletv?provider=startimes", icon: Tv },
+      { id: "showmax", label: "SHOWMAX", href: "/dashboard/cabletv?provider=showmax", icon: Monitor },
     ],
+  },
+  {
+    id: "education",
+    label: "Education",
+    icon: GraduationCap,
+    href: "/dashboard/education",
   },
   // {
   //   id: "pay-bills",
@@ -122,14 +130,14 @@ const otherMenuItems: MenuItem[] = [
   // },
 ];
 
-// Active routes - Dashboard, VTU (Airtime, Data), Cable TV (DSTV, GOTV), and Profile
+// Active routes - Dashboard, VTU (Airtime, Data), Cable TV, Education, and Profile
 // When you need to enable a feature, uncomment it above and add its route here
 const ENABLED_ROUTES = [
   "/dashboard",
   "/dashboard/airtime",
   "/dashboard/data",
-  "/dashboard/cabletv/dstv",
-  "/dashboard/cabletv/gotv",
+  "/dashboard/cabletv",
+  "/dashboard/education",
   "/dashboard/settings-profile",
 ];
 
@@ -137,7 +145,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [openMenus, setOpenMenus] = useState<string[]>(["vtu", "cable-tv", "account-settings"]);
+  // By default, only keep VTU expanded; others collapsed
+  const [openMenus, setOpenMenus] = useState<string[]>(["vtu"]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMenu = (menuId: string) => {
@@ -153,7 +162,17 @@ export default function Sidebar() {
     router.push("/");
   };
 
-  const isRouteEnabled = (href: string) => ENABLED_ROUTES.includes(href);
+  const isRouteEnabled = (href: string) => {
+    // Treat all Cable TV subtabs as enabled via the base /dashboard/cabletv route
+    if (href.startsWith("/dashboard/cabletv")) {
+      return ENABLED_ROUTES.includes("/dashboard/cabletv");
+    }
+    // Treat all Education subtabs as enabled via the base /dashboard/education route
+    if (href.startsWith("/dashboard/education")) {
+      return ENABLED_ROUTES.includes("/dashboard/education");
+    }
+    return ENABLED_ROUTES.includes(href);
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">

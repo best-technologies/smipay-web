@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
   Loader2, 
@@ -20,16 +20,30 @@ import {
 } from "lucide-react";
 import { transactionApi } from "@/services/transaction-api";
 import type { TransactionDetail } from "@/types/transaction";
+import { getNetworkLogo } from "@/lib/network-logos";
 
 export default function TransactionDetailPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const params = useParams();
   const transactionId = params.id as string;
+  const providerFromQuery = (searchParams.get("provider") as string | null) || null;
 
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const getTransactionLogo = (tx: TransactionDetail): string | null => {
+    const providerKey = (tx.provider || providerFromQuery || "").toLowerCase();
+
+    if (providerKey) {
+      const logo = getNetworkLogo(providerKey);
+      if (logo) return logo;
+    }
+    if (tx.icon) return tx.icon;
+    return null;
+  };
 
   useEffect(() => {
     const fetchTransaction = async () => {
@@ -166,12 +180,12 @@ export default function TransactionDetailPage() {
         {/* Status Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
           <div className="flex flex-col items-center text-center">
-            {/* Status Icon */}
+            {/* Provider / Status Icon */}
             <div className="mb-4">
-              {transaction.icon ? (
+              {getTransactionLogo(transaction) ? (
                 <img 
-                  src={transaction.icon} 
-                  alt="" 
+                  src={getTransactionLogo(transaction) as string} 
+                  alt={transaction.description} 
                   className="w-20 h-20 rounded-full object-cover"
                 />
               ) : (

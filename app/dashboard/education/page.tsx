@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 // Get provider from env, default to 'vtpass'
 const getProvider = () => {
-  const provider = (process.env.NEXT_PUBLIC_AIRTIME_PROVIDER || "vtpass")
+  const provider = (process.env.NEXT_PUBLIC_EDUCATION_PROVIDER || "vtpass")
     .toLowerCase()
     .trim();
   
@@ -14,8 +14,8 @@ const getProvider = () => {
 };
 
 // Dynamically import the provider component
-const VtpassDstv = dynamic(
-  () => import("../vtpass/page"),
+const VtpassEducation = dynamic(
+  () => import("./vtpass/page"),
   { 
     loading: () => (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -28,8 +28,8 @@ const VtpassDstv = dynamic(
   }
 );
 
-const SagecloudDstv = dynamic(
-  () => import("../sagecloud/page"),
+const SagecloudEducation = dynamic(
+  () => import("./sagecloud/page"),
   { 
     loading: () => (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -42,14 +42,14 @@ const SagecloudDstv = dynamic(
   }
 );
 
-export default function DstvPage() {
+export default function EducationPage() {
   const provider = getProvider();
 
   // Conditionally render the appropriate provider component
   if (provider === "sagecloud") {
-    return <SagecloudDstv />;
+    return <SagecloudEducation />;
   }
 
   // Default to vtpass
-  return <VtpassDstv />;
+  return <VtpassEducation />;
 }

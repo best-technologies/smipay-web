@@ -47,6 +47,8 @@ export interface Transaction {
   date: string;
   sender: string;
   icon?: string;
+  // Provider identifier for mapping to logos (e.g. "mtn", "airtel", "glo", "etisalat", "dstv", "gotv", "startimes", "showmax")
+  provider?: string | null;
 }
 
 export interface KycVerification {

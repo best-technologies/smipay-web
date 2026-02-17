@@ -20,12 +20,18 @@ export const NETWORK_LOGOS: Record<string, string> = {
   "glo-sme-data": "/vtu-logo/glo-logo.png",
   "smile-direct": "/vtu-logo/glo-logo.png", // Fallback - add smile logo if available
   "spectranet": "/vtu-logo/glo-logo.png", // Fallback - add spectranet logo if available
+  
+  // Cable TV service IDs
+  dstv: "/imgs/cable-tv-logo/dstv-logo.png",
+  gotv: "/imgs/cable-tv-logo/gotv-logo-png_seeklogo-496045.png",
+  startimes: "/imgs/cable-tv-logo/startimes-logo.jpg",
+  showmax: "/imgs/cable-tv-logo/showmax-logo.png",
 };
 
 /**
  * Get local logo path for a service ID
  * Returns null if logo not found
- * Supports both airtime and data service IDs
+ * Supports airtime, data, and cable TV service IDs
  */
 export function getNetworkLogo(serviceID: string): string | null {
   // Normalize service ID to lowercase
@@ -56,6 +62,9 @@ export function getNetworkLogo(serviceID: string): string | null {
       return logo;
     }
   }
+  
+  // Cable TV service IDs are usually direct (dstv, gotv, etc.)
+  // Already handled by exact match above
   
   return null;
 }

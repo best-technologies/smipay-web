@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 // Get provider from env, default to 'vtpass'
 const getProvider = () => {
@@ -43,13 +44,15 @@ const SagecloudCabletv = dynamic(
 );
 
 export default function CabletvPage() {
+  const searchParams = useSearchParams();
   const provider = getProvider();
+  const initialServiceId = searchParams?.get("provider") || undefined;
 
   // Conditionally render the appropriate provider component
   if (provider === "sagecloud") {
-    return <SagecloudCabletv />;
+    return <SagecloudCabletv initialServiceId={initialServiceId} />;
   }
 
   // Default to vtpass
-  return <VtpassCabletv />;
+  return <VtpassCabletv initialServiceId={initialServiceId} />;
 }

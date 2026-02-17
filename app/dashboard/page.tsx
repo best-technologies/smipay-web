@@ -9,7 +9,8 @@ import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
 import { Wallet, TrendingUp, ArrowUpRight, ArrowDownLeft, CreditCard, Zap, Smartphone, Tv, FileText, Users, ChevronRight, Copy, Check, Loader2 } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
-import type { DashboardData } from "@/types/dashboard";
+import type { DashboardData, Transaction as DashboardTransaction } from "@/types/dashboard";
+import { getNetworkLogo } from "@/lib/network-logos";
 
 const QUICK_ACTIONS = [
   { id: "airtime", name: "Buy Airtime", icon: Smartphone, color: "bg-blue-500", href: "/dashboard/airtime" },
@@ -71,6 +72,18 @@ function DashboardContent() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Helper to resolve a logo for a transaction based on provider or icon
+  const getTransactionLogo = (transaction: DashboardTransaction): string | null => {
+    if (transaction.provider) {
+      const logo = getNetworkLogo(transaction.provider);
+      if (logo) return logo;
+    }
+    if (transaction.icon) {
+      return transaction.icon;
+    }
+    return null;
   };
 
   if (loading) {
@@ -299,14 +312,14 @@ function DashboardContent() {
                 <div 
                   key={transaction.id} 
                   className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/dashboard/transactions/${transaction.id}`)}
+                  onClick={() => router.push(`/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      {transaction.icon ? (
+                      {getTransactionLogo(transaction) ? (
                         <img 
-                          src={transaction.icon} 
-                          alt="" 
+                          src={getTransactionLogo(transaction) as string} 
+                          alt={transaction.description} 
                           className="w-10 h-10 rounded-lg object-cover"
                         />
                       ) : (

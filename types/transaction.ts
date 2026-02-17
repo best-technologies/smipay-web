@@ -45,6 +45,8 @@ export interface TransactionDetail {
   updated_on: string;
   sender: string | null;
   icon: string;
+  // Optional provider identifier for mapping to logos (e.g. "mtn", "dstv", etc.)
+  provider?: string | null;
 }
 
 export interface PaginationMeta {
