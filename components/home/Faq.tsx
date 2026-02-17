@@ -45,33 +45,33 @@ export default function Faq() {
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-4 md:px-6 py-8 md:py-24">
+    <section className="mx-auto max-w-7xl px-4 md:px-6 py-8 sm:py-12 md:py-24">
       {/* Heading and Description */}
-      <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-        <h2 className="text-brand-text-primary text-xl md:text-4xl lg:text-4xl font-semibold mb-4">
+      <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 md:mb-16">
+        <h2 className="text-brand-text-primary text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold mb-2 sm:mb-4">
           Got Questions? We&apos;ve Got Answers
         </h2>
-        <p className="text-brand-text-secondary text-sm md:text-base">
+        <p className="text-brand-text-secondary text-xs sm:text-sm md:text-base">
           Everything you need to understand how the platform works
         </p>
       </div>
 
       {/* FAQ List */}
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4">
         {faqs.map((faq, index) => (
           <div key={faq.id} className="bg-[#F9F8FA] rounded-sm overflow-hidden">
             {/* Question Button */}
             <button
               onClick={() => toggleFaq(index)}
-              className="w-full flex items-center justify-between p-6 text-left transition-all"
+              className="w-full flex items-center justify-between p-4 sm:p-6 text-left transition-all"
               aria-expanded={openIndex === index}
             >
-              <h3 className="text-brand-text-primary text-sm md:text-base font-medium pr-4">
+              <h3 className="text-brand-text-primary text-xs sm:text-sm md:text-base font-medium pr-3 sm:pr-4">
                 {faq.question}
               </h3>
-              <div className="shrink-0 w-8 h-8 rounded-full bg-brand-bg-primary flex items-center justify-center transition-transform duration-300">
+              <div className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-bg-primary flex items-center justify-center transition-transform duration-300">
                 <ChevronDown
-                  className={`w-5 h-5 text-white transition-transform duration-300 ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 text-white transition-transform duration-300 ${
                     openIndex === index ? "rotate-180" : ""
                   }`}
                 />
@@ -86,8 +86,8 @@ export default function Faq() {
                   : "max-h-0 opacity-0"
               } overflow-hidden`}
             >
-              <div className="px-6 pb-6 pt-0">
-                <p className="text-brand-text-secondary text-sm md:text-base leading-relaxed">
+              <div className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0">
+                <p className="text-brand-text-secondary text-xs sm:text-sm md:text-base leading-relaxed">
                   {faq.answer}
                 </p>
               </div>

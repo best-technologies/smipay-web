@@ -18,8 +18,8 @@ export default function HeaderNew() {
 
   return (
     <header className="w-full bg-brand-bg-primary text-white">
-      <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="text-xl font-semibold hover:opacity-90">
+      <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-4 sm:px-6">
+        <Link href="/" className="text-lg sm:text-xl font-semibold hover:opacity-90">
           Smipay
         </Link>
 
@@ -138,7 +138,82 @@ export default function HeaderNew() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="bg-brand-bg-primary border-t border-white/10 lg:hidden">
-          <nav className="mx-auto max-w-7xl px-6 py-6 flex flex-col gap-4 text-sm">
+          <nav className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6 flex flex-col gap-3 sm:gap-4 text-xs sm:text-sm">
+            {/* Mobile Auth Section - at the top */}
+            {!isLoading && (
+              <>
+                {isAuthenticated && user ? (
+                  <div className="pb-3 border-b border-white/10 space-y-2">
+                    <div className="flex items-center gap-2 py-2">
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">
+                        {user.first_name} {user.last_name}
+                      </span>
+                    </div>
+                    <Link
+                      href="/dashboard"
+                      className="block py-2 hover:opacity-90"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/profile"
+                      className="block py-2 hover:opacity-90"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="block py-2 hover:opacity-90"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2 py-2 hover:opacity-90 text-red-300"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pb-3 border-b border-white/10 flex items-center gap-2">
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="flex-1 text-white hover:bg-white/10"
+                    >
+                      <Link
+                        href="/auth/signin"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Sign In
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      className="flex-1 bg-white text-brand-bg-primary hover:bg-white/90"
+                    >
+                      <Link
+                        href="/auth/register"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Register
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+
             <Link
               href="/"
               className="hover:opacity-90"
@@ -198,81 +273,6 @@ export default function HeaderNew() {
             >
               Support
             </Link>
-
-            {/* Mobile Auth Section */}
-            {!isLoading && (
-              <>
-                {isAuthenticated && user ? (
-                  <div className="pt-4 border-t border-white/10 space-y-2">
-                    <div className="flex items-center gap-2 py-2">
-                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                        <User className="h-4 w-4" />
-                      </div>
-                      <span className="font-medium">
-                        {user.first_name} {user.last_name}
-                      </span>
-                    </div>
-                    <Link
-                      href="/dashboard"
-                      className="block py-2 hover:opacity-90"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/profile"
-                      className="block py-2 hover:opacity-90"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      href="/settings"
-                      className="block py-2 hover:opacity-90"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Settings
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleSignOut();
-                        setIsMenuOpen(false);
-                      }}
-                      className="flex items-center gap-2 py-2 hover:opacity-90 text-red-300"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </button>
-                  </div>
-                ) : (
-                  <div className="pt-4 border-t border-white/10 space-y-2">
-                    <Button
-                      asChild
-                      variant="ghost"
-                      className="w-full text-white hover:bg-white/10"
-                    >
-                      <Link
-                        href="/auth/signin"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Sign In
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      className="w-full bg-white text-brand-bg-primary hover:bg-white/90"
-                    >
-                      <Link
-                        href="/auth/register"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Register
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
           </nav>
         </div>
       )}

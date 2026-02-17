@@ -15,9 +15,9 @@ const brands = [
 export default function TrustMarquee() {
   const track = [...brands, ...brands];
   return (
-    <section className="mx-auto max-w-6xl px-6 py-12">
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center">
-        <h2 className="lg:text-xl font-semibold text-brand-primary">
+    <section className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+      <div className="grid grid-cols-1 gap-4 sm:gap-8 md:grid-cols-2 md:items-center">
+        <h2 className="text-sm sm:text-base lg:text-xl font-semibold text-brand-primary text-center md:text-left">
           Supporting Brands Behind Smipay
         </h2>
         <div className="marquee relative">

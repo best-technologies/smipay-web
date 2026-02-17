@@ -92,7 +92,17 @@ body {
 
 /* Header fixed height */
 .h-header {
-  height: 75px;
+  height: 60px;
+}
+@media (min-width: 640px) {
+  .h-header {
+    height: 68px;
+  }
+}
+@media (min-width: 1024px) {
+  .h-header {
+    height: 75px;
+  }
 }
 
 /* Marquee animation */
@@ -111,9 +121,14 @@ body {
 }
 .marquee-track {
   display: flex;
-  gap: 48px;
+  gap: 28px;
   width: max-content;
   animation: marquee-left 20s linear infinite;
+}
+@media (min-width: 640px) {
+  .marquee-track {
+    gap: 48px;
+  }
 }
 
 @layer base {

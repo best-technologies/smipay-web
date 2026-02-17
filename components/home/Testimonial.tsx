@@ -29,20 +29,20 @@ export default function Testimonial() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-4 md:px-6 py-16 md:py-24">
+    <section className="mx-auto max-w-7xl px-4 md:px-6 py-10 sm:py-16 md:py-24">
       {/* Heading and Description */}
-      <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-        <h2 className="text-brand-text-primary text-xl md:text-4xl lg:text-4xl font-semibold mb-4">
+      <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 md:mb-16">
+        <h2 className="text-brand-text-primary text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold mb-2 sm:mb-4">
           Users Who Love the Experience
         </h2>
-        <p className="text-brand-text-secondary text-sm md:text-base">
+        <p className="text-brand-text-secondary text-xs sm:text-sm md:text-base">
           See how the platform is helping users save time, money, and stress
           every <br className="hidden lg:block" /> day.
         </p>
       </div>
 
       {/* Unified responsive grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         {testimonials.map((testimonial, index) => (
           <div
             key={testimonial.id}
@@ -99,18 +99,18 @@ function TestimonialCard({
       </div>
 
       {/* Card content */}
-      <div className="border border-gray-200 rounded-sm p-6 pt-8 bg-white shadow-sm mb-8 lg:mb-0">
+      <div className="border border-gray-200 rounded-sm p-4 sm:p-6 pt-7 sm:pt-8 bg-white shadow-sm mb-6 sm:mb-8 lg:mb-0">
         {/* Quote */}
-        <blockquote className="text-brand-text-secondary text-sm leading-relaxed mb-6 md:mb-4">
+        <blockquote className="text-brand-text-secondary text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6 md:mb-4">
           &quot;{quote}&quot;
         </blockquote>
 
         {/* Name and review place */}
-        <div className="space-y-1">
-          <h4 className="text-brand-text-primary text-sm font-medium">
+        <div className="space-y-0.5 sm:space-y-1">
+          <h4 className="text-brand-text-primary text-xs sm:text-sm font-medium">
             {name}
           </h4>
-          <p className="text-brand-text-secondary text-sm">{reviewPlace}</p>
+          <p className="text-brand-text-secondary text-[11px] sm:text-sm">{reviewPlace}</p>
         </div>
       </div>
     </div>
