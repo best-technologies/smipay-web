@@ -20,9 +20,19 @@ const funnelDisplay = Funnel_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Smipay - Pay with a Smile",
+  title: {
+    default: "Smipay - Pay with a Smile",
+    template: "%s | Smipay",
+  },
   description:
     "Smipay offers Utilities Payments, Save Money, Buy Data, Buy Airtime, Transfer, Pay Bills, Bet Funding, and lot more. Experience seamless transactions with our user-friendly app designed for your convenience.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/smipay-logo.png",
+  },
 };
 
 export default function RootLayout({

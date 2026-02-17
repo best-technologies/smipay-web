@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: "Buy Data",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return <>{children}</>;
 }
-
-

@@ -12,7 +12,7 @@ export interface VtpassCableService {
   minimum_amount?: string;
   maximum_amount?: string;
   minimium_amount?: string; // API typo - keeping both for compatibility
-  maximum_amount?: string;
+  maximium_amount?: string; // API typo - keeping both for compatibility
   convinience_fee?: string;
   product_type?: string;
   image?: string;
