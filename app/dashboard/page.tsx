@@ -6,20 +6,52 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
-import { Wallet, TrendingUp, ArrowUpRight, ArrowDownLeft, CreditCard, Zap, Smartphone, Tv, FileText, Users, ChevronRight, Copy, Check, Loader2 } from "lucide-react";
+import {
+  Wallet,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownLeft,
+  CreditCard,
+  Zap,
+  Smartphone,
+  Tv,
+  FileText,
+  ChevronRight,
+  Copy,
+  Check,
+  Loader2,
+} from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { DashboardData, Transaction as DashboardTransaction } from "@/types/dashboard";
 import { getNetworkLogo } from "@/lib/network-logos";
+import { motion } from "motion/react";
 
 const QUICK_ACTIONS = [
-  { id: "airtime", name: "Buy Airtime", icon: Smartphone, color: "bg-blue-500", href: "/dashboard/airtime" },
-  { id: "data", name: "Buy Data", icon: Zap, color: "bg-purple-500", href: "/dashboard/data" },
-  { id: "cable", name: "Cable TV", icon: Tv, color: "bg-orange-500", href: "/dashboard/cable" },
-  { id: "electricity", name: "Electricity", icon: Zap, color: "bg-green-500", href: "/dashboard/electricity" },
-  { id: "transfer", name: "Transfer", icon: ArrowUpRight, color: "bg-indigo-500", href: "/dashboard/transfer" },
-  { id: "transactions", name: "Transactions", icon: FileText, color: "bg-pink-500", href: "/dashboard/transactions" },
+  { id: "airtime", name: "Buy Airtime", icon: Smartphone, hue: 217, href: "/dashboard/airtime" },
+  { id: "data", name: "Buy Data", icon: Zap, hue: 270, href: "/dashboard/data" },
+  { id: "cable", name: "Cable TV", icon: Tv, hue: 24, href: "/dashboard/cable" },
+  { id: "electricity", name: "Electricity", icon: Zap, hue: 142, href: "/dashboard/electricity" },
+  { id: "transfer", name: "Transfer", icon: ArrowUpRight, hue: 239, href: "/dashboard/transfer" },
+  { id: "transactions", name: "Transactions", icon: FileText, hue: 330, href: "/dashboard/transactions" },
 ];
+
+const container = {
+  hidden: { opacity: 0 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 * i },
+  }),
+};
+
+const item = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35 },
+  },
+};
 
 function DashboardContent() {
   const router = useRouter();
@@ -30,17 +62,13 @@ function DashboardContent() {
   const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
 
-  // Handle Paystack callback
   useEffect(() => {
     const payment = searchParams.get("payment");
     const reference = searchParams.get("reference") || searchParams.get("trxref");
 
     if (payment === "callback" && reference) {
-      // User returned from Paystack, trigger verification
       setPaymentReference(reference);
       setIsFundWalletModalOpen(true);
-      
-      // Don't clean up URL immediately - wait for modal to open
       setTimeout(() => {
         const url = new URL(window.location.href);
         url.searchParams.delete("payment");
@@ -57,12 +85,10 @@ function DashboardContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Helper function to parse balance string to number
   const parseBalance = (balance: string): number => {
     return parseFloat(balance.replace(/,/g, ""));
   };
 
-  // Helper function to format date
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
@@ -74,24 +100,21 @@ function DashboardContent() {
     });
   };
 
-  // Helper to resolve a logo for a transaction based on provider or icon
   const getTransactionLogo = (transaction: DashboardTransaction): string | null => {
     if (transaction.provider) {
       const logo = getNetworkLogo(transaction.provider);
       if (logo) return logo;
     }
-    if (transaction.icon) {
-      return transaction.icon;
-    }
+    if (transaction.icon) return transaction.icon;
     return null;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-brand-bg-primary mx-auto mb-4" />
-          <p className="text-brand-text-secondary">Loading your dashboard...</p>
+          <Loader2 className="h-10 w-10 animate-spin text-dashboard-accent mx-auto mb-3" />
+          <p className="text-dashboard-muted text-sm">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -99,10 +122,10 @@ function DashboardContent() {
 
   if (error || !dashboardData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error || "Failed to load dashboard"}</p>
-          <Button onClick={() => window.location.reload()}>
+          <p className="text-red-600 mb-4 text-sm">{error || "Failed to load dashboard"}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
             Retry
           </Button>
         </div>
@@ -113,275 +136,337 @@ function DashboardContent() {
   const primaryAccount = dashboardData.accounts[0];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dashboard-bg">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-dashboard-surface border-b border-dashboard-border/80 sticky top-0 z-10 backdrop-blur-sm bg-dashboard-surface/95"
+      >
         <div className="px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary">
+              <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight">
                 Dashboard
               </h1>
-              <p className="text-xs sm:text-sm text-brand-text-secondary mt-0.5 sm:mt-1">
-                Welcome back, {dashboardData.user.first_name}! 👋
+              <p className="text-xs sm:text-sm text-dashboard-muted mt-0.5">
+                Welcome back, {dashboardData.user.first_name}
               </p>
             </div>
-            <div className="flex gap-3">
-              <Button 
-                className="bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4"
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                className="bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-white text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4 shadow-sm"
                 onClick={() => setIsFundWalletModalOpen(true)}
               >
-                <ArrowDownLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <ArrowDownLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
                 Fund Wallet
               </Button>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="px-3 sm:px-4 py-4 sm:py-6 md:px-6 lg:px-8">
-        {/* Wallet Analysis Cards - Global Component */}
-        <WalletAnalysisCards />
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.08 }}
+        >
+          <WalletAnalysisCards />
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
           {/* Virtual Account Card */}
           <div className="lg:col-span-2">
             {primaryAccount ? (
-              <div className="bg-gradient-to-br from-brand-bg-primary to-indigo-700 rounded-xl shadow-lg p-4 sm:p-6 md:p-8 text-white">
-                <div className="flex items-start justify-between mb-3 sm:mb-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.12 }}
+                whileHover={{ y: -2 }}
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 p-5 sm:p-6 md:p-8 text-white shadow-xl shadow-slate-900/20"
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(148,163,184,0.15),transparent)] pointer-events-none" />
+                <div className="relative flex items-start justify-between mb-4 sm:mb-6">
                   <div>
-                    <p className="text-blue-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Bank Account</p>
-                    <p className="text-base sm:text-xl md:text-2xl font-bold">{primaryAccount.bank_name}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm mb-0.5">Bank Account</p>
+                    <p className="text-base sm:text-xl font-semibold text-white">{primaryAccount.bank_name}</p>
                   </div>
-                  <div className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${
-                    primaryAccount.isActive ? "bg-green-500" : "bg-red-500"
-                  }`}>
-                    {primaryAccount.isActive ? "ACTIVE" : "INACTIVE"}
-                  </div>
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
+                      primaryAccount.isActive
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : "bg-red-500/20 text-red-300"
+                    }`}
+                  >
+                    {primaryAccount.isActive ? "Active" : "Inactive"}
+                  </span>
                 </div>
 
-                <div className="space-y-3 sm:space-y-4 mb-3 sm:mb-6">
+                <div className="relative space-y-3 sm:space-y-4 mb-4 sm:mb-6">
                   <div>
-                    <p className="text-blue-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Account Number</p>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <p className="text-lg sm:text-2xl md:text-3xl font-mono font-bold tracking-wider">
+                    <p className="text-slate-400 text-xs sm:text-sm mb-0.5">Account Number</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-lg sm:text-2xl md:text-3xl font-mono font-semibold tracking-wider text-white">
                         {primaryAccount.account_number}
                       </p>
-                      <button
-                        onClick={() => copyAccountNumber(primaryAccount.account_number)}
-                        className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Copy account number"
-                      >
+                      <motion.button
+                          whileHover={{ scale: 1.08 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => copyAccountNumber(primaryAccount.account_number)}
+                          className="p-1.5 sm:p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Copy account number"
+                        >
                         {copied ? (
-                          <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-300" />
+                          <Check className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
                         ) : (
-                          <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
+                          <Copy className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
                         )}
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
-
                   <div>
-                    <p className="text-blue-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Account Name</p>
-                    <p className="text-sm sm:text-lg md:text-xl font-semibold">
+                    <p className="text-slate-400 text-xs sm:text-sm mb-0.5">Account Name</p>
+                    <p className="text-sm sm:text-lg font-medium text-white">
                       {primaryAccount.account_holder_name}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-3 sm:pt-6 border-t border-white/20">
+                <div className="relative pt-4 sm:pt-6 border-t border-white/10">
                   <div className="flex items-end justify-between">
                     <div>
-                      <p className="text-blue-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Account Balance</p>
-                      <p className="text-xl sm:text-2xl md:text-3xl font-bold">
+                      <p className="text-slate-400 text-xs sm:text-sm mb-0.5">Account Balance</p>
+                      <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white tabular-nums">
                         ₦{parseBalance(primaryAccount.balance).toLocaleString()}
                       </p>
                     </div>
-                    <CreditCard className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-white/30" />
+                    <CreditCard className="h-8 w-8 sm:h-10 sm:w-10 text-white/20" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ) : (
-              <div className="bg-gradient-to-br from-brand-bg-primary to-indigo-700 rounded-xl shadow-lg p-6 sm:p-8 text-white flex items-center justify-center">
-                <p>No bank account available</p>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.12 }}
+                className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-8 text-center text-slate-400"
+              >
+                No bank account available
+              </motion.div>
             )}
           </div>
 
-          {/* User Info Card - hidden on mobile, sidebar already shows user info */}
-          <div className="hidden lg:block bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-            <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-              {dashboardData.user.profile_image ? (
-                <img
-                  src={dashboardData.user.profile_image}
-                  alt={dashboardData.user.name}
-                  className="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-cover"
-                />
-              ) : (
-                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-brand-bg-primary text-white flex items-center justify-center text-lg sm:text-2xl font-bold">
-                  {dashboardData.user.first_name[0]}{dashboardData.user.last_name[0]}
+          {/* User Info Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.18 }}
+            className="hidden lg:block"
+          >
+            <div className="bg-dashboard-surface rounded-2xl border border-dashboard-border/80 shadow-sm p-5 h-full">
+              <div className="flex items-center gap-3 mb-5">
+                {dashboardData.user.profile_image ? (
+                  <img
+                    src={dashboardData.user.profile_image}
+                    alt={dashboardData.user.name}
+                    className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-dashboard-border"
+                  />
+                ) : (
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-lg font-semibold">
+                    {dashboardData.user.first_name[0]}
+                    {dashboardData.user.last_name[0]}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="font-semibold text-dashboard-heading text-sm truncate">
+                    {dashboardData.user.first_name} {dashboardData.user.last_name}
+                  </p>
+                  <p className="text-xs text-dashboard-muted truncate">@{dashboardData.user.smipay_tag}</p>
                 </div>
-              )}
-              <div>
-                <p className="font-semibold text-brand-text-primary text-sm sm:text-base md:text-lg">
-                  {dashboardData.user.first_name} {dashboardData.user.last_name}
-                </p>
-                <p className="text-xs sm:text-sm text-brand-text-secondary">
-                  @{dashboardData.user.smipay_tag}
-                </p>
+              </div>
+              <div className="space-y-0 border-t border-dashboard-border/80 pt-4">
+                <div className="flex items-center justify-between py-2.5 border-b border-dashboard-border/60">
+                  <span className="text-xs text-dashboard-muted">Email</span>
+                  <span
+                    className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-medium ${
+                      dashboardData.user.is_email_verified
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-amber-50 text-amber-700"
+                    }`}
+                  >
+                    {dashboardData.user.is_email_verified ? "Verified" : "Unverified"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2.5 border-b border-dashboard-border/60">
+                  <span className="text-xs text-dashboard-muted">KYC</span>
+                  <span
+                    className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-medium ${
+                      dashboardData.kyc_verification.is_verified
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-amber-50 text-amber-700"
+                    }`}
+                  >
+                    {dashboardData.kyc_verification.status}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-xs text-dashboard-muted">Tier</span>
+                  <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-medium bg-sky-50 text-sky-700">
+                    {dashboardData.current_tier.tier}
+                  </span>
+                </div>
               </div>
             </div>
-
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
-                <span className="text-xs sm:text-sm text-brand-text-secondary">Email</span>
-                <span className={`text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full ${
-                  dashboardData.user.is_email_verified
-                    ? "bg-green-50 text-green-700"
-                    : "bg-orange-50 text-orange-700"
-                }`}>
-                  {dashboardData.user.is_email_verified ? "Verified" : "Unverified"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
-                <span className="text-xs sm:text-sm text-brand-text-secondary">KYC Status</span>
-                <span className={`text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full ${
-                  dashboardData.kyc_verification.is_verified
-                    ? "bg-green-50 text-green-700"
-                    : "bg-orange-50 text-orange-700"
-                }`}>
-                  {dashboardData.kyc_verification.status}
-                </span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 sm:py-2">
-                <span className="text-xs sm:text-sm text-brand-text-secondary">Account Tier</span>
-                <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full bg-blue-50 text-blue-700">
-                  {dashboardData.current_tier.tier}
-                </span>
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-4 sm:mb-6">
-          <div className="flex items-center justify-between mb-2 sm:mb-4">
-            <h2 className="text-sm sm:text-base md:text-lg font-semibold text-brand-text-primary">
-              Quick Actions
-            </h2>
-          </div>
-          <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
-            {QUICK_ACTIONS.map((action) => (
-              <button
+        <div className="mb-6">
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="text-sm font-semibold text-dashboard-heading mb-3"
+          >
+            Quick Actions
+          </motion.h2>
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3"
+          >
+            {QUICK_ACTIONS.map((action, index) => (
+              <motion.button
                 key={action.id}
+                variants={item}
                 onClick={() => router.push(action.href)}
-                className="bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 border border-gray-100 hover:shadow-md transition-shadow group"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                whileTap={{ scale: 0.97 }}
+                className="bg-dashboard-surface rounded-xl border border-dashboard-border/80 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-dashboard-border transition-all duration-200 group text-left"
               >
-                <div className={`${action.color} w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center mb-1.5 sm:mb-2 md:mb-3 group-hover:scale-110 transition-transform`}>
-                  <action.icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
+                <div
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105"
+                  style={{
+                    backgroundColor: `hsl(${action.hue}, 55%, 94%)`,
+                    color: `hsl(${action.hue}, 55%, 40%)`,
+                  }}
+                >
+                  <action.icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2} />
                 </div>
-                <p className="text-[10px] sm:text-xs md:text-sm font-medium text-brand-text-primary text-left">
+                <p className="text-[10px] sm:text-xs font-medium text-dashboard-heading leading-tight">
                   {action.name}
                 </p>
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-3 sm:p-4 md:p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm sm:text-base md:text-lg font-semibold text-brand-text-primary">
-                Recent Transactions
-              </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/dashboard/transactions")}
-                className="text-brand-bg-primary hover:text-brand-bg-primary/80 text-xs sm:text-sm h-7 sm:h-8"
-              >
-                View All
-                <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-0.5 sm:ml-1" />
-              </Button>
-            </div>
-          </div>
-          <div className="divide-y divide-gray-100">
+        <div className="bg-dashboard-surface rounded-2xl border border-dashboard-border/80 shadow-sm overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="p-4 sm:p-5 border-b border-dashboard-border/80 flex items-center justify-between"
+          >
+            <h2 className="text-sm font-semibold text-dashboard-heading">Recent Transactions</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/dashboard/transactions")}
+              className="text-dashboard-accent hover:text-dashboard-accent/90 hover:bg-sky-50 text-xs h-8"
+            >
+              View All
+              <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+            </Button>
+          </motion.div>
+          <div className="divide-y divide-dashboard-border/60">
             {dashboardData.transaction_history.length > 0 ? (
-              dashboardData.transaction_history.slice(0, 5).map((transaction) => (
-                <div
+              dashboardData.transaction_history.slice(0, 5).map((transaction, index) => (
+                <motion.div
                   key={transaction.id}
-                  className="p-3 sm:p-4 md:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`)}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="p-3 sm:p-4 hover:bg-dashboard-bg/60 transition-colors cursor-pointer"
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`
+                    )
+                  }
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       {getTransactionLogo(transaction) ? (
                         <img
                           src={getTransactionLogo(transaction) as string}
-                          alt={transaction.description}
-                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover flex-shrink-0"
+                          alt=""
+                          className="w-9 h-9 rounded-lg object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${
-                          transaction.credit_debit === "credit"
-                            ? "bg-green-50"
-                            : "bg-red-50"
-                        }`}>
+                        <div
+                          className={`p-2 rounded-lg flex-shrink-0 ${
+                            transaction.credit_debit === "credit" ? "bg-emerald-50" : "bg-red-50"
+                          }`}
+                        >
                           {transaction.credit_debit === "credit" ? (
-                            <ArrowDownLeft className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                            <ArrowDownLeft className="h-4 w-4 text-emerald-600" />
                           ) : (
-                            <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
+                            <ArrowUpRight className="h-4 w-4 text-red-600" />
                           )}
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="font-medium text-brand-text-primary text-xs sm:text-sm truncate">
+                        <p className="font-medium text-dashboard-heading text-sm truncate">
                           {transaction.description}
                         </p>
-                        <p className="text-[10px] sm:text-xs md:text-sm text-brand-text-secondary">
-                          {formatDate(transaction.date)}
-                        </p>
+                        <p className="text-xs text-dashboard-muted">{formatDate(transaction.date)}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className={`font-semibold text-xs sm:text-sm ${
-                        transaction.credit_debit === "credit"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}>
+                      <p
+                        className={`font-semibold text-sm tabular-nums ${
+                          transaction.credit_debit === "credit" ? "text-emerald-600" : "text-red-600"
+                        }`}
+                      >
                         {transaction.credit_debit === "credit" ? "+" : "-"}₦{transaction.amount}
                       </p>
-                      <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${
-                        transaction.status === "success"
-                          ? "bg-green-50 text-green-700"
-                          : transaction.status === "pending"
-                          ? "bg-yellow-50 text-yellow-700"
-                          : "bg-red-50 text-red-700"
-                      }`}>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          transaction.status === "success"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : transaction.status === "pending"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-red-50 text-red-700"
+                        }`}
+                      >
                         {transaction.status}
                       </span>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))
             ) : (
-              <div className="p-8 sm:p-12 text-center text-brand-text-secondary">
-                <FileText className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 opacity-30" />
-                <p className="text-xs sm:text-sm">No transactions yet</p>
+              <div className="p-10 text-center text-dashboard-muted">
+                <FileText className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No transactions yet</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Fund Wallet Modal */}
       <FundWalletModal
         isOpen={isFundWalletModalOpen}
         onClose={() => {
           setIsFundWalletModalOpen(false);
           setPaymentReference(null);
-          // Refresh dashboard data after closing modal (in case payment was successful)
           refetch();
         }}
         bankAccounts={dashboardData?.accounts || []}
@@ -393,11 +478,13 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-brand-bg-primary" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-dashboard-accent" />
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );

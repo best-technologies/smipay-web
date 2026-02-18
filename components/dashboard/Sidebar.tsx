@@ -177,18 +177,18 @@ export default function Sidebar() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* User Profile */}
-      <div className="p-4 bg-white border-b border-gray-200">
+      <div className="p-4 bg-dashboard-surface border-b border-dashboard-border">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-brand-bg-primary text-white flex items-center justify-center text-lg font-bold relative">
+          <div className="h-12 w-12 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-lg font-semibold relative">
             {user?.first_name?.[0]}{user?.last_name?.[0]}
-            <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></span>
+            <span className="absolute bottom-0 right-0 h-3 w-3 bg-emerald-500 rounded-full border-2 border-white"></span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-brand-text-primary truncate">
+            <p className="font-semibold text-sm text-dashboard-heading truncate">
               {user?.first_name} {user?.last_name}
             </p>
-            <p className="text-xs text-brand-text-secondary">
-              Balance: <span className="font-semibold text-green-600">₦{user?.wallet?.current_balance?.toLocaleString() || "0.00"}</span>
+            <p className="text-xs text-dashboard-muted">
+              Balance: <span className="font-semibold text-emerald-600">₦{user?.wallet?.current_balance?.toLocaleString() || "0.00"}</span>
             </p>
           </div>
         </div>
@@ -197,7 +197,7 @@ export default function Sidebar() {
       {/* Main Menu - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          <h3 className="text-xs font-semibold text-brand-text-secondary uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-3">
             Main Menu
           </h3>
           <nav className="space-y-1">
@@ -207,16 +207,16 @@ export default function Sidebar() {
                   <div>
                     <button
                       onClick={() => toggleMenu(item.id)}
-                      className="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 text-brand-text-primary transition-colors"
+                      className="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-dashboard-bg text-dashboard-heading transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon className="h-5 w-5 text-gray-500" />
+                        <item.icon className="h-5 w-5 text-dashboard-muted" />
                         <span className="font-medium">{item.label}</span>
                       </div>
                       {openMenus.includes(item.id) ? (
-                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                        <ChevronDown className="h-4 w-4 text-dashboard-muted" />
                       ) : (
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                        <ChevronRight className="h-4 w-4 text-dashboard-muted" />
                       )}
                     </button>
                     {openMenus.includes(item.id) && (
@@ -231,8 +231,8 @@ export default function Sidebar() {
                               onClick={() => setIsMobileMenuOpen(false)}
                               className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                                 pathname === subitem.href
-                                  ? "bg-brand-bg-primary/10 text-brand-bg-primary font-medium"
-                                  : "text-brand-text-secondary hover:bg-gray-100 hover:text-brand-text-primary"
+                                  ? "bg-slate-100 text-dashboard-heading font-medium"
+                                  : "text-dashboard-muted hover:bg-dashboard-bg hover:text-dashboard-heading"
                               }`}
                             >
                               {SubIcon && <SubIcon className="h-4 w-4" />}
@@ -243,11 +243,11 @@ export default function Sidebar() {
                               key={subitem.id}
                               className="relative group"
                             >
-                              <div className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                              <div className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-dashboard-muted cursor-not-allowed">
                                 {SubIcon && <SubIcon className="h-4 w-4" />}
                                 <span>{subitem.label}</span>
                               </div>
-                              <div className="absolute left-full top-0 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
+                              <div className="absolute left-full top-0 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
                                 Coming Soon
                               </div>
                             </div>
@@ -262,8 +262,8 @@ export default function Sidebar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
                       pathname === item.href
-                        ? "bg-brand-bg-primary text-white font-medium"
-                        : "text-brand-text-primary hover:bg-gray-100"
+                        ? "bg-dashboard-heading text-white font-medium"
+                        : "text-dashboard-heading hover:bg-dashboard-bg"
                     }`}
                   >
                     <item.icon className="h-5 w-5" />
@@ -271,11 +271,11 @@ export default function Sidebar() {
                   </Link>
                 ) : (
                   <div className="relative group">
-                    <div className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                    <div className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-dashboard-muted cursor-not-allowed">
                       <item.icon className="h-5 w-5" />
                       <span className="font-medium">{item.label}</span>
                     </div>
-                    <div className="absolute left-0 top-0 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
+                    <div className="absolute left-0 top-0 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
                       Coming Soon
                     </div>
                   </div>
@@ -287,8 +287,8 @@ export default function Sidebar() {
       </div>
 
       {/* Other Menu - Pinned to Bottom */}
-      <div className="p-4 border-t border-gray-200 bg-white">
-        <h3 className="text-xs font-semibold text-brand-text-secondary uppercase tracking-wider mb-3">
+      <div className="p-4 border-t border-dashboard-border bg-dashboard-surface">
+        <h3 className="text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-3">
           Other Menu
         </h3>
         <nav className="space-y-1">
@@ -298,16 +298,16 @@ export default function Sidebar() {
                 <div>
                   <button
                     onClick={() => toggleMenu(item.id)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 text-brand-text-primary transition-colors"
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-dashboard-bg text-dashboard-heading transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <item.icon className="h-5 w-5 text-gray-500" />
+                      <item.icon className="h-5 w-5 text-dashboard-muted" />
                       <span className="font-medium">{item.label}</span>
                     </div>
                     {openMenus.includes(item.id) ? (
-                      <ChevronDown className="h-4 w-4 text-gray-400" />
+                      <ChevronDown className="h-4 w-4 text-dashboard-muted" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                      <ChevronRight className="h-4 w-4 text-dashboard-muted" />
                     )}
                   </button>
                   {openMenus.includes(item.id) && (
@@ -322,8 +322,8 @@ export default function Sidebar() {
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                               pathname === subitem.href
-                                ? "bg-brand-bg-primary/10 text-brand-bg-primary font-medium"
-                                : "text-brand-text-secondary hover:bg-gray-100 hover:text-brand-text-primary"
+                                ? "bg-slate-100 text-dashboard-heading font-medium"
+                                : "text-dashboard-muted hover:bg-dashboard-bg hover:text-dashboard-heading"
                             }`}
                           >
                             {SubIcon && <SubIcon className="h-4 w-4" />}
@@ -334,11 +334,11 @@ export default function Sidebar() {
                             key={subitem.id}
                             className="relative group"
                           >
-                            <div className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                            <div className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-dashboard-muted cursor-not-allowed">
                               {SubIcon && <SubIcon className="h-4 w-4" />}
                               <span>{subitem.label}</span>
                             </div>
-                            <div className="absolute left-full top-0 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
+                            <div className="absolute left-full top-0 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
                               Coming Soon
                             </div>
                           </div>
@@ -351,18 +351,18 @@ export default function Sidebar() {
                 <Link
                   href={item.href!}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-brand-text-primary hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-dashboard-heading hover:bg-dashboard-bg transition-colors"
                 >
-                  <item.icon className="h-5 w-5 text-gray-500" />
+                  <item.icon className="h-5 w-5 text-dashboard-muted" />
                   <span className="font-medium">{item.label}</span>
                 </Link>
               ) : (
                 <div className="relative group">
-                  <div className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
-                    <item.icon className="h-5 w-5 text-gray-400" />
+                  <div className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-dashboard-muted cursor-not-allowed">
+                    <item.icon className="h-5 w-5 text-dashboard-muted" />
                     <span className="font-medium">{item.label}</span>
                   </div>
-                  <div className="absolute left-0 top-0 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
+                  <div className="absolute left-0 top-0 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
                     Coming Soon
                   </div>
                 </div>
@@ -388,12 +388,12 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-dashboard-surface rounded-lg shadow-lg border border-dashboard-border"
       >
         {isMobileMenuOpen ? (
-          <X className="h-6 w-6 text-brand-text-primary" />
+          <X className="h-6 w-6 text-dashboard-heading" />
         ) : (
-          <Menu className="h-6 w-6 text-brand-text-primary" />
+          <Menu className="h-6 w-6 text-dashboard-heading" />
         )}
       </button>
 
@@ -406,13 +406,13 @@ export default function Sidebar() {
       )}
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 h-screen sticky top-0 overflow-hidden">
+      <aside className="hidden lg:block w-64 bg-dashboard-surface border-r border-dashboard-border h-screen sticky top-0 overflow-hidden">
         <SidebarContent />
       </aside>
 
       {/* Mobile Sidebar */}
       <aside
-        className={`lg:hidden fixed top-0 left-0 w-64 bg-white border-r border-gray-200 h-screen z-40 transform transition-transform duration-300 ${
+        className={`lg:hidden fixed top-0 left-0 w-64 bg-dashboard-surface border-r border-dashboard-border h-screen z-40 transform transition-transform duration-300 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

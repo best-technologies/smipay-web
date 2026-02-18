@@ -19,6 +19,40 @@ export interface User {
   };
 }
 
+/** New-auth API user shape (§3.3 FRONTEND_DEVICE_METADATA.md) */
+export interface NewAuthUser {
+  id: string;
+  email: string;
+  name?: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string | null;
+  is_email_verified: boolean;
+  role?: string;
+  gender?: string | null;
+  date_of_birth?: string | null;
+  profile_image?: string | null;
+  kyc_verified?: boolean;
+  isTransactionPinSetup?: boolean;
+  created_at?: string;
+}
+
+/** Map new-auth user to app User */
+export function mapNewAuthUserToUser(api: NewAuthUser): User {
+  return {
+    id: api.id,
+    email: api.email,
+    phone_number: api.phone_number ?? "",
+    smipay_tag: (api as any).smipay_tag ?? "",
+    first_name: api.first_name,
+    last_name: api.last_name,
+    is_email_verified: api.is_email_verified,
+    is_phone_verified: (api as any).is_phone_verified ?? false,
+    account_status: (api as any).account_status ?? "active",
+    wallet: (api as any).wallet,
+  };
+}
+
 const TOKEN_KEY = "smipay-access-token";
 const USER_KEY = "smipay-user";
 const LAST_ACTIVITY_KEY = "smipay-last-activity";

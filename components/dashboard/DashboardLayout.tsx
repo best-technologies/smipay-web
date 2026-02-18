@@ -35,8 +35,8 @@ function DashboardAuthGuard({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-bg-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-dashboard-bg">
+        <Loader2 className="h-8 w-8 animate-spin text-dashboard-accent" />
       </div>
     );
   }
@@ -53,12 +53,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-bg-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-dashboard-bg">
+        <Loader2 className="h-8 w-8 animate-spin text-dashboard-accent" />
       </div>
     }>
       <DashboardAuthGuard>
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen bg-dashboard-bg">
           <Sidebar />
           <main className="flex-1 overflow-auto">
             {children}

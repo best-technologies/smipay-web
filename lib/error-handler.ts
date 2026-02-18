@@ -12,6 +12,15 @@ export interface ApiError {
  * Convert API errors to user-friendly messages
  */
 export function handleApiError(error: any): ApiError {
+  // Already formatted by api-client-backend interceptor (e.g. 401 on login)
+  if (error && typeof error.statusCode === "number" && typeof error.message === "string") {
+    return {
+      message: error.message,
+      code: "API_ERROR",
+      statusCode: error.statusCode,
+    };
+  }
+
   // Network errors (server down, no internet, etc.)
   if (!error.response) {
     if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {

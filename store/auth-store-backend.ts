@@ -8,6 +8,7 @@ import {
   getUser,
   getToken,
 } from "@/lib/auth-storage";
+import { authApi } from "@/services/auth-api";
 
 interface AuthState {
   user: User | null;
@@ -54,6 +55,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // Fire-and-forget: invalidate refresh tokens server-side (§3.7).
+        // Local state is cleared immediately regardless of API outcome.
+        authApi.logout().catch(() => {});
         clearAuthStorage();
         set({
           user: null,

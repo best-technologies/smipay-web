@@ -2,10 +2,18 @@
 @import "tw-animate-css";
 
 :root {
-  --brand-bg-primary: #ff6600;
-  --brand-text-primary: #ff6600;
-  --brand-text-secondary: #6b7280;
-  --brand-black: #222222;
+  /* Brand – use sparingly for primary CTAs only */
+  --brand-bg-primary: #ea580c;
+  --brand-text-primary: #ea580c;
+  --brand-text-secondary: #64748b;
+  --brand-black: #0f172a;
+  /* Dashboard / app surface palette – professional 2026 */
+  --dashboard-bg: #f8fafc;
+  --dashboard-surface: #ffffff;
+  --dashboard-heading: #0f172a;
+  --dashboard-muted: #64748b;
+  --dashboard-border: #e2e8f0;
+  --dashboard-accent: #0ea5e9;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -47,6 +55,12 @@
   --color-brand-text-primary: var(--brand-text-primary);
   --color-brand-text-secondary: var(--brand-text-secondary);
   --color-brand-black: var(--brand-black);
+  --color-dashboard-bg: var(--dashboard-bg);
+  --color-dashboard-surface: var(--dashboard-surface);
+  --color-dashboard-heading: var(--dashboard-heading);
+  --color-dashboard-muted: var(--dashboard-muted);
+  --color-dashboard-border: var(--dashboard-border);
+  --color-dashboard-accent: var(--dashboard-accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-funnel-display);
@@ -129,6 +143,69 @@ body {
   .marquee-track {
     gap: 48px;
   }
+}
+
+/* Smooth scroll for dashboard and main content */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Auth form: professional input styling (breathing borders, focus glow) ── */
+.input-auth {
+  @apply h-11 w-full min-w-0 rounded-xl border-2 bg-slate-50/90 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400;
+  @apply transition-all duration-200 ease-out;
+  @apply shadow-sm;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.input-auth:hover {
+  border-color: #94a3b8;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.input-auth:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+.input-auth::placeholder {
+  color: #94a3b8;
+}
+.input-auth:disabled {
+  @apply cursor-not-allowed opacity-60;
+  background-color: #f1f5f9;
+}
+.input-auth.input-auth-error {
+  border-color: #f87171;
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.15);
+}
+.input-auth.input-auth-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+.input-auth-readonly {
+  @apply cursor-default bg-slate-100/90 text-slate-600;
+  border-color: #e2e8f0;
+}
+.input-auth-readonly:hover {
+  border-color: #e2e8f0;
+  background-color: #f1f5f9;
+}
+
+/* Auth form labels */
+.label-auth {
+  @apply text-sm font-medium text-slate-700;
+}
+
+/* Auth card container */
+.auth-card {
+  @apply rounded-2xl p-6 sm:p-8;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 @layer base {

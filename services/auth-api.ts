@@ -1,21 +1,70 @@
 /**
  * Authentication API Service
- * Handles all authentication-related API calls with proper error handling
+ * New-auth endpoints (§3 FRONTEND_DEVICE_METADATA.md).
+ * Device metadata headers (§1) are attached by api-client-backend on every request.
  */
 
 import { backendApi } from "@/lib/api-client-backend";
 import { formatErrorMessage } from "@/lib/error-handler";
+import type { NewAuthUser } from "@/lib/auth-storage";
+
+/** Standard envelope from backend */
+interface ApiEnvelope<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
+}
+
+/** Register payload (§3.1) */
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  agree_to_terms: boolean;
+  middle_name?: string;
+  gender?: "male" | "female";
+  referral_code?: string;
+  country?: string;
+  updates_opt_in?: boolean;
+}
+
+/** Register response: account created, OTP sent to email */
+export interface RegisterResponseData {
+  user: { id: string; email: string; first_name: string; last_name: string };
+}
+
+/** Sign-in payload (§3.3) */
+export interface SignInPayload {
+  email: string;
+  password: string;
+}
+
+/** Sign-in response (§3.3) */
+export interface SignInResponseData {
+  access_token: string;
+  refresh_token: string | null;
+  user: NewAuthUser;
+}
+
+/** Reset password payload (§3.6) */
+export interface ResetPasswordPayload {
+  email: string;
+  otp: string;
+  new_password: string;
+}
 
 export const authApi = {
   /**
-   * Step 1: Request email OTP for registration
-   * @param email - User's email address
+   * Step 1 — Request email verification (§3.1).
+   * User enters email and clicks "Verify email". Backend sends OTP.
    */
-  requestEmailOtp: async (email: string) => {
+  requestEmailVerification: async (email: string): Promise<ApiEnvelope> => {
     try {
-      const response = await backendApi.post(
-        "/auth/minimal-register/request-email-otp",
-        { email }
+      const response = await backendApi.post<ApiEnvelope>(
+        "/new-auth/request-email-verification",
+        { email: email.trim().toLowerCase() }
       );
       return response.data;
     } catch (error) {
@@ -24,15 +73,17 @@ export const authApi = {
   },
 
   /**
-   * Step 2: Verify email OTP
-   * @param email - User's email address
-   * @param otp - 4-digit OTP code
+   * Step 2 — Verify email for registration (§3.2).
+   * User enters OTP. On success, email is verified and user can call register.
    */
-  verifyEmailOtp: async (email: string, otp: string) => {
+  verifyEmailForRegistration: async (
+    email: string,
+    otp: string
+  ): Promise<ApiEnvelope> => {
     try {
-      const response = await backendApi.post(
-        "/auth/minimal-register/verify-email-otp",
-        { email, otp }
+      const response = await backendApi.post<ApiEnvelope>(
+        "/new-auth/verify-email-for-registration",
+        { email: email.trim().toLowerCase(), otp }
       );
       return response.data;
     } catch (error) {
@@ -41,20 +92,13 @@ export const authApi = {
   },
 
   /**
-   * Step 3: Complete registration
-   * @param data - Registration data
+   * Step 3 — Register (§3.3). Email must already be verified (steps 1 & 2).
+   * On success, user can sign in immediately (no post-registration OTP).
    */
-  register: async (data: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone_number: string;
-    password: string;
-    referral_code?: string;
-  }) => {
+  register: async (data: RegisterPayload): Promise<ApiEnvelope<RegisterResponseData>> => {
     try {
-      const response = await backendApi.post(
-        "/auth/minimal-register/register",
+      const response = await backendApi.post<ApiEnvelope<RegisterResponseData>>(
+        "/new-auth/register",
         data
       );
       return response.data;
@@ -64,17 +108,28 @@ export const authApi = {
   },
 
   /**
-   * Login with email or phone number
-   * @param credentials - Email/phone + password
+   * Legacy — Verify email OTP (§3.4) for flows where user already exists.
+   * For registration flow use verifyEmailForRegistration instead.
    */
-  login: async (credentials: {
-    email?: string;
-    phone_number?: string;
-    password: string;
-  }) => {
+  verifyEmailOtp: async (email: string, otp: string): Promise<ApiEnvelope> => {
     try {
-      const response = await backendApi.post(
-        "/auth/minimal-register/login",
+      const response = await backendApi.post<ApiEnvelope>("/new-auth/verify-email-otp", {
+        email,
+        otp,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Sign in (§3.3) — email + password only.
+   */
+  login: async (credentials: SignInPayload): Promise<ApiEnvelope<SignInResponseData>> => {
+    try {
+      const response = await backendApi.post<ApiEnvelope<SignInResponseData>>(
+        "/new-auth/signin",
         credentials
       );
       return response.data;
@@ -84,12 +139,11 @@ export const authApi = {
   },
 
   /**
-   * Request password reset OTP
-   * @param email - User's email address
+   * Forgot password — request OTP (§3.4).
    */
-  requestPasswordReset: async (email: string) => {
+  requestPasswordReset: async (email: string): Promise<ApiEnvelope> => {
     try {
-      const response = await backendApi.post("/auth/request-password-reset", {
+      const response = await backendApi.post<ApiEnvelope>("/new-auth/forgot-password", {
         email,
       });
       return response.data;
@@ -99,22 +153,14 @@ export const authApi = {
   },
 
   /**
-   * Verify password reset OTP and set new password
-   * @param email - User's email address
-   * @param otp - OTP code
-   * @param newPassword - New password
+   * Verify password reset OTP (§3.5) — step 2 of forgot flow.
    */
-  verifyPasswordResetOtp: async (
-    email: string,
-    otp: string,
-    newPassword: string
-  ) => {
+  verifyPasswordResetOtp: async (email: string, otp: string): Promise<ApiEnvelope> => {
     try {
-      const response = await backendApi.post("/auth/verify-password-reset-otp", {
-        email,
-        otp,
-        newPassword,
-      });
+      const response = await backendApi.post<ApiEnvelope>(
+        "/new-auth/verify-password-reset-otp",
+        { email, otp }
+      );
       return response.data;
     } catch (error) {
       throw new Error(formatErrorMessage(error));
@@ -122,11 +168,11 @@ export const authApi = {
   },
 
   /**
-   * Logout user
+   * Reset password (§3.6) — step 3: set new password with verified OTP.
    */
-  logout: async () => {
+  resetPassword: async (data: ResetPasswordPayload): Promise<ApiEnvelope> => {
     try {
-      const response = await backendApi.post("/auth/logout");
+      const response = await backendApi.post<ApiEnvelope>("/new-auth/reset-password", data);
       return response.data;
     } catch (error) {
       throw new Error(formatErrorMessage(error));
@@ -134,40 +180,14 @@ export const authApi = {
   },
 
   /**
-   * Refresh access token
-   * @param refreshToken - Refresh token
+   * Logout (§3.7) — invalidates refresh tokens server-side.
+   * Frontend must also discard stored tokens locally regardless of outcome.
    */
-  refreshToken: async (refreshToken: string) => {
+  logout: async (): Promise<void> => {
     try {
-      const response = await backendApi.post("/auth/refresh", { refreshToken });
-      return response.data;
-    } catch (error) {
-      throw new Error(formatErrorMessage(error));
-    }
-  },
-
-  /**
-   * Verify email address
-   * @param token - Email verification token
-   */
-  verifyEmail: async (token: string) => {
-    try {
-      const response = await backendApi.post("/auth/verify-email", { token });
-      return response.data;
-    } catch (error) {
-      throw new Error(formatErrorMessage(error));
-    }
-  },
-
-  /**
-   * Resend email verification
-   */
-  resendEmailVerification: async () => {
-    try {
-      const response = await backendApi.post("/auth/resend-verification");
-      return response.data;
-    } catch (error) {
-      throw new Error(formatErrorMessage(error));
+      await backendApi.post("/new-auth/logout");
+    } catch {
+      // Client clears auth regardless
     }
   },
 };
