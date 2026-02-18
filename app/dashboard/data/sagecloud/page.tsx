@@ -24,11 +24,11 @@ export default function SagecloudDataPage() {
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-brand-text-primary flex items-center gap-2">
-                <Zap className="h-6 w-6" />
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary flex items-center gap-2">
+                <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
                 Buy Data
               </h1>
-              <p className="text-sm text-brand-text-secondary mt-1">
+              <p className="text-xs sm:text-sm text-brand-text-secondary mt-0.5 sm:mt-1">
                 Purchase data bundles using Sagecloud provider
               </p>
             </div>
@@ -44,19 +44,19 @@ export default function SagecloudDataPage() {
         <div className="max-w-4xl">
 
           {/* Provider Content */}
-          <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-purple-100 mb-4">
-                <Zap className="h-10 w-10 text-purple-600" />
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border border-gray-100">
+            <div className="text-center py-8 sm:py-12">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-purple-100 mb-3 sm:mb-4">
+                <Zap className="h-7 w-7 sm:h-10 sm:w-10 text-purple-600" />
               </div>
-              <h2 className="text-2xl font-bold text-brand-text-primary mb-2">
+              <h2 className="text-lg sm:text-2xl font-bold text-brand-text-primary mb-2">
                 Sagecloud Data Provider
               </h2>
-              <p className="text-brand-text-secondary mb-6">
+              <p className="text-sm sm:text-base text-brand-text-secondary mb-4 sm:mb-6">
                 This is the Sagecloud data purchase page. The form and fields will be implemented based on Sagecloud API requirements.
               </p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full">
-                <span className="text-sm font-semibold text-purple-700">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-purple-50 rounded-full">
+                <span className="text-xs sm:text-sm font-semibold text-purple-700">
                   Provider: Sagecloud
                 </span>
               </div>

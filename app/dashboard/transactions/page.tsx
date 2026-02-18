@@ -93,10 +93,10 @@ export default function TransactionsPage() {
         <div className="px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-brand-text-primary">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary">
                 Transaction History
               </h1>
-              <p className="text-sm text-brand-text-secondary mt-1">
+              <p className="text-xs sm:text-sm text-brand-text-secondary mt-1">
                 View all your transactions
               </p>
             </div>
@@ -115,7 +115,7 @@ export default function TransactionsPage() {
       <div className="px-4 py-6 sm:px-6 lg:px-8">
         {/* Stats Summary */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <p className="text-sm text-brand-text-secondary mb-1">Total Transactions</p>
               <p className="text-2xl font-bold text-brand-text-primary">
@@ -178,7 +178,7 @@ export default function TransactionsPage() {
                 {transactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="p-3 sm:p-4 md:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
                     onClick={() => router.push(`/dashboard/transactions/${transaction.id}`)}
                   >
                     {/* Mobile Layout */}
@@ -207,10 +207,10 @@ export default function TransactionsPage() {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-brand-text-primary">
+                            <p className="font-medium text-brand-text-primary text-xs sm:text-sm">
                               {transaction.description}
                             </p>
-                            <p className="text-sm text-brand-text-secondary">
+                            <p className="text-[10px] sm:text-xs md:text-sm text-brand-text-secondary">
                               {formatDate(transaction.date)}
                             </p>
                           </div>
@@ -304,9 +304,9 @@ export default function TransactionsPage() {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-100">
+                <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-100">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-brand-text-secondary">
+                    <p className="text-xs sm:text-sm text-brand-text-secondary">
                       Showing page {pagination.currentPage} of {pagination.totalPages}
                     </p>
                     <div className="flex items-center gap-2">

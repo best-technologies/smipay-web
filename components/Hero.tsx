@@ -16,8 +16,8 @@ export default function Hero() {
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-brand-text-secondary max-w-xl">
             Experience seamless digital transactions, instant airtime & data
-            top-ups, bill payments, virtual cards, and gift card redemptions—all
-            in one powerful platform.
+            top-ups, bill payments, and virtual cards—all in one powerful
+            platform.
           </p>
           <div className="pt-1 sm:pt-2">
             <AppStoreButtons />

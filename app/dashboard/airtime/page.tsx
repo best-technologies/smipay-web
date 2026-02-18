@@ -20,8 +20,8 @@ const VtpassAirtime = dynamic(
     loading: () => (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-brand-bg-primary mx-auto mb-4" />
-          <p className="text-brand-text-secondary">Loading...</p>
+          <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-brand-bg-primary mx-auto mb-3 sm:mb-4" />
+          <p className="text-xs sm:text-sm text-brand-text-secondary">Loading...</p>
         </div>
       </div>
     )
@@ -34,8 +34,8 @@ const SagecloudAirtime = dynamic(
     loading: () => (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-brand-bg-primary mx-auto mb-4" />
-          <p className="text-brand-text-secondary">Loading...</p>
+          <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-brand-bg-primary mx-auto mb-3 sm:mb-4" />
+          <p className="text-xs sm:text-sm text-brand-text-secondary">Loading...</p>
         </div>
       </div>
     )

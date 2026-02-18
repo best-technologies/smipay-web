@@ -239,28 +239,6 @@ export default function TermsOfServicePage() {
             </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
-              Gift Card Services
-            </h2>
-            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
-              Smipay offers buying, selling, and redeeming of gift cards. You
-              agree that:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
-              <li>
-                The value offered for gift card redemption may vary depending on
-                market conditions.
-              </li>
-              <li>
-                Smipay is not responsible for invalid, already-used, or damaged
-                gift cards submitted for sale.
-              </li>
-              <li>
-                All gift card trades are subject to verification before
-                approval.
-              </li>
-            </ul>
-
-            <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               Service Availability
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">

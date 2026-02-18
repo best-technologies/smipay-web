@@ -141,11 +141,11 @@ export default function VtpassDataPage() {
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-brand-text-primary flex items-center gap-2">
-                <Zap className="h-6 w-6" />
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary flex items-center gap-2">
+                <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
                 Buy Data
               </h1>
-              <p className="text-sm text-brand-text-secondary mt-1">
+              <p className="text-xs sm:text-sm text-brand-text-secondary mt-0.5 sm:mt-1">
                 Purchase data bundles using VTPass provider
               </p>
             </div>
@@ -162,8 +162,8 @@ export default function VtpassDataPage() {
           {!showPurchaseView ? (
             <>
               {/* Network Selection */}
-              <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 border border-gray-100 mb-6">
-                <h2 className="text-lg font-semibold text-slate-800 mb-4">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border border-gray-100 mb-4 sm:mb-6">
+                <h2 className="text-sm sm:text-base md:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                   Select Network Provider
                 </h2>
                 
@@ -181,11 +181,11 @@ export default function VtpassDataPage() {
                 />
 
                 {selectedServiceId && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs sm:text-sm text-blue-800">
                       <strong>Selected:</strong> {services.find(s => s.serviceID === selectedServiceId)?.name || "N/A"}
                     </p>
-                    <p className="text-xs text-blue-600 mt-1">
+                    <p className="text-[10px] sm:text-xs text-blue-600 mt-0.5 sm:mt-1">
                       Next step: Select a data plan for this network
                     </p>
                   </div>
@@ -194,7 +194,7 @@ export default function VtpassDataPage() {
 
               {/* Data Plan Selection */}
               {selectedServiceId && (
-                <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 border border-gray-100">
+                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border border-gray-100">
                   {variationsError && (
                     <div className="mb-4">
                       <FormError message={variationsError} />
@@ -213,9 +213,9 @@ export default function VtpassDataPage() {
             </>
           ) : (
             /* Purchase View - Mini Page */
-            <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border border-gray-100">
               {/* Back Button and Title */}
-              <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -225,28 +225,28 @@ export default function VtpassDataPage() {
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </Button>
-                <h2 className="text-lg font-semibold text-slate-800">
+                <h2 className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
                   Complete Purchase
                 </h2>
               </div>
 
               {/* Selected Plan Summary */}
               {currentVariation && selectedService && (
-                <div className="bg-gradient-to-r from-brand-bg-primary/5 to-indigo-50 rounded-lg p-4 mb-6 border border-brand-bg-primary/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600 mb-1">Network</p>
-                      <p className="font-semibold text-slate-800">
+                <div className="bg-gradient-to-r from-brand-bg-primary/5 to-indigo-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-brand-bg-primary/20">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs text-slate-600 mb-0.5 sm:mb-1">Network</p>
+                      <p className="font-semibold text-xs sm:text-sm text-slate-800 truncate">
                         {selectedService.name.replace(" Data", "").replace(" (SME)", "")}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-sm text-slate-600 mb-1">Data Plan</p>
-                      <p className="font-semibold text-slate-800">{currentVariation.name}</p>
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs text-slate-600 mb-0.5 sm:mb-1">Data Plan</p>
+                      <p className="font-semibold text-xs sm:text-sm text-slate-800 truncate">{currentVariation.name}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-slate-600 mb-1">Amount</p>
-                      <p className="text-xl font-bold text-brand-bg-primary">
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[10px] sm:text-xs text-slate-600 mb-0.5 sm:mb-1">Amount</p>
+                      <p className="text-sm sm:text-lg md:text-xl font-bold text-brand-bg-primary">
                         ₦{parseFloat(currentVariation.variation_amount).toLocaleString()}
                       </p>
                     </div>

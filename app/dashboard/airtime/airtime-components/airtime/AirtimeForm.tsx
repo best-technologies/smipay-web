@@ -168,13 +168,13 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
   const maxAmount = selectedService ? parseFloat(selectedService.maximum_amount) : 100000;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Server Error */}
       {serverError && <FormError message={serverError} />}
 
       {/* Network Selection */}
       <div>
-        <label className="text-base font-semibold mb-3 block text-brand-text-primary">
+        <label className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 block text-brand-text-primary">
           Select Network Provider
           <span className="text-red-500 ml-1">*</span>
         </label>
@@ -190,7 +190,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
       </div>
 
       {/* Phone Number and Amount - Side by Side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <PhoneNumberInput
           value={phoneNumber}
           onChange={setPhoneNumber}
@@ -212,7 +212,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full h-12 bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-lg font-semibold"
+        className="w-full h-10 sm:h-12 bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-sm sm:text-lg font-semibold"
         disabled={
           isSubmitting ||
           loadingServices ||
@@ -232,8 +232,8 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
       </Button>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+        <p className="text-xs sm:text-sm text-blue-800">
           <strong>Note:</strong> Airtime will be delivered instantly to the phone number
           provided. Make sure the number is correct before proceeding.
         </p>

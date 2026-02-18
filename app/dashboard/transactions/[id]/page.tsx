@@ -167,18 +167,18 @@ export default function TransactionDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold text-brand-text-primary">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary">
             Transaction Details
           </h1>
-          <p className="text-sm text-brand-text-secondary mt-1">
+          <p className="text-xs sm:text-sm text-brand-text-secondary mt-0.5 sm:mt-1">
             View complete information about this transaction
           </p>
         </div>
       </div>
 
-      <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+      <div className="px-3 sm:px-4 py-4 sm:py-6 md:px-6 lg:px-8 max-w-4xl mx-auto">
         {/* Status Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8 mb-4 sm:mb-6">
           <div className="flex flex-col items-center text-center">
             {/* Provider / Status Icon */}
             <div className="mb-4">
@@ -199,12 +199,12 @@ export default function TransactionDetailPage() {
             </span>
 
             {/* Amount */}
-            <p className="text-4xl font-bold text-brand-text-primary mb-2">
+            <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-text-primary mb-1 sm:mb-2">
               ₦{transaction.amount}
             </p>
 
             {/* Description */}
-            <p className="text-lg text-brand-text-secondary">
+            <p className="text-sm sm:text-base md:text-lg text-brand-text-secondary">
               {transaction.description}
             </p>
           </div>

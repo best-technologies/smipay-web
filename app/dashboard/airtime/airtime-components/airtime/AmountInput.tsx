@@ -43,7 +43,7 @@ export function AmountInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="amount" className="text-base font-semibold">
+      <Label htmlFor="amount" className="text-sm sm:text-base font-semibold">
         Amount (₦)
         {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
@@ -106,7 +106,7 @@ export function AmountInput({
 
       {/* Preset Amount Buttons */}
       {presetAmounts.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3">
           {presetAmounts
             .filter((amount) => amount >= min && amount <= max)
             .map((amount) => (
@@ -116,7 +116,7 @@ export function AmountInput({
                 onClick={() => handlePresetClick(amount)}
                 disabled={disabled}
                 className={cn(
-                  "px-4 py-2 text-sm border rounded-lg transition-colors",
+                  "px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm border rounded-lg transition-colors",
                   "hover:border-brand-bg-primary hover:bg-brand-bg-primary/5",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
                   value === amount.toString()

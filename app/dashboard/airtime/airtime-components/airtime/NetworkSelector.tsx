@@ -20,14 +20,14 @@ export function NetworkSelector({
 }: NetworkSelectorProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="p-4 rounded-xl border-2 border-gray-200 animate-pulse bg-gray-50"
+            className="p-2.5 sm:p-4 rounded-xl border-2 border-gray-200 animate-pulse bg-gray-50"
           >
-            <div className="h-12 w-12 rounded-lg bg-gray-200 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg bg-gray-200 mb-1.5 sm:mb-2 mx-auto"></div>
+            <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
           </div>
         ))}
       </div>
@@ -43,7 +43,7 @@ export function NetworkSelector({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
       {services.map((service) => {
         const isSelected = selectedServiceId === service.serviceID;
         const minAmount = parseFloat(service.minimium_amount);
@@ -60,7 +60,7 @@ export function NetworkSelector({
             onClick={() => onSelect(service.serviceID)}
             disabled={isLoading}
             className={cn(
-              "p-4 rounded-xl border-2 transition-all text-left",
+              "p-2.5 sm:p-4 rounded-xl border-2 transition-all text-left",
               "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-bg-primary focus:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               isSelected
@@ -70,7 +70,7 @@ export function NetworkSelector({
           >
             <div className="flex flex-col items-center text-center">
               {logoPath ? (
-                <div className="relative h-12 w-12 mb-2">
+                <div className="relative h-9 w-9 sm:h-12 sm:w-12 mb-1.5 sm:mb-2">
                   <Image
                     src={logoPath}
                     alt={service.name}
@@ -89,14 +89,14 @@ export function NetworkSelector({
                   />
                 </div>
               ) : (
-                <div className="h-12 w-12 rounded-lg bg-gray-100 mb-2 flex items-center justify-center">
-                  <span className="text-2xl">📱</span>
+                <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg bg-gray-100 mb-1.5 sm:mb-2 flex items-center justify-center">
+                  <span className="text-lg sm:text-2xl">📱</span>
                 </div>
               )}
-              <p className="font-semibold text-sm text-brand-text-primary">
+              <p className="font-semibold text-xs sm:text-sm text-brand-text-primary">
                 {service.name.replace(" Airtime", "")}
               </p>
-              <p className="text-xs text-brand-text-secondary mt-1">
+              <p className="text-[10px] sm:text-xs text-brand-text-secondary mt-0.5 sm:mt-1">
                 ₦{minAmount.toLocaleString()} - ₦{maxAmount.toLocaleString()}
               </p>
             </div>

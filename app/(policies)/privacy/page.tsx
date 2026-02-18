@@ -131,8 +131,7 @@ export default function PrivacyPolicyPage() {
               <li>Electricity meter details</li>
               <li>Airtime and data purchase details</li>
               <li>Cable subscription details</li>
-              {/* <li>Virtual card transactions</li>
-              <li>Gift card trading information</li> */}
+              {/* <li>Virtual card transactions</li> */}
             </ul>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
@@ -196,7 +195,6 @@ export default function PrivacyPolicyPage() {
               <li>Payment processors</li>
               <li>Banks and financial institutions</li>
               <li>Utility providers (electricity, cable, telecoms)</li>
-              {/* <li>Gift card partners</li> */}
               <li>Identity verification services</li>
               <li>Analytics and security providers</li>
             </ul>

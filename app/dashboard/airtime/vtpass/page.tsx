@@ -82,11 +82,11 @@ export default function VtpassAirtimePage() {
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-brand-text-primary flex items-center gap-2">
-                <Smartphone className="h-6 w-6" />
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary flex items-center gap-2">
+                <Smartphone className="h-5 w-5 sm:h-6 sm:w-6" />
                 Buy Airtime
               </h1>
-              <p className="text-sm text-brand-text-secondary mt-1">
+              <p className="text-xs sm:text-sm text-brand-text-secondary mt-0.5 sm:mt-1">
                 Purchase airtime for any network provider
               </p>
             </div>
@@ -102,7 +102,7 @@ export default function VtpassAirtimePage() {
         <div className="max-w-4xl">
 
           {/* Airtime Purchase Form */}
-          <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 border border-gray-100">
             <AirtimeForm
               onSuccess={handleTransactionSuccess}
               onError={handleTransactionError}

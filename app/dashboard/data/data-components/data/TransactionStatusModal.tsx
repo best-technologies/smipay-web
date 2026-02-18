@@ -85,53 +85,53 @@ export function TransactionStatusModal({
         className={`bg-white rounded-xl shadow-xl max-w-md w-full ${config.borderColor} border-2 overflow-hidden`}
       >
         {/* Header */}
-        <div className={`${config.bgColor} p-6 text-center relative`}>
+        <div className={`${config.bgColor} p-4 sm:p-6 text-center relative`}>
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-colors"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1 hover:bg-white/20 rounded-full transition-colors"
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
           </button>
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-3 sm:mb-4">
             {status === "processing" ? (
-              <Loader2 className={`h-16 w-16 ${config.iconColor} animate-spin`} />
+              <Loader2 className={`h-12 w-12 sm:h-16 sm:w-16 ${config.iconColor} animate-spin`} />
             ) : (
-              <Icon className={`h-16 w-16 ${config.iconColor}`} />
+              <Icon className={`h-12 w-12 sm:h-16 sm:w-16 ${config.iconColor}`} />
             )}
           </div>
-          <h2 className={`text-2xl font-bold ${config.iconColor.replace("text-", "text-")} mb-2`}>
+          <h2 className={`text-lg sm:text-2xl font-bold ${config.iconColor.replace("text-", "text-")} mb-1.5 sm:mb-2`}>
             {config.title}
           </h2>
-          <p className="text-gray-600 text-sm">{config.description}</p>
+          <p className="text-gray-600 text-xs sm:text-sm">{config.description}</p>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {status === "success" && transactionData?.content?.transactions && (
-            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2.5 sm:space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Product:</span>
-                <span className="font-semibold text-gray-900">
+                <span className="text-xs sm:text-sm text-gray-600">Product:</span>
+                <span className="font-semibold text-sm sm:text-base text-gray-900">
                   {transactionData.content.transactions.product_name}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Phone Number:</span>
-                <span className="font-semibold text-gray-900 font-mono">
+                <span className="text-xs sm:text-sm text-gray-600">Phone Number:</span>
+                <span className="font-semibold text-sm sm:text-base text-gray-900 font-mono">
                   {transactionData.content.transactions.unique_element}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Amount:</span>
-                <span className="font-semibold text-gray-900">
+                <span className="text-xs sm:text-sm text-gray-600">Amount:</span>
+                <span className="font-semibold text-sm sm:text-base text-gray-900">
                   ₦{parseFloat(String(transactionData.content.transactions.amount)).toLocaleString()}
                 </span>
               </div>
               {transactionId && (
-                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                  <span className="text-sm text-gray-600">Transaction ID:</span>
+                <div className="flex justify-between items-center pt-2.5 sm:pt-3 border-t border-gray-200">
+                  <span className="text-xs sm:text-sm text-gray-600">Transaction ID:</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-gray-700 truncate max-w-[120px]">
+                    <span className="font-mono text-[10px] sm:text-xs text-gray-700 truncate max-w-[100px] sm:max-w-[120px]">
                       {transactionId}
                     </span>
                     <button
@@ -152,12 +152,12 @@ export function TransactionStatusModal({
           )}
 
           {status === "processing" && transactionData && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800 mb-2">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-yellow-800 mb-1.5 sm:mb-2">
                 <strong>Request ID:</strong> {transactionData.requestId}
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
-                <p className="text-xs text-blue-800">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3 mt-2 sm:mt-3">
+                <p className="text-[10px] sm:text-xs text-blue-800">
                   <strong>Note:</strong> You can close this window and continue using the app. 
                   You'll receive a notification once the transaction is completed.
                 </p>
@@ -166,14 +166,14 @@ export function TransactionStatusModal({
           )}
 
           {status === "error" && errorMessage && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-800 font-medium mb-1">Error Details:</p>
-              <p className="text-sm text-red-700">{errorMessage}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-red-800 font-medium mb-0.5 sm:mb-1">Error Details:</p>
+              <p className="text-xs sm:text-sm text-red-700">{errorMessage}</p>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2 sm:gap-3 pt-2">
             {status === "error" && onRetry && (
               <Button
                 variant="outline"

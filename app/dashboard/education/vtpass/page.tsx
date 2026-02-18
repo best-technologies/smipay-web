@@ -25,11 +25,11 @@ export default function VtpassEducationPage() {
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-brand-text-primary flex items-center gap-2">
-                <GraduationCap className="h-6 w-6" />
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-text-primary flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" />
                 Education
               </h1>
-              <p className="text-sm text-brand-text-secondary mt-1">
+              <p className="text-xs sm:text-sm text-brand-text-secondary mt-0.5 sm:mt-1">
                 Purchase education services using VTPass provider
               </p>
             </div>

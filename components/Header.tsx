@@ -45,12 +45,6 @@ export default function Header() {
               >
                 Bills Payment
               </Link>
-              <Link
-                href="#"
-                className="block rounded px-3 py-2 hover:bg-zinc-100"
-              >
-                Gift Cards
-              </Link>
             </div>
           </div>
           <Link href="#" className="hover:opacity-90">
@@ -109,13 +103,6 @@ export default function Header() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Bills Payment
-                  </Link>
-                  <Link
-                    href="#"
-                    className="block py-2 hover:opacity-90"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gift Cards
                   </Link>
                 </div>
               )}

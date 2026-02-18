@@ -56,14 +56,6 @@ const cards = [
       "Fund your favorite betting platforms quickly and securely from one place. No delays, no failed payments, and no switching between apps. Enjoy fast top-ups, reliable processing, and clear transaction history — so you can focus on the game, not the payment.",
     image: "/imgs/stack-card-06.png",
   },
-  // {
-  //   bgColor: "bg-[#F6E4F0]",
-  //   badge: "Gift cards",
-  //   title: "Turn Gift Cards into Real Value",
-  //   description:
-  //     "Buy, sell, or redeem gift cards from top international brands at competitive rates. Whether you are sending a gift or converting unused cards into cash, the process is fast, secure, and straightforward. No hidden conditions — just real value in minutes.",
-  //   image: "/imgs/stack-card-07.png",
-  // },
 ];
 
 export default function StackCard() {

@@ -85,55 +85,55 @@ export function TransactionStatusModal({
         className={`bg-white rounded-xl shadow-xl max-w-md w-full ${config.borderColor} border-2 overflow-hidden`}
       >
         {/* Header */}
-        <div className={`${config.bgColor} p-6 text-center relative`}>
+        <div className={`${config.bgColor} p-4 sm:p-6 text-center relative`}>
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-colors"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1 hover:bg-white/20 rounded-full transition-colors"
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
           </button>
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-3 sm:mb-4">
             {status === "processing" ? (
-              <Loader2 className={`h-16 w-16 ${config.iconColor} animate-spin`} />
+              <Loader2 className={`h-12 w-12 sm:h-16 sm:w-16 ${config.iconColor} animate-spin`} />
             ) : (
-              <Icon className={`h-16 w-16 ${config.iconColor}`} />
+              <Icon className={`h-12 w-12 sm:h-16 sm:w-16 ${config.iconColor}`} />
             )}
           </div>
-          <h2 className="text-2xl font-bold text-brand-text-primary mb-2">
+          <h2 className="text-lg sm:text-2xl font-bold text-brand-text-primary mb-1.5 sm:mb-2">
             {config.title}
           </h2>
-          <p className="text-sm text-brand-text-secondary">{config.description}</p>
+          <p className="text-xs sm:text-sm text-brand-text-secondary">{config.description}</p>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {status === "success" && transactionData?.content?.transactions && (
-            <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+            <div className="space-y-2.5 sm:space-y-3 bg-gray-50 rounded-lg p-3 sm:p-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Phone Number:</span>
-                <span className="font-semibold text-brand-text-primary">
+                <span className="text-xs sm:text-sm text-brand-text-secondary">Phone Number:</span>
+                <span className="font-semibold text-sm sm:text-base text-brand-text-primary">
                   {transactionData.content.transactions.unique_element}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Amount:</span>
-                <span className="font-semibold text-brand-text-primary">
+                <span className="text-xs sm:text-sm text-brand-text-secondary">Amount:</span>
+                <span className="font-semibold text-sm sm:text-base text-brand-text-primary">
                   ₦{parseFloat(transactionData.content.transactions.amount).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Product:</span>
-                <span className="font-semibold text-brand-text-primary">
+                <span className="text-xs sm:text-sm text-brand-text-secondary">Product:</span>
+                <span className="font-semibold text-sm sm:text-base text-brand-text-primary">
                   {transactionData.content.transactions.product_name}
                 </span>
               </div>
               {transactionId && (
-                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                  <span className="text-sm text-brand-text-secondary">
+                <div className="flex justify-between items-center pt-2.5 sm:pt-3 border-t border-gray-200">
+                  <span className="text-xs sm:text-sm text-brand-text-secondary">
                     Transaction ID:
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-brand-text-primary">
+                    <span className="font-mono text-[10px] sm:text-xs text-brand-text-primary">
                       {transactionId.slice(0, 12)}...
                     </span>
                     <button
@@ -154,21 +154,21 @@ export function TransactionStatusModal({
           )}
 
           {status === "processing" && transactionData && (
-            <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+            <div className="space-y-2.5 sm:space-y-3 bg-gray-50 rounded-lg p-3 sm:p-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Request ID:</span>
-                <span className="font-mono text-xs text-brand-text-primary">
+                <span className="text-xs sm:text-sm text-brand-text-secondary">Request ID:</span>
+                <span className="font-mono text-[10px] sm:text-xs text-brand-text-primary">
                   {transactionData.requestId}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-brand-text-secondary">Amount:</span>
-                <span className="font-semibold text-brand-text-primary">
+                <span className="text-xs sm:text-sm text-brand-text-secondary">Amount:</span>
+                <span className="font-semibold text-sm sm:text-base text-brand-text-primary">
                   ₦{transactionData.amount.toLocaleString()}
                 </span>
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-                <p className="text-xs text-blue-800">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3 mt-3 sm:mt-4">
+                <p className="text-[10px] sm:text-xs text-blue-800">
                   <strong>Note:</strong> You can close this window and continue using the app. 
                   You'll receive a notification once the transaction is completed.
                 </p>
@@ -177,8 +177,8 @@ export function TransactionStatusModal({
           )}
 
           {status === "error" && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-800">{config.description}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-red-800">{config.description}</p>
               {errorMessage?.includes("Insufficient") && (
                 <Button
                   onClick={() => {
@@ -195,7 +195,7 @@ export function TransactionStatusModal({
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
             {status === "error" && onRetry && (
               <Button
                 variant="outline"

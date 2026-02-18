@@ -40,7 +40,7 @@ export function PhoneNumberInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="phone" className="text-base font-semibold">
+      <Label htmlFor="phone" className="text-sm sm:text-base font-semibold">
         Phone Number
         {required && <span className="text-red-500 ml-1">*</span>}
       </Label>

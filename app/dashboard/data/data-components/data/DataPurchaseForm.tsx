@@ -109,9 +109,9 @@ export function DataPurchaseForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Phone Number Input */}
-      <div className="flex gap-4 items-end">
+      <div className="flex gap-3 sm:gap-4 items-end">
         <div className="flex-1">
           <PhoneNumberInput
             value={phoneNumber}
@@ -130,15 +130,15 @@ export function DataPurchaseForm({
       )}
 
       {/* Selected Plan Info */}
-      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-slate-600 mb-1">Selected Plan</p>
-            <p className="font-semibold text-slate-800">{selectedVariation.name}</p>
+      <div className="bg-slate-50 rounded-lg p-3 sm:p-4 border border-slate-200">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-xs sm:text-sm text-slate-600 mb-0.5 sm:mb-1">Selected Plan</p>
+            <p className="font-semibold text-xs sm:text-sm text-slate-800 truncate">{selectedVariation.name}</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-slate-600 mb-1">Amount</p>
-            <p className="text-xl font-bold text-slate-800">₦{amount.toLocaleString()}</p>
+          <div className="text-right flex-shrink-0">
+            <p className="text-xs sm:text-sm text-slate-600 mb-0.5 sm:mb-1">Amount</p>
+            <p className="text-base sm:text-xl font-bold text-slate-800">₦{amount.toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -161,8 +161,8 @@ export function DataPurchaseForm({
       </Button>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+        <p className="text-xs sm:text-sm text-blue-800">
           <strong>Note:</strong> Data will be delivered instantly to the phone number
           provided. Make sure the number is correct before proceeding.
         </p>

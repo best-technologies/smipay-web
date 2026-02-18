@@ -110,18 +110,18 @@ export function DataPlanSelector({
 
   if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-bg-primary mx-auto mb-4" />
-        <p className="text-brand-text-secondary">Loading data plans...</p>
+      <div className="text-center py-8 sm:py-12">
+        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-brand-bg-primary mx-auto mb-3 sm:mb-4" />
+        <p className="text-xs sm:text-sm text-brand-text-secondary">Loading data plans...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600 text-sm">{error}</p>
+      <div className="text-center py-8 sm:py-12">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+          <p className="text-red-600 text-xs sm:text-sm">{error}</p>
         </div>
       </div>
     );
@@ -129,8 +129,8 @@ export function DataPlanSelector({
 
   if (!variationCodes || !variationCodes.variations_categorized) {
     return (
-      <div className="text-center py-12">
-        <p className="text-brand-text-secondary">No data plans available at the moment.</p>
+      <div className="text-center py-8 sm:py-12">
+        <p className="text-xs sm:text-sm text-brand-text-secondary">No data plans available at the moment.</p>
       </div>
     );
   }
@@ -155,26 +155,26 @@ export function DataPlanSelector({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4 relative">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-slate-800">
+      <div className="flex items-center justify-between mb-3 sm:mb-4 relative">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <h2 className="text-sm sm:text-base md:text-lg font-semibold text-slate-800 whitespace-nowrap">
             Select Data Plan
           </h2>
           {favorites.size > 0 && (
             <button
               onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                "px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs md:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 whitespace-nowrap",
                 showFavoritesOnly
                   ? "bg-brand-bg-primary text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               )}
             >
               <Star className={cn(
-                "h-4 w-4",
+                "h-3 w-3 sm:h-4 sm:w-4",
                 showFavoritesOnly ? "fill-white" : "fill-yellow-400 text-yellow-400"
               )} />
-              View Favourites ({favorites.size})
+              <span className="hidden min-[400px]:inline">Favourites</span> ({favorites.size})
             </button>
           )}
         </div>
@@ -237,7 +237,7 @@ export function DataPlanSelector({
 
       {/* Category Tabs */}
       {categories.length > 1 && (
-        <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-gray-200 overflow-x-auto">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 overflow-x-auto">
           {categories.map((category) => {
             const config = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.Others;
             const Icon = config.icon;
@@ -249,16 +249,16 @@ export function DataPlanSelector({
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  "flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[10px] sm:text-xs md:text-sm font-medium transition-all",
                   "border-2",
                   isActive
                     ? `${config.color} shadow-sm font-semibold`
                     : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>{config.label}</span>
-                <span className="text-xs opacity-75">({count})</span>
+                <span className="text-[9px] sm:text-xs opacity-75">({count})</span>
               </button>
             );
           })}
@@ -268,7 +268,7 @@ export function DataPlanSelector({
       {/* Data Plans - Cards or Rows */}
       {displayedVariations.length > 0 ? (
         layout === "cards" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
             {displayedVariations.map((variation, index) => {
               const isSelected = selectedVariationCode === variation.variation_code;
               const amount = parseFloat(variation.variation_amount);
@@ -285,12 +285,12 @@ export function DataPlanSelector({
               const cardColor = colorVariants[index % colorVariants.length];
 
               return (
-                <button
+                  <button
                   key={variation.variation_code}
                   onClick={() => onSelectPlan(variation)}
                   className={cn(
-                    "p-5 rounded-xl border-2 transition-all text-left relative overflow-hidden",
-                    "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brand-bg-primary focus:ring-offset-2",
+                    "p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border-2 transition-all text-left relative overflow-hidden",
+                    "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brand-bg-primary focus:ring-offset-1 sm:focus:ring-offset-2",
                     isSelected
                       ? "border-brand-bg-primary bg-gradient-to-br from-brand-bg-primary/10 to-brand-bg-primary/5 shadow-lg ring-2 ring-brand-bg-primary/30 scale-[1.02]"
                       : `bg-gradient-to-br ${cardColor.gradient} ${cardColor.border} hover:shadow-md`
@@ -299,33 +299,33 @@ export function DataPlanSelector({
                   {/* Decorative corner accent */}
                   {!isSelected && (
                     <div className={cn(
-                      "absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-20",
+                      "absolute top-0 right-0 w-10 h-10 sm:w-16 sm:h-16 rounded-bl-full opacity-20",
                       cardColor.accent
                     )} />
                   )}
                   
-                  <div className="flex items-start justify-between mb-3 relative z-10">
-                    <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3 relative z-10">
+                    <div className="flex-1 min-w-0">
                       <h3 className={cn(
-                        "font-semibold text-sm mb-1",
+                        "font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 line-clamp-2",
                         isSelected ? "text-brand-bg-primary" : "text-slate-800"
                       )}>
                         {variation.name}
                       </h3>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-[9px] sm:text-xs text-slate-500 truncate">
                         {variation.variation_code}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 ml-2">
+                    <div className="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 flex-shrink-0">
                       {/* Favorite Star */}
                       <button
                         onClick={(e) => toggleFavorite(variation.variation_code, e)}
-                        className="p-1 hover:bg-white/50 rounded transition-colors"
+                        className="p-0.5 sm:p-1 hover:bg-white/50 rounded transition-colors"
                         title={isFavorite(variation.variation_code) ? "Remove from favorites" : "Add to favorites"}
                       >
                         <Star
                           className={cn(
-                            "h-5 w-5 transition-colors",
+                            "h-3.5 w-3.5 sm:h-5 sm:w-5 transition-colors",
                             isFavorite(variation.variation_code)
                               ? "fill-yellow-400 text-yellow-400"
                               : "text-gray-400 hover:text-yellow-400"
@@ -333,18 +333,18 @@ export function DataPlanSelector({
                         />
                       </button>
                       {isSelected && (
-                        <div className="h-5 w-5 rounded-full bg-brand-bg-primary flex items-center justify-center shadow-sm">
-                          <div className="h-2 w-2 rounded-full bg-white"></div>
+                        <div className="h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-brand-bg-primary flex items-center justify-center shadow-sm">
+                          <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-white"></div>
                         </div>
                       )}
                     </div>
                   </div>
                   <div className={cn(
-                    "mt-4 pt-4 border-t relative z-10",
+                    "mt-2 sm:mt-4 pt-2 sm:pt-4 border-t relative z-10",
                     isSelected ? "border-brand-bg-primary/30" : "border-slate-200"
                   )}>
                     <p className={cn(
-                      "text-2xl font-bold",
+                      "text-base sm:text-lg md:text-2xl font-bold",
                       isSelected ? "text-brand-bg-primary" : "text-slate-800"
                     )}>
                       ₦{amount.toLocaleString()}
@@ -355,8 +355,8 @@ export function DataPlanSelector({
             })}
           </div>
         ) : (
-          <div className="overflow-x-auto pb-4 -mx-2 px-2">
-            <div className="flex gap-3 min-w-max">
+          <div className="overflow-x-auto pb-3 sm:pb-4 -mx-2 px-2">
+            <div className="flex gap-2 sm:gap-3 min-w-max">
               {displayedVariations.map((variation, index) => {
                 const isSelected = selectedVariationCode === variation.variation_code;
                 const amount = parseFloat(variation.variation_amount);
@@ -377,8 +377,8 @@ export function DataPlanSelector({
                     key={variation.variation_code}
                     onClick={() => onSelectPlan(variation)}
                     className={cn(
-                      "flex-shrink-0 w-64 p-4 rounded-lg border-2 transition-all text-left relative overflow-hidden",
-                      "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-bg-primary focus:ring-offset-2",
+                      "flex-shrink-0 w-44 sm:w-52 md:w-64 p-3 sm:p-4 rounded-lg border-2 transition-all text-left relative overflow-hidden",
+                      "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-bg-primary focus:ring-offset-1 sm:focus:ring-offset-2",
                       "flex flex-col justify-between",
                       isSelected
                         ? "border-brand-bg-primary bg-gradient-to-br from-brand-bg-primary/10 to-brand-bg-primary/5 shadow-md ring-2 ring-brand-bg-primary/20"
@@ -393,29 +393,29 @@ export function DataPlanSelector({
                       )} />
                     )}
                     
-                    <div className="relative z-10 mt-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
+                    <div className="relative z-10 mt-0.5 sm:mt-1">
+                      <div className="flex items-start justify-between mb-1.5 sm:mb-2">
+                        <div className="flex-1 min-w-0">
                           <h3 className={cn(
-                            "font-semibold text-sm mb-1 line-clamp-2",
+                            "font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 line-clamp-2",
                             isSelected ? "text-brand-bg-primary" : "text-slate-800"
                           )}>
                             {variation.name}
                           </h3>
-                          <p className="text-xs text-slate-500 truncate">
+                          <p className="text-[9px] sm:text-xs text-slate-500 truncate">
                             {variation.variation_code}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                        <div className="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 flex-shrink-0">
                           {/* Favorite Star */}
                           <button
                             onClick={(e) => toggleFavorite(variation.variation_code, e)}
-                            className="p-1 hover:bg-white/50 rounded transition-colors"
+                            className="p-0.5 sm:p-1 hover:bg-white/50 rounded transition-colors"
                             title={isFavorite(variation.variation_code) ? "Remove from favorites" : "Add to favorites"}
                           >
                             <Star
                               className={cn(
-                                "h-4 w-4 transition-colors",
+                                "h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors",
                                 isFavorite(variation.variation_code)
                                   ? "fill-yellow-400 text-yellow-400"
                                   : "text-gray-400 hover:text-yellow-400"
@@ -423,16 +423,16 @@ export function DataPlanSelector({
                             />
                           </button>
                           {isSelected && (
-                            <div className="h-5 w-5 rounded-full bg-brand-bg-primary flex items-center justify-center shadow-sm">
-                              <div className="h-2 w-2 rounded-full bg-white"></div>
+                            <div className="h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-brand-bg-primary flex items-center justify-center shadow-sm">
+                              <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-white"></div>
                             </div>
                           )}
                         </div>
                       </div>
                       
-                      <div className="mt-3 pt-3 border-t border-slate-200">
+                      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-200">
                         <p className={cn(
-                          "text-xl font-bold",
+                          "text-base sm:text-lg md:text-xl font-bold",
                           isSelected ? "text-brand-bg-primary" : "text-slate-800"
                         )}>
                           ₦{amount.toLocaleString()}
@@ -446,14 +446,14 @@ export function DataPlanSelector({
           </div>
         )
       ) : showFavoritesOnly ? (
-        <div className="text-center py-12">
-          <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-brand-text-secondary font-medium">No favorite plans yet</p>
-          <p className="text-sm text-gray-400 mt-2">Click the star icon on any plan to add it to favorites</p>
+        <div className="text-center py-8 sm:py-12">
+          <Star className="h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+          <p className="text-sm sm:text-base text-brand-text-secondary font-medium">No favorite plans yet</p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1.5 sm:mt-2">Click the star icon on any plan to add it to favorites</p>
         </div>
       ) : (
-        <div className="text-center py-8 text-brand-text-secondary">
-          <p>No plans available in this category.</p>
+        <div className="text-center py-6 sm:py-8 text-brand-text-secondary">
+          <p className="text-xs sm:text-sm">No plans available in this category.</p>
         </div>
       )}
     </div>
