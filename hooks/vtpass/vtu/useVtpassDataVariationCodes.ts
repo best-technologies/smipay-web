@@ -29,7 +29,7 @@ export function useVtpassDataVariationCodes(serviceID: string | null) {
 
   useEffect(() => {
     if (!serviceID) {
-      setState({ data: null, isLoading: false, error: null });
+      queueMicrotask(() => setState({ data: null, isLoading: false, error: null }));
       return;
     }
 
@@ -73,7 +73,7 @@ export function useVtpassDataVariationCodes(serviceID: string | null) {
       .finally(() => {
         fetchingRef.current = null;
       });
-  }, [serviceID]);
+  }, [serviceID, CACHE_DURATION]);
 
   return {
     variationCodes: state.data,

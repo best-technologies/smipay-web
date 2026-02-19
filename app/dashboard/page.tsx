@@ -32,16 +32,16 @@ const TRANSFER_ACTIONS = [
 ];
 
 const SERVICE_ACTIONS = [
-  { id: "airtime", name: "Airtime", icon: Phone, href: "/dashboard/airtime", bg: "var(--quick-action-3-bg)", color: "var(--quick-action-3)" },
-  { id: "data", name: "Data", icon: Wifi, href: "/dashboard/data", bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
-  { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv", bg: "var(--quick-action-5-bg)", color: "var(--quick-action-5)" },
-  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity", bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
-  { id: "transactions", name: "History", icon: Receipt, href: "/dashboard/transactions", bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
+  { id: "airtime", name: "Airtime", icon: Phone, href: "/dashboard/airtime", comingSoon: false, bg: "var(--quick-action-3-bg)", color: "var(--quick-action-3)" },
+  { id: "data", name: "Data", icon: Wifi, href: "/dashboard/data", comingSoon: false, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
+  { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv", comingSoon: true, bg: "var(--quick-action-5-bg)", color: "var(--quick-action-5)" },
+  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity", comingSoon: true, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
+  { id: "transactions", name: "History", icon: Receipt, href: "/dashboard/transactions", comingSoon: true, bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
 ];
 
 const container = {
   hidden: { opacity: 0 },
-  visible: (_i = 1) => ({
+  visible: () => ({
     opacity: 1,
     transition: { staggerChildren: 0.06, delayChildren: 0.04 },
   }),
@@ -446,7 +446,7 @@ function DashboardContent() {
           </div>
         </motion.section>
 
-        {/* Service Actions – compact grid, circular icons, no header */}
+        {/* Service Actions – Airtime & Data available; others Coming Soon */}
         <motion.section
           variants={container}
           initial="hidden"
@@ -456,16 +456,30 @@ function DashboardContent() {
           <div className="grid grid-cols-5 gap-y-1">
             {SERVICE_ACTIONS.map((action) => (
               <motion.div key={action.id} variants={item} className="flex flex-col items-center">
-                <motion.button
-                  type="button"
-                  onClick={() => router.push(action.href)}
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
-                  style={{ backgroundColor: action.bg, color: action.color }}
-                >
-                  <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
-                </motion.button>
+                {action.comingSoon ? (
+                  <div className="relative">
+                    <div
+                      className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full opacity-75 cursor-not-allowed"
+                      style={{ backgroundColor: action.bg, color: action.color }}
+                    >
+                      <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+                    </div>
+                    <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
+                      Soon
+                    </span>
+                  </div>
+                ) : (
+                  <motion.button
+                    type="button"
+                    onClick={() => router.push(action.href)}
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
+                    style={{ backgroundColor: action.bg, color: action.color }}
+                  >
+                    <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+                  </motion.button>
+                )}
                 <span className="mt-1.5 text-[10px] sm:text-[11px] font-medium text-dashboard-heading leading-tight text-center">
                   {action.name}
                 </span>

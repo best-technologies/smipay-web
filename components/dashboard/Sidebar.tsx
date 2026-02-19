@@ -4,24 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Globe,
-  CreditCard,
-  Wallet,
   Smartphone,
-  Zap,
-  Database,
-  MessageSquare,
-  Receipt,
   Tv,
-  FileText,
-  ArrowLeftRight,
-  BarChart3,
-  Users,
   Settings,
-  User,
-  FileCode,
   LogOut,
   ChevronDown,
   ChevronRight,
@@ -38,13 +27,13 @@ import { useDashboard } from "@/hooks/useDashboard";
 interface MenuItem {
   id: string;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   href?: string;
   submenu?: {
     id: string;
     label: string;
     href: string;
-    icon?: any;
+    icon?: LucideIcon;
   }[];
 }
 
@@ -131,14 +120,11 @@ const otherMenuItems: MenuItem[] = [
   // },
 ];
 
-// Active routes - Dashboard, VTU (Airtime, Data), Cable TV, Education, and Profile
-// When you need to enable a feature, uncomment it above and add its route here
+// Active routes - only Dashboard, VTU (Airtime, Data), and Profile for now; Cable TV, Education, etc. show as Coming Soon
 const ENABLED_ROUTES = [
   "/dashboard",
   "/dashboard/airtime",
   "/dashboard/data",
-  "/dashboard/cabletv",
-  "/dashboard/education",
   "/dashboard/settings-profile",
 ];
 
@@ -185,7 +171,7 @@ export default function Sidebar() {
     return ENABLED_ROUTES.includes(href);
   };
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className="flex flex-col h-full min-h-0">
       {/* Mobile: in-panel header with close button */}
       <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-dashboard-border bg-dashboard-surface">
@@ -433,7 +419,7 @@ export default function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 bg-dashboard-surface border-r border-dashboard-border h-screen sticky top-0 overflow-hidden">
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Mobile Sidebar – solid opaque background; full viewport height, content scrolls inside; overflow-y-auto so only this panel scrolls */}
@@ -449,7 +435,7 @@ export default function Sidebar() {
           className="h-full min-h-0 w-full border-r border-slate-200 flex flex-col overflow-hidden overscroll-contain"
           style={{ backgroundColor: "#ffffff" }}
         >
-          <SidebarContent />
+          {sidebarContent}
         </div>
       </aside>
     </>

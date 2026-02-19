@@ -11,19 +11,18 @@ export interface ApiError {
 /**
  * Convert API errors to user-friendly messages
  */
-export function handleApiError(error: any): ApiError {
-  // Already formatted by api-client-backend interceptor (e.g. 401 on login)
-  if (error && typeof error.statusCode === "number" && typeof error.message === "string") {
+export function handleApiError(error: unknown): ApiError {
+  const err = error as Record<string, unknown>;
+  if (err && typeof err.statusCode === "number" && typeof err.message === "string") {
     return {
-      message: error.message,
+      message: err.message as string,
       code: "API_ERROR",
-      statusCode: error.statusCode,
+      statusCode: err.statusCode as number,
     };
   }
 
-  // Network errors (server down, no internet, etc.)
-  if (!error.response) {
-    if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+  if (!err.response) {
+    if (err.code === "ECONNABORTED" || (err.message as string)?.includes("timeout")) {
       return {
         message:
           "Request timed out. Please check your internet connection and try again.",
@@ -31,7 +30,7 @@ export function handleApiError(error: any): ApiError {
       };
     }
 
-    if (error.code === "ERR_NETWORK" || error.message?.includes("Network Error")) {
+    if (err.code === "ERR_NETWORK" || (err.message as string)?.includes("Network Error")) {
       return {
         message:
           "Unable to connect to our servers. Please check your internet connection and try again.",
@@ -46,23 +45,24 @@ export function handleApiError(error: any): ApiError {
     };
   }
 
-  const status = error.response?.status;
-  const responseData = error.response?.data;
+  const response = err.response as { status?: number; data?: Record<string, unknown> } | undefined;
+  const status = response?.status;
+  const responseData = response?.data;
 
   // Handle specific HTTP status codes
   switch (status) {
     case 400:
       // Bad request - validation errors
       if (responseData?.message) {
-        if (Array.isArray(responseData.message)) {
-          return {
-            message: responseData.message.join(", "),
+      if (Array.isArray(responseData.message)) {
+        return {
+          message: (responseData.message as string[]).join(", "),
             code: "VALIDATION_ERROR",
             statusCode: 400,
           };
         }
         return {
-          message: responseData.message,
+          message: responseData.message as string,
           code: "BAD_REQUEST",
           statusCode: 400,
         };
@@ -77,7 +77,7 @@ export function handleApiError(error: any): ApiError {
       // Unauthorized
       return {
         message:
-          responseData?.message ||
+          (responseData?.message as string) ||
           "Invalid credentials. Please check your email/phone and password.",
         code: "UNAUTHORIZED",
         statusCode: 401,
@@ -87,7 +87,7 @@ export function handleApiError(error: any): ApiError {
       // Forbidden
       return {
         message:
-          responseData?.message ||
+          (responseData?.message as string) ||
           "You don't have permission to perform this action.",
         code: "FORBIDDEN",
         statusCode: 403,
@@ -103,10 +103,9 @@ export function handleApiError(error: any): ApiError {
       };
 
     case 409:
-      // Conflict (e.g., email already exists)
       return {
         message:
-          responseData?.message ||
+          (responseData?.message as string) ||
           "This information is already registered. Please use different details.",
         code: "CONFLICT",
         statusCode: 409,
@@ -114,7 +113,7 @@ export function handleApiError(error: any): ApiError {
 
     case 429:
       // Too many requests
-      const retryAfter = responseData?.data?.retry_after || 120;
+      const retryAfter = (responseData?.data as Record<string, unknown>)?.retry_after as number | undefined || 120;
       const retryMessage =
         retryAfter > 60
           ? `${Math.ceil(retryAfter / 60)} minutes`
@@ -122,7 +121,7 @@ export function handleApiError(error: any): ApiError {
 
       return {
         message:
-          responseData?.message ||
+          (responseData?.message as string) ||
           `Too many attempts. Please try again in ${retryMessage}.`,
         code: "RATE_LIMIT_EXCEEDED",
         statusCode: 429,
@@ -141,10 +140,9 @@ export function handleApiError(error: any): ApiError {
       };
 
     default:
-      // Unknown error
       return {
         message:
-          responseData?.message ||
+          (responseData?.message as string) ||
           "Something went wrong. Please try again or contact support if the issue persists.",
         code: "UNKNOWN_ERROR",
         statusCode: status,
@@ -155,7 +153,7 @@ export function handleApiError(error: any): ApiError {
 /**
  * Format error message for display
  */
-export function formatErrorMessage(error: any): string {
+export function formatErrorMessage(error: unknown): string {
   const apiError = handleApiError(error);
   return apiError.message;
 }
@@ -163,13 +161,14 @@ export function formatErrorMessage(error: any): string {
 /**
  * Check if error is a network/connectivity issue
  */
-export function isNetworkError(error: any): boolean {
-  if (!error.response) {
+export function isNetworkError(error: unknown): boolean {
+  const err = error as Record<string, unknown>;
+  if (!err.response) {
     return (
-      error.code === "ERR_NETWORK" ||
-      error.code === "ECONNABORTED" ||
-      error.message?.includes("Network Error") ||
-      error.message?.includes("timeout")
+      err.code === "ERR_NETWORK" ||
+      err.code === "ECONNABORTED" ||
+      (err.message as string)?.includes("Network Error") ||
+      (err.message as string)?.includes("timeout")
     );
   }
   return false;
@@ -178,17 +177,19 @@ export function isNetworkError(error: any): boolean {
 /**
  * Check if error is a server error (5xx)
  */
-export function isServerError(error: any): boolean {
-  const status = error.response?.status;
-  return status >= 500 && status < 600;
+export function isServerError(error: unknown): boolean {
+  const err = error as { response?: { status?: number } };
+  const status = err.response?.status;
+  return typeof status === "number" && status >= 500 && status < 600;
 }
 
 /**
  * Check if error is a client error (4xx)
  */
-export function isClientError(error: any): boolean {
-  const status = error.response?.status;
-  return status >= 400 && status < 500;
+export function isClientError(error: unknown): boolean {
+  const err = error as { response?: { status?: number } };
+  const status = err.response?.status;
+  return typeof status === "number" && status >= 400 && status < 500;
 }
 
 

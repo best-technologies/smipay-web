@@ -27,6 +27,7 @@ export function FundWalletModal({
 }: FundWalletModalProps) {
   const [currentStep, setCurrentStep] = useState<Step>("select-method");
   const [selectedMethod, setSelectedMethod] = useState<FundingMethod | null>(null);
+  void selectedMethod; // used by step flow via setSelectedMethod
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(initialReference);
@@ -37,8 +38,10 @@ export function FundWalletModal({
   // Handle initial reference (from Paystack callback)
   useEffect(() => {
     if (initialReference && isOpen) {
-      setPaymentReference(initialReference);
-      setCurrentStep("card-verification");
+      queueMicrotask(() => {
+        setPaymentReference(initialReference);
+        setCurrentStep("card-verification");
+      });
     }
   }, [initialReference, isOpen]);
 

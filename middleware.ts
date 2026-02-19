@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
 
   // Check if this is a payment callback (from Paystack, etc.)
   const isPaymentCallback = searchParams.get("payment") === "callback";
-  const hasPaymentReference = searchParams.has("reference") || searchParams.has("trxref");
+  void (searchParams.has("reference") || searchParams.has("trxref")); // reserved for payment callback handling
 
   // Get token from cookie or localStorage (handled client-side)
   // For server-side, we check if there's a token cookie

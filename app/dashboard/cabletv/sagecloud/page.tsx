@@ -9,7 +9,8 @@ interface SagecloudCabletvPageProps {
   initialServiceId?: string;
 }
 
-export default function SagecloudCabletvPage({ initialServiceId: _initialServiceId }: SagecloudCabletvPageProps) {
+export default function SagecloudCabletvPage({ initialServiceId }: SagecloudCabletvPageProps) {
+  void initialServiceId; // reserved for future provider pre-selection
   const router = useRouter();
 
   return (

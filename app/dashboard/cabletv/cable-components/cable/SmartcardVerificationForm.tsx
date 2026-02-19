@@ -114,7 +114,7 @@ export function SmartcardVerificationForm({
     };
 
     const renewalAmount = parseRenewalAmount(verificationData.Renewal_Amount);
-    const _isValidAmount = renewalAmount !== null;
+    void renewalAmount; // reserved for future validation UI
 
     // Format due date
     const formatDueDate = (dateString: string | undefined): string => {

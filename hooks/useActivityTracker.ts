@@ -32,40 +32,38 @@ export function useActivityTracker() {
     }
   }, [isAuthenticated]);
 
+  // Handle logout (declared before checkSession so it can be used there)
+  const handleLogout = useCallback((message?: string) => {
+    clearAuth();
+    logout();
+
+    const url = new URL("/auth/signin", window.location.origin);
+    if (message) {
+      url.searchParams.set("expired", "true");
+      url.searchParams.set("message", message);
+    }
+
+    router.push(url.toString());
+  }, [logout, router]);
+
   // Check session and show warning if needed
   const checkSession = useCallback(() => {
     if (!isAuthenticated) return;
 
-    // Check if session has expired
     if (isSessionExpired()) {
       handleLogout("Your session has expired due to inactivity.");
       return;
     }
 
-    // Check if we should show warning
     const timeLeft = getTimeUntilExpiry();
-    setTimeRemaining(Math.ceil(timeLeft / 1000)); // Convert to seconds
+    setTimeRemaining(Math.ceil(timeLeft / 1000));
 
     if (timeLeft <= SESSION_WARNING_TIME && timeLeft > 0) {
       setShowWarning(true);
     } else {
       setShowWarning(false);
     }
-  }, [isAuthenticated]);
-
-  // Handle logout
-  const handleLogout = useCallback((message?: string) => {
-    clearAuth();
-    logout();
-    
-    const url = new URL("/auth/signin", window.location.origin);
-    if (message) {
-      url.searchParams.set("expired", "true");
-      url.searchParams.set("message", message);
-    }
-    
-    router.push(url.toString());
-  }, [logout, router]);
+  }, [isAuthenticated, handleLogout]);
 
   // Extend session (user clicked "Stay logged in")
   const extendSession = useCallback(() => {
@@ -128,8 +126,8 @@ export function useActivityTracker() {
       }
     }, 1000);
 
-    // Initial check
-    checkSession();
+    // Initial check (defer to avoid synchronous setState in effect)
+    queueMicrotask(() => checkSession());
 
     // Cleanup
     return () => {

@@ -25,7 +25,7 @@ type Step = "verify-email" | "verify-otp" | "register";
 
 const formVariants = {
   hidden: { opacity: 0 },
-  visible: (_i = 1) => ({
+  visible: () => ({
     opacity: 1,
     transition: { staggerChildren: 0.05, delayChildren: 0.08 },
   }),

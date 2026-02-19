@@ -71,7 +71,7 @@ export const userApi = {
    * Update user settings
    * @param data - Settings to update
    */
-  updateSettings: async (data: Record<string, any>) => {
+  updateSettings: async (data: Record<string, unknown>) => {
     try {
       const response = await backendApi.put("/user/settings", data);
       return response.data;

@@ -183,9 +183,10 @@ export default function TransactionDetailPage() {
             {/* Provider / Status Icon */}
             <div className="mb-4">
               {getTransactionLogo(transaction) ? (
-                <img 
-                  src={getTransactionLogo(transaction) as string} 
-                  alt={transaction.description} 
+                // eslint-disable-next-line @next/next/no-img-element -- dynamic transaction/network logo
+                <img
+                  src={getTransactionLogo(transaction) as string}
+                  alt={transaction.description}
                   className="w-20 h-20 rounded-full object-cover"
                 />
               ) : (

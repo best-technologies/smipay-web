@@ -39,6 +39,8 @@ interface CachedCoords {
 const LOCATION_CACHE_KEY = "smipay-geo-cache";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 let cachedLocation: CachedCoords | null = null;
+// Timer handle kept for potential future cleanup
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- assigned for possible clearInterval later
 let locationRefreshTimer: ReturnType<typeof setInterval> | null = null;
 let locationRequested = false;
 

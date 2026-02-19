@@ -50,7 +50,7 @@ async function sha256Browser(message: string): Promise<string> {
  * @param secret - Secret key for signing (from env)
  */
 export async function generateSignature(
-  body: string | Record<string, any>,
+  body: string | Record<string, unknown>,
   secret: string
 ): Promise<string> {
   const bodyString = typeof body === "string" ? body : JSON.stringify(body);
@@ -146,7 +146,7 @@ export async function getDeviceFingerprint(): Promise<string> {
  * @param body - Request body (optional, used for signature)
  */
 export async function generateSecurityHeaders(
-  body?: Record<string, any> | string
+  body?: Record<string, unknown> | string
 ): Promise<SecurityHeaders> {
   const timestamp = Date.now().toString();
   const nonce = generateNonce();

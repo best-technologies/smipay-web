@@ -112,10 +112,10 @@ backendApi.interceptors.response.use(
     }
 
     // Return formatted error
-    const errorData = error.response?.data as any;
+    const errorData = error.response?.data as Record<string, unknown> | undefined;
     return Promise.reject({
       success: false,
-      message: errorData?.message || error.message || "An error occurred",
+      message: (errorData?.message as string) || error.message || "An error occurred",
       statusCode: error.response?.status,
       data: errorData,
     });

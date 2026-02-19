@@ -39,17 +39,18 @@ export interface NewAuthUser {
 
 /** Map new-auth user to app User */
 export function mapNewAuthUserToUser(api: NewAuthUser): User {
+  const ext = api as unknown as Record<string, unknown>;
   return {
     id: api.id,
     email: api.email,
     phone_number: api.phone_number ?? "",
-    smipay_tag: (api as any).smipay_tag ?? "",
+    smipay_tag: (typeof ext.smipay_tag === "string" ? ext.smipay_tag : ""),
     first_name: api.first_name,
     last_name: api.last_name,
     is_email_verified: api.is_email_verified,
-    is_phone_verified: (api as any).is_phone_verified ?? false,
-    account_status: (api as any).account_status ?? "active",
-    wallet: (api as any).wallet,
+    is_phone_verified: ext.is_phone_verified === true,
+    account_status: (typeof ext.account_status === "string" ? ext.account_status : "active"),
+    wallet: ext.wallet as User["wallet"] | undefined,
   };
 }
 

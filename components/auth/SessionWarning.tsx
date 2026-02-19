@@ -60,7 +60,7 @@ export function SessionWarning({
               Session Expiring Soon
             </h2>
             <p className="text-gray-600 mb-4">
-              For your security, you'll be automatically logged out due to inactivity.
+              For your security, you&apos;ll be automatically logged out due to inactivity.
             </p>
 
             {/* Countdown Timer */}
@@ -72,7 +72,7 @@ export function SessionWarning({
             </div>
 
             <p className="text-sm text-gray-500">
-              Click "Stay Logged In" to continue your session
+              Click &quot;Stay Logged In&quot; to continue your session
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export function SessionWarning({
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center">
               <span className="font-semibold">Security Notice:</span> This session timeout
-              protects your financial information when you're away from your device.
+              protects your financial information when you&apos;re away from your device.
             </p>
           </div>
         </div>

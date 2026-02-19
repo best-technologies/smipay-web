@@ -9,6 +9,7 @@ import { vtpassCableApi } from "@/services/vtpass/vtu/vtpass-cable-api";
 import type { 
   VtpassCableVariation, 
   VtpassCablePurchaseResponse,
+  VtpassCablePurchaseRequest,
   VtpassCableVerifyContent 
 } from "@/types/vtpass/vtu/vtpass-cable";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
@@ -139,33 +140,19 @@ export function CablePurchaseForm({
       const randomStr = Math.random().toString(36).substring(2, 8);
       const requestId = `${dateStr}${randomStr}`;
 
-      // Build purchase request based on provider
-      const purchaseRequest: {
-        request_id: string;
-        serviceID: string;
-        billersCode?: string;
-        phone?: string;
-      } = {
+      // billersCode is required by API (smartcard for DSTV/GOTV/Startimes, phone for Showmax)
+      const billersCode = isShowmax ? phoneNumber : smartcardNumber;
+      const purchaseRequest: VtpassCablePurchaseRequest = {
         request_id: requestId,
         serviceID: selectedServiceId,
+        billersCode,
+        ...(phoneNumber ? { phone: phoneNumber } : {}),
       };
-
-      // Set billersCode (smartcard for DSTV/GOTV/Startimes, phone for Showmax)
-      if (isShowmax) {
-        purchaseRequest.billersCode = phoneNumber;
-        purchaseRequest.phone = phoneNumber;
-      } else {
-        purchaseRequest.billersCode = smartcardNumber;
-        if (phoneNumber) {
-          purchaseRequest.phone = phoneNumber;
-        }
-      }
 
       // DSTV/GOTV specific fields
       if (isDSTVOrGOTV) {
-        purchaseRequest.subscription_type = subscriptionType;
+        if (subscriptionType) purchaseRequest.subscription_type = subscriptionType;
         purchaseRequest.quantity = 1;
-
         if (subscriptionType === "change" && selectedVariation) {
           purchaseRequest.variation_code = selectedVariation.variation_code;
         } else if (subscriptionType === "renew") {
@@ -178,7 +165,6 @@ export function CablePurchaseForm({
         if (selectedVariation) {
           purchaseRequest.variation_code = selectedVariation.variation_code;
         }
-        // Amount is optional for Startimes/Showmax (will use variation_code price)
         if (amount > 0) {
           purchaseRequest.amount = amount;
         }
