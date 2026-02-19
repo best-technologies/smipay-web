@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
@@ -43,70 +42,56 @@ export function AmountInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="amount" className="text-sm sm:text-base font-semibold">
+      <Label htmlFor="amount" className="label-auth text-dashboard-heading">
         Amount (₦)
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
       </Label>
       <div className="relative">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 text-brand-text-secondary font-semibold text-base">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-dashboard-muted font-semibold text-base pointer-events-none">
           ₦
-        </div>
+        </span>
         <input
           id="amount"
           type="text"
           inputMode="numeric"
-          placeholder="Enter amount"
+          placeholder="0"
           value={value}
           onChange={handleChange}
           disabled={disabled}
           className={cn(
-            "w-full bg-transparent text-base py-2 pl-6 border-0 border-b-2 focus:outline-none focus:ring-0 transition-colors",
-            "placeholder:text-brand-text-secondary/50",
-            error 
-              ? "border-red-500 focus:border-red-500" 
+            "w-full rounded-xl border-2 bg-dashboard-bg/80 py-3 pl-9 pr-10 text-base text-dashboard-heading placeholder:text-dashboard-muted shadow-sm transition-all duration-200",
+            "focus:outline-none hover:border-dashboard-border",
+            error
+              ? "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]"
               : isValid && !error
-              ? "border-green-500 focus:border-green-500"
-              : "border-gray-300 focus:border-brand-bg-primary"
+                ? "border-[var(--tx-success-text)] focus:border-[var(--tx-success-text)] focus:shadow-[0_0_0_4px_rgba(5,150,105,0.12)]"
+                : "border-dashboard-border focus:border-dashboard-accent focus:shadow-[0_0_0_4px_rgba(14,165,233,0.12)]"
           )}
           aria-invalid={!!error}
           aria-describedby={error ? "amount-error" : undefined}
         />
         {isValid && !error && (
-          <div className="absolute right-0 top-1/2 -translate-y-1/2">
-            <svg
-              className="h-5 w-5 text-green-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg className="h-5 w-5 text-[var(--tx-success-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
         )}
       </div>
       {error && (
-        <div
-          id="amount-error"
-          className="flex items-center gap-2 text-sm text-red-600"
-        >
+        <div id="amount-error" className="flex items-center gap-2 text-sm text-red-600">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
       {!error && value && !isValid && (
-        <p className="text-xs text-brand-text-secondary">
-          Amount must be between ₦{min.toLocaleString()} and ₦{max.toLocaleString()}
+        <p className="text-xs text-dashboard-muted">
+          Between ₦{min.toLocaleString()} and ₦{max.toLocaleString()}
         </p>
       )}
 
-      {/* Preset Amount Buttons */}
       {presetAmounts.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+        <div className="flex flex-wrap gap-2 mt-3">
           {presetAmounts
             .filter((amount) => amount >= min && amount <= max)
             .map((amount) => (
@@ -116,12 +101,11 @@ export function AmountInput({
                 onClick={() => handlePresetClick(amount)}
                 disabled={disabled}
                 className={cn(
-                  "px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm border rounded-lg transition-colors",
-                  "hover:border-brand-bg-primary hover:bg-brand-bg-primary/5",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  "min-h-[44px] px-3 py-2.5 sm:px-4 sm:py-2 text-sm font-medium border-2 rounded-xl transition-all duration-200",
+                  "disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]",
                   value === amount.toString()
-                    ? "border-brand-bg-primary bg-brand-bg-primary/10 text-brand-bg-primary font-semibold"
-                    : "border-gray-300 text-brand-text-primary"
+                    ? "border-brand-bg-primary bg-brand-bg-primary/10 text-brand-bg-primary"
+                    : "border-dashboard-border/80 bg-dashboard-surface text-dashboard-heading hover:border-dashboard-border"
                 )}
               >
                 ₦{amount.toLocaleString()}

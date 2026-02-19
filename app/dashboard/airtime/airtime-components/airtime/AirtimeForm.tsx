@@ -168,15 +168,14 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
   const maxAmount = selectedService ? parseFloat(selectedService.maximum_amount) : 100000;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-      {/* Server Error */}
+    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
       {serverError && <FormError message={serverError} />}
 
       {/* Network Selection */}
       <div>
-        <label className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 block text-brand-text-primary">
-          Select Network Provider
-          <span className="text-red-500 ml-1">*</span>
+        <label className="label-auth mb-2 sm:mb-3 block text-dashboard-heading">
+          Select network
+          <span className="text-red-500 ml-0.5">*</span>
         </label>
         <NetworkSelector
           services={services}
@@ -189,15 +188,14 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         )}
       </div>
 
-      {/* Phone Number and Amount - Side by Side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      {/* Phone & Amount – stacked on mobile, side-by-side from md */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         <PhoneNumberInput
           value={phoneNumber}
           onChange={setPhoneNumber}
           error={errors.phoneNumber}
           disabled={isSubmitting || loadingServices}
         />
-
         <AmountInput
           value={amount}
           onChange={setAmount}
@@ -209,10 +207,10 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         />
       </div>
 
-      {/* Submit Button */}
+      {/* Primary CTA – touch-friendly height */}
       <Button
         type="submit"
-        className="w-full h-10 sm:h-12 bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-sm sm:text-lg font-semibold"
+        className="w-full min-h-12 h-12 sm:min-h-[52px] sm:h-[52px] rounded-xl bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-white text-base sm:text-lg font-semibold shadow-sm transition-all active:scale-[0.99] touch-manipulation"
         disabled={
           isSubmitting ||
           loadingServices ||
@@ -231,11 +229,11 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         )}
       </Button>
 
-      {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-        <p className="text-xs sm:text-sm text-blue-800">
-          <strong>Note:</strong> Airtime will be delivered instantly to the phone number
-          provided. Make sure the number is correct before proceeding.
+      {/* Info */}
+      <div className="rounded-xl border border-dashboard-border/80 bg-dashboard-bg/80 p-3 sm:p-4">
+        <p className="text-xs sm:text-sm text-dashboard-muted">
+          <strong className="text-dashboard-heading">Note:</strong> Airtime is delivered
+          instantly. Double-check the number before paying.
         </p>
       </div>
 

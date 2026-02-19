@@ -12,8 +12,11 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Zap,
-  Smartphone,
+  Phone,
+  Wifi,
   Tv,
+  ArrowRightLeft,
+  Receipt,
   FileText,
   ChevronRight,
   Copy,
@@ -21,19 +24,28 @@ import {
   Loader2,
 } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
-import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
+// import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { DashboardData, Transaction as DashboardTransaction } from "@/types/dashboard";
 import { getNetworkLogo } from "@/lib/network-logos";
 import { motion } from "motion/react";
 
 const QUICK_ACTIONS = [
-  { id: "airtime", name: "Buy Airtime", icon: Smartphone, hue: 217, href: "/dashboard/airtime" },
-  { id: "data", name: "Buy Data", icon: Zap, hue: 270, href: "/dashboard/data" },
-  { id: "cable", name: "Cable TV", icon: Tv, hue: 24, href: "/dashboard/cabletv" },
-  { id: "electricity", name: "Electricity", icon: Zap, hue: 142, href: "/dashboard/electricity" },
-  { id: "transfer", name: "Transfer", icon: ArrowUpRight, hue: 239, href: "/dashboard/transfer" },
-  { id: "transactions", name: "Transactions", icon: FileText, hue: 330, href: "/dashboard/transactions" },
+  { id: "transfer", name: "Transfer", icon: ArrowRightLeft, href: "/dashboard/transfer", comingSoon: true },
+  { id: "airtime", name: "Buy Airtime", icon: Phone, href: "/dashboard/airtime" },
+  { id: "data", name: "Buy Data", icon: Wifi, href: "/dashboard/data" },
+  { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv" },
+  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity" },
+  { id: "transactions", name: "Transactions", icon: Receipt, href: "/dashboard/transactions" },
 ];
+
+const QUICK_ACTION_COLORS = [
+  { bg: "var(--quick-action-1-bg)", icon: "var(--quick-action-1)" },
+  { bg: "var(--quick-action-2-bg)", icon: "var(--quick-action-2)" },
+  { bg: "var(--quick-action-3-bg)", icon: "var(--quick-action-3)" },
+  { bg: "var(--quick-action-4-bg)", icon: "var(--quick-action-4)" },
+  { bg: "var(--quick-action-5-bg)", icon: "var(--quick-action-5)" },
+  { bg: "var(--quick-action-6-bg)", icon: "var(--quick-action-6)" },
+] as const;
 
 const container = {
   hidden: { opacity: 0 },
@@ -264,16 +276,26 @@ function DashboardContent() {
                 <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
 
                 <div className="relative p-4 sm:p-5">
-                  {/* Row 1: Bank + status */}
-                  <div className="flex items-center justify-between mb-4">
+                  {/* Row 1: Bank name (left) | Active + Fund Wallet pills (right) */}
+                  <div className="flex items-center justify-between gap-3 mb-4">
                     <span className="text-xs font-medium text-slate-400">{primaryAccount.bank_name}</span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        primaryAccount.isActive ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
-                      }`}
-                    >
-                      {primaryAccount.isActive ? "Active" : "Inactive"}
-                    </span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span
+                        className={`px-2 py-1 rounded-full text-[10px] font-semibold ${
+                          primaryAccount.isActive ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
+                        }`}
+                      >
+                        {primaryAccount.isActive ? "Active" : "Inactive"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsFundWalletModalOpen(true)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                      >
+                        <ArrowDownLeft className="h-3 w-3" />
+                        Fund
+                      </button>
+                    </div>
                   </div>
 
                   {/* Hero: Balance */}
@@ -302,16 +324,7 @@ function DashboardContent() {
                   <p className="text-sm sm:text-base font-mono font-semibold text-white tracking-wider mb-3">
                     {primaryAccount.account_number}
                   </p>
-                  <p className="text-xs text-slate-500 truncate mb-4">{primaryAccount.account_holder_name}</p>
-
-                  {/* CTA */}
-                  <Button
-                    onClick={() => setIsFundWalletModalOpen(true)}
-                    className="w-full h-11 rounded-xl font-semibold text-sm bg-white text-slate-900 hover:bg-slate-100 shadow-lg border-0"
-                  >
-                    <ArrowDownLeft className="h-4 w-4 mr-2" />
-                    Fund Wallet
-                  </Button>
+                  <p className="text-xs text-slate-500 truncate">{primaryAccount.account_holder_name}</p>
                 </div>
               </motion.div>
             ) : (
@@ -390,132 +403,159 @@ function DashboardContent() {
           </motion.div>
         </div>
 
-        <motion.section
+        {/* Wallet analysis section – commented out for now */}
+        {/* <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.08 }}
         >
           <WalletAnalysisCards />
-        </motion.section>
+        </motion.section> */}
 
-        {/* Quick Actions */}
+        {/* Quick Actions – icon on top, text below, 3 per row, colored from globals */}
         <section>
-          <h2 className="text-sm font-semibold text-dashboard-heading mb-3">
-            Quick Actions
+          <h2 className="text-base font-semibold text-dashboard-heading tracking-tight mb-1">
+            Quick actions
           </h2>
+          <p className="text-xs text-dashboard-muted mb-4">
+            Airtime, data, bills & transfers
+          </p>
           <motion.div
             variants={container}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3"
+            className="grid grid-cols-3 gap-3"
           >
-            {QUICK_ACTIONS.map((action, index) => (
-              <motion.button
-                key={action.id}
-                variants={item}
-                onClick={() => router.push(action.href)}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                whileTap={{ scale: 0.97 }}
-                className="bg-dashboard-surface rounded-xl border border-dashboard-border/80 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-dashboard-border transition-all duration-200 group text-left"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    backgroundColor: `hsl(${action.hue}, 55%, 94%)`,
-                    color: `hsl(${action.hue}, 55%, 40%)`,
-                  }}
-                >
-                  <action.icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2} />
-                </div>
-                <p className="text-[10px] sm:text-xs font-medium text-dashboard-heading leading-tight">
-                  {action.name}
-                </p>
-              </motion.button>
-            ))}
+            {QUICK_ACTIONS.map((action, index) => {
+              const colors = QUICK_ACTION_COLORS[index % QUICK_ACTION_COLORS.length];
+              const isDisabled = "comingSoon" in action && action.comingSoon;
+              return (
+                <motion.div key={action.id} variants={item} className="relative w-full overflow-hidden rounded-xl">
+                  {isDisabled && (
+                    <div className="absolute top-0 left-0 right-0 rounded-t-xl bg-amber-500 px-1.5 py-0.5 text-center text-[9px] font-semibold uppercase tracking-wide text-white z-10">
+                      Coming soon
+                    </div>
+                  )}
+                  <motion.button
+                    type="button"
+                    onClick={() => !isDisabled && router.push(action.href)}
+                    whileHover={isDisabled ? undefined : { y: -2 }}
+                    whileTap={isDisabled ? undefined : { scale: 0.98 }}
+                    disabled={isDisabled}
+                    className={`group flex w-full flex-col items-center rounded-xl border border-dashboard-border/80 bg-dashboard-surface p-4 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-dashboard-accent focus:ring-offset-2 ${
+                      isDisabled
+                        ? "cursor-not-allowed opacity-80 pt-5"
+                        : "hover:shadow-md hover:border-dashboard-border"
+                    }`}
+                  >
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl mb-3 transition-transform duration-200 group-hover:scale-105"
+                      style={{ backgroundColor: colors.bg, color: colors.icon }}
+                    >
+                      <action.icon className="h-5 w-5" strokeWidth={1.75} />
+                    </div>
+                    <span className="text-center text-sm font-medium text-dashboard-heading leading-tight">
+                      {action.name}
+                    </span>
+                  </motion.button>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </section>
 
         {/* Recent Transactions */}
-        <section className="bg-dashboard-surface rounded-2xl border border-dashboard-border/60 shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-5 border-b border-dashboard-border/60 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-dashboard-heading">Recent Transactions</h2>
+        <section className="rounded-2xl border border-dashboard-border bg-dashboard-surface shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-4 border-b border-dashboard-border">
+            <div>
+              <h2 className="text-base font-semibold text-dashboard-heading tracking-tight">
+                Recent transactions
+              </h2>
+              <p className="text-xs text-dashboard-muted mt-0.5">
+                Your latest activity
+              </p>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => router.push("/dashboard/transactions")}
-              className="text-dashboard-accent hover:text-dashboard-accent/90 hover:bg-sky-50 text-xs h-8"
+              className="text-dashboard-accent hover:bg-dashboard-accent/10 text-xs h-8 shrink-0"
             >
-              View All
+              View all
               <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
             </Button>
           </div>
-          <div className="divide-y divide-dashboard-border/50">
+          <div className="divide-y divide-dashboard-border">
             {dashboardData.transaction_history.length > 0 ? (
-              dashboardData.transaction_history.slice(0, 5).map((transaction, index) => (
-                <div
-                  key={transaction.id}
-                  className="p-3 sm:p-4 hover:bg-dashboard-bg/50 active:bg-dashboard-bg/70 transition-colors cursor-pointer"
-                  onClick={() =>
-                    router.push(
-                      `/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`
-                    )
-                  }
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {getTransactionLogo(transaction) ? (
+              dashboardData.transaction_history.slice(0, 5).map((transaction) => {
+                const logo = getTransactionLogo(transaction);
+                const isCredit = transaction.credit_debit === "credit";
+                const statusStyle =
+                  transaction.status === "success"
+                    ? "bg-[var(--tx-success-bg)] text-[var(--tx-success-text)]"
+                    : transaction.status === "pending"
+                      ? "bg-[var(--tx-pending-bg)] text-[var(--tx-pending-text)]"
+                      : "bg-[var(--tx-failed-bg)] text-[var(--tx-failed-text)]";
+                return (
+                  <button
+                    key={transaction.id}
+                    type="button"
+                    className="flex w-full items-center gap-4 px-4 py-3.5 sm:px-5 sm:py-4 text-left hover:bg-dashboard-bg/60 active:bg-dashboard-bg/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent focus-visible:ring-inset"
+                    onClick={() =>
+                      router.push(
+                        `/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`
+                      )
+                    }
+                  >
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dashboard-bg ring-1 ring-dashboard-border/80">
+                      {logo ? (
                         <img
-                          src={getTransactionLogo(transaction) as string}
+                          src={logo}
                           alt=""
-                          className="w-9 h-9 rounded-lg object-cover flex-shrink-0"
+                          className="h-full w-full object-contain p-1"
                         />
                       ) : (
-                        <div
-                          className={`p-2 rounded-lg flex-shrink-0 ${
-                            transaction.credit_debit === "credit" ? "bg-emerald-50" : "bg-red-50"
-                          }`}
-                        >
-                          {transaction.credit_debit === "credit" ? (
-                            <ArrowDownLeft className="h-4 w-4 text-emerald-600" />
+                        <span className="flex items-center justify-center">
+                          {isCredit ? (
+                            <ArrowDownLeft className="h-5 w-5 text-[var(--tx-success-text)]" />
                           ) : (
-                            <ArrowUpRight className="h-4 w-4 text-red-600" />
+                            <ArrowUpRight className="h-5 w-5 text-[var(--tx-failed-text)]" />
                           )}
-                        </div>
+                        </span>
                       )}
-                      <div className="min-w-0">
-                        <p className="font-medium text-dashboard-heading text-sm truncate">
-                          {transaction.description}
-                        </p>
-                        <p className="text-xs text-dashboard-muted">{formatDate(transaction.date)}</p>
-                      </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-dashboard-heading text-sm truncate">
+                        {transaction.description}
+                      </p>
+                      <p className="text-xs text-dashboard-muted mt-0.5">
+                        {formatDate(transaction.date)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
                       <p
-                        className={`font-semibold text-sm tabular-nums ${
-                          transaction.credit_debit === "credit" ? "text-emerald-600" : "text-red-600"
+                        className={`text-sm font-semibold tabular-nums ${
+                          isCredit ? "text-[var(--tx-success-text)]" : "text-dashboard-heading"
                         }`}
                       >
-                        {transaction.credit_debit === "credit" ? "+" : "-"}₦{transaction.amount}
+                        {isCredit ? "+" : "−"}₦{Number(transaction.amount).toLocaleString()}
                       </p>
                       <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                          transaction.status === "success"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : transaction.status === "pending"
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-red-50 text-red-700"
-                        }`}
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${statusStyle}`}
                       >
                         {transaction.status}
                       </span>
                     </div>
-                  </div>
-                </div>
-              ))
+                  </button>
+                );
+              })
             ) : (
-              <div className="p-10 text-center text-dashboard-muted">
-                <FileText className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">No transactions yet</p>
+              <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-dashboard-border/50 text-dashboard-muted">
+                  <Receipt className="h-6 w-6" />
+                </div>
+                <p className="mt-3 text-sm font-medium text-dashboard-heading">No transactions yet</p>
+                <p className="mt-1 text-xs text-dashboard-muted">Your recent activity will appear here</p>
               </div>
             )}
           </div>
