@@ -176,6 +176,19 @@ export default function Sidebar() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
+      {/* Mobile: in-panel header with close button */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-dashboard-border bg-dashboard-surface">
+        <span className="text-sm font-semibold text-dashboard-heading">Menu</span>
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="p-2 -m-2 rounded-lg hover:bg-dashboard-bg text-dashboard-muted hover:text-dashboard-heading transition-colors"
+          aria-label="Close menu"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
       {/* User Profile */}
       <div className="p-4 bg-dashboard-surface border-b border-dashboard-border">
         <div className="flex items-center gap-3">
@@ -385,10 +398,11 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button – top-right on mobile (replaces Fund Wallet in header) */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-dashboard-surface rounded-lg shadow-lg border border-dashboard-border"
+        className="lg:hidden fixed top-4 right-4 z-50 p-2.5 bg-dashboard-surface rounded-lg shadow-md border border-dashboard-border touch-manipulation"
+        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
       >
         {isMobileMenuOpen ? (
           <X className="h-6 w-6 text-dashboard-heading" />
@@ -397,11 +411,12 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay – covers entire screen behind sidebar; tap to close */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[45]"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden
         />
       )}
 
@@ -410,13 +425,21 @@ export default function Sidebar() {
         <SidebarContent />
       </aside>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar – solid opaque background so nothing shows through */}
       <aside
-        className={`lg:hidden fixed top-0 left-0 w-64 bg-dashboard-surface border-r border-dashboard-border h-screen z-40 transform transition-transform duration-300 ${
+        className={`lg:hidden fixed top-0 left-0 w-[min(288px,85vw)] max-w-full h-screen z-50 transform transition-transform duration-300 ease-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
       >
-        <SidebarContent />
+        <div
+          className="h-full w-full border-r border-slate-200 overflow-auto"
+          style={{ backgroundColor: "#ffffff" }}
+        >
+          <SidebarContent />
+        </div>
       </aside>
     </>
   );

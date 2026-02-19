@@ -30,15 +30,15 @@ export function WalletAnalysisCards() {
 
   if (loading && !dashboardData) {
     return (
-      <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
+      <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="bg-dashboard-surface rounded-xl border border-dashboard-border/80 p-4 animate-pulse"
+            className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 p-3 sm:p-4 animate-pulse"
           >
-            <div className="h-9 w-9 bg-dashboard-border/60 rounded-lg mb-3" />
-            <div className="h-3 bg-dashboard-border/60 rounded w-20 mb-2" />
-            <div className="h-6 bg-dashboard-border/60 rounded w-24" />
+            <div className="h-8 w-8 sm:h-9 sm:w-9 bg-dashboard-border/60 rounded-lg mb-2 sm:mb-3" />
+            <div className="h-2.5 sm:h-3 bg-dashboard-border/60 rounded w-14 sm:w-20 mb-1.5 sm:mb-2" />
+            <div className="h-4 sm:h-6 bg-dashboard-border/60 rounded w-16 sm:w-24" />
           </div>
         ))}
       </div>
@@ -98,20 +98,20 @@ export function WalletAnalysisCards() {
       variants={container}
       initial="hidden"
       animate="visible"
-      className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6"
+      className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
     >
       {cards.map((card) => (
         <motion.div
           key={card.label}
           variants={item}
           whileHover={{ y: -2, transition: { duration: 0.2 } }}
-          className={`bg-dashboard-surface rounded-xl border border-dashboard-border/80 p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow duration-200 ${card.className}`}
+          className={`bg-dashboard-surface rounded-xl border border-dashboard-border/60 p-3 sm:p-4 shadow-sm hover:shadow transition-shadow ${card.className}`}
         >
-          <div className={`inline-flex p-2 rounded-lg ${card.iconBg} mb-2`}>
-            <card.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${card.iconColor}`} strokeWidth={2} />
+          <div className={`inline-flex p-1.5 sm:p-2 rounded-md sm:rounded-lg ${card.iconBg} mb-1 sm:mb-2`}>
+            <card.icon className={`h-3.5 w-3.5 sm:h-5 sm:w-5 ${card.iconColor}`} strokeWidth={2} />
           </div>
           <p className="text-[10px] sm:text-xs text-dashboard-muted mb-0.5">{card.label}</p>
-          <p className="text-base sm:text-lg font-semibold text-dashboard-heading tabular-nums">
+          <p className="text-xs sm:text-base font-semibold text-dashboard-heading tabular-nums">
             {card.value}
           </p>
         </motion.div>
