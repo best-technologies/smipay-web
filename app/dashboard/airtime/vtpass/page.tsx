@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import { AirtimeForm } from "@/app/dashboard/airtime/airtime-components/airtime/AirtimeForm";
 import { TransactionStatusModal } from "@/app/dashboard/airtime/airtime-components/airtime/TransactionStatusModal";
@@ -13,7 +13,7 @@ import { motion } from "motion/react";
 
 export default function VtpassAirtimePage() {
   const router = useRouter();
-  
+
   // const { user } = useAuth();
   const { dashboardData, refetch } = useDashboard();
   const [transactionStatus, setTransactionStatus] = useState<

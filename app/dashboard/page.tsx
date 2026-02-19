@@ -2,9 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
 import {
   ArrowUpRight,
@@ -14,7 +12,6 @@ import {
   Wifi,
   Tv,
   Receipt,
-  ChevronRight,
   Copy,
   Check,
   Loader2,
@@ -24,7 +21,7 @@ import {
 } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
-import type { DashboardData, Transaction as DashboardTransaction } from "@/types/dashboard";
+import type { Transaction as DashboardTransaction } from "@/types/dashboard";
 import { getNetworkLogo } from "@/lib/network-logos";
 import { motion } from "motion/react";
 
@@ -44,9 +41,9 @@ const SERVICE_ACTIONS = [
 
 const container = {
   hidden: { opacity: 0 },
-  visible: (i = 1) => ({
+  visible: (_i = 1) => ({
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.04 * i },
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
   }),
 };
 
@@ -73,8 +70,10 @@ function DashboardContent() {
     const reference = searchParams.get("reference") || searchParams.get("trxref");
 
     if (payment === "callback" && reference) {
-      setPaymentReference(reference);
-      setIsFundWalletModalOpen(true);
+      queueMicrotask(() => {
+        setPaymentReference(reference);
+        setIsFundWalletModalOpen(true);
+      });
       setTimeout(() => {
         const url = new URL(window.location.href);
         url.searchParams.delete("payment");
@@ -352,6 +351,7 @@ function DashboardContent() {
             <div className="bg-dashboard-surface rounded-2xl border border-dashboard-border/80 shadow-sm p-5 h-full">
               <div className="flex items-center gap-3 mb-5">
                 {dashboardData.user.profile_image ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- dynamic user avatar URL
                   <img
                     src={dashboardData.user.profile_image}
                     alt={dashboardData.user.name}
@@ -504,6 +504,7 @@ function DashboardContent() {
                     >
                       <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dashboard-bg/80">
                         {logo ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- dynamic network/transaction logo
                           <img
                             src={logo}
                             alt=""

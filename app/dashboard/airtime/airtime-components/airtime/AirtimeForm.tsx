@@ -9,11 +9,11 @@ import { FormError } from "@/components/auth/FormError";
 import { Loader2 } from "lucide-react";
 import { useVtpassServiceIds } from "@/hooks/vtpass/vtu/useVtpassServiceIds";
 import { vtpassAirtimeApi } from "@/services/vtpass/vtu/vtpass-airtime-api";
-import type { VtpassService } from "@/services/vtpass/vtu/vtpass-airtime-api";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
+import type { VtpassPurchaseResponse } from "@/services/vtpass/vtu/vtpass-airtime-api";
 
 interface AirtimeFormProps {
-  onSuccess: (data: any) => void;
+  onSuccess: (data: VtpassPurchaseResponse) => void;
   onError: (error: string) => void;
   walletBalance: number;
 }

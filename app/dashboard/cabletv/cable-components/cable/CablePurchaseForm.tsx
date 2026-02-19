@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SmartcardInput } from "./SmartcardInput";
 import { FormError } from "@/components/auth/FormError";
-import { Loader2, Tv, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { vtpassCableApi } from "@/services/vtpass/vtu/vtpass-cable-api";
 import type { 
   VtpassCableVariation, 
@@ -140,7 +140,12 @@ export function CablePurchaseForm({
       const requestId = `${dateStr}${randomStr}`;
 
       // Build purchase request based on provider
-      const purchaseRequest: any = {
+      const purchaseRequest: {
+        request_id: string;
+        serviceID: string;
+        billersCode?: string;
+        phone?: string;
+      } = {
         request_id: requestId,
         serviceID: selectedServiceId,
       };

@@ -168,7 +168,7 @@ export function TransactionStatusModal({
                     </button>
                   </div>
                   <p className="text-xs text-yellow-700 mt-2">
-                    <strong>Important:</strong> Save this voucher code. You'll need it to activate your Showmax subscription.
+                    <strong>Important:</strong> Save this voucher code. You&apos;ll need it to activate your Showmax subscription.
                   </p>
                 </div>
               )}
@@ -205,7 +205,7 @@ export function TransactionStatusModal({
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
                 <p className="text-xs text-blue-800">
                   <strong>Note:</strong> You can close this window and continue using the app. 
-                  You'll receive a notification once the transaction is completed.
+                  You&apos;ll receive a notification once the transaction is completed.
                 </p>
               </div>
             </div>

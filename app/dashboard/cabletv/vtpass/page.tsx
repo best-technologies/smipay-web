@@ -29,7 +29,7 @@ interface VtpassCabletvPageProps {
 
 export default function VtpassCabletvPage({ initialServiceId }: VtpassCabletvPageProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  useAuth();
   const { dashboardData, refetch } = useDashboard();
   const { serviceIds: allServices, isLoading: loadingServices, error: servicesError } = useVtpassCableServiceIds();
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
@@ -60,28 +60,28 @@ export default function VtpassCabletvPage({ initialServiceId }: VtpassCabletvPag
   // Auto-select service when services are loaded
   useEffect(() => {
     if (allServices.length > 0 && !selectedServiceId) {
-      // If initialServiceId is provided, try to find and select it
       if (initialServiceId) {
         const foundService = allServices.find(
           (s) => s.serviceID.toLowerCase() === initialServiceId.toLowerCase()
         );
         if (foundService) {
-          setSelectedServiceId(foundService.serviceID);
+          queueMicrotask(() => setSelectedServiceId(foundService.serviceID));
           return;
         }
       }
-      // Otherwise, select first service
-      setSelectedServiceId(allServices[0].serviceID);
+      queueMicrotask(() => setSelectedServiceId(allServices[0].serviceID));
     }
   }, [allServices, selectedServiceId, initialServiceId]);
 
   // Reset selected variation and purchase view when service changes
   useEffect(() => {
-    setSelectedVariationCode(null);
-    setSelectedVariation(null);
-    setShowPurchaseView(false);
-    setVerificationData(null);
-    setVerifiedSmartcardNumber("");
+    queueMicrotask(() => {
+      setSelectedVariationCode(null);
+      setSelectedVariation(null);
+      setShowPurchaseView(false);
+      setVerificationData(null);
+      setVerifiedSmartcardNumber("");
+    });
   }, [selectedServiceId]);
 
   const handleSelectPlan = (variation: VtpassCableVariation) => {
@@ -154,7 +154,8 @@ export default function VtpassCabletvPage({ initialServiceId }: VtpassCabletvPag
   const getSelectedVariation = (): VtpassCableVariation | null => {
     if (!selectedVariationCode || !variationCodes) return null;
     
-    const allVariations = variationCodes.variations || (variationCodes as any).varations || [];
+    const withTypo = variationCodes as { variations?: VtpassCableVariation[]; varations?: VtpassCableVariation[] };
+    const allVariations = variationCodes.variations || withTypo.varations || [];
     return allVariations.find((v) => v.variation_code === selectedVariationCode) || null;
   };
 

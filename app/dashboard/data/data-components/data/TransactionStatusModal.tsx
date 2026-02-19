@@ -155,7 +155,7 @@ export function TransactionStatusModal({
               </div>
               <div className="rounded-xl border border-dashboard-border/80 bg-dashboard-bg/50 p-3 mt-3">
                 <p className="text-xs text-dashboard-muted">
-                  You can close this and keep using the app. We'll notify you when it's done.
+                  You can close this and keep using the app. We&apos;ll notify you when it&apos;s done.
                 </p>
               </div>
             </div>

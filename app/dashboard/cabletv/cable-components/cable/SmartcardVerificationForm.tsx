@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SmartcardInput } from "./SmartcardInput";
 import { FormError } from "@/components/auth/FormError";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { vtpassCableApi } from "@/services/vtpass/vtu/vtpass-cable-api";
 import type { VtpassCableVerifyContent } from "@/types/vtpass/vtu/vtpass-cable";
 
@@ -114,7 +114,7 @@ export function SmartcardVerificationForm({
     };
 
     const renewalAmount = parseRenewalAmount(verificationData.Renewal_Amount);
-    const isValidAmount = renewalAmount !== null;
+    const _isValidAmount = renewalAmount !== null;
 
     // Format due date
     const formatDueDate = (dateString: string | undefined): string => {

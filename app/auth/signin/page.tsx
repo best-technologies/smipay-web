@@ -22,7 +22,7 @@ import { motion } from "motion/react";
 
 const formVariants = {
   hidden: { opacity: 0 },
-  visible: (i = 1) => ({
+  visible: (_i = 1) => ({
     opacity: 1,
     transition: { staggerChildren: 0.06, delayChildren: 0.1 },
   }),
@@ -48,13 +48,14 @@ function SignInForm() {
 
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
-      setSuccessMessage("Registration successful! Please sign in to continue.");
+      const msg = "Registration successful! Please sign in to continue.";
+      queueMicrotask(() => setSuccessMessage(msg));
     }
     if (searchParams.get("expired") === "true") {
       const message = searchParams.get("message");
-      setServerError(
-        message || "Your session has expired. Please sign in again."
-      );
+      const err =
+        message || "Your session has expired. Please sign in again.";
+      queueMicrotask(() => setServerError(err));
     }
   }, [searchParams]);
 

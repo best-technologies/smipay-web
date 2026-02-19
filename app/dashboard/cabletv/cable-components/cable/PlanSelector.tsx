@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { VtpassCableVariation } from "@/types/vtpass/vtu/vtpass-cable";
-import { Loader2, Star, Tv, Grid3x3, List, X, ArrowRight } from "lucide-react";
+import { Loader2, Star, Grid3x3, List, X, ArrowRight } from "lucide-react";
 
 interface PlanSelectorProps {
   variationCodes: {
@@ -40,9 +40,9 @@ export function PlanSelector({
     if (saved) {
       try {
         const favoriteArray = JSON.parse(saved);
-        setFavorites(new Set(favoriteArray));
-      } catch (e) {
-        setFavorites(new Set());
+        queueMicrotask(() => setFavorites(new Set(favoriteArray)));
+      } catch {
+        queueMicrotask(() => setFavorites(new Set()));
       }
     }
   }, []);
@@ -119,9 +119,10 @@ export function PlanSelector({
   }
 
   // Get all variations (use varations if variations is empty - API typo)
-  const allVariations: VtpassCableVariation[] = variationCodes.variations.length > 0 
-    ? variationCodes.variations 
-    : ((variationCodes as any).varations as VtpassCableVariation[]) || [];
+  const withTypo = variationCodes as { variations: VtpassCableVariation[]; varations?: VtpassCableVariation[] };
+  const allVariations: VtpassCableVariation[] = variationCodes.variations.length > 0
+    ? variationCodes.variations
+    : withTypo.varations || [];
 
   // Filter by favorites if enabled
   const displayedVariations = showFavoritesOnly

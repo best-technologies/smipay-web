@@ -41,14 +41,16 @@ export default function VtpassDataPage() {
 
   useEffect(() => {
     if (services.length > 0 && !selectedServiceId) {
-      setSelectedServiceId(services[0].serviceID);
+      queueMicrotask(() => setSelectedServiceId(services[0].serviceID));
     }
   }, [services, selectedServiceId]);
 
   useEffect(() => {
-    setSelectedVariationCode(null);
-    setSelectedVariation(null);
-    setShowPurchaseView(false);
+    queueMicrotask(() => {
+      setSelectedVariationCode(null);
+      setSelectedVariation(null);
+      setShowPurchaseView(false);
+    });
   }, [selectedServiceId]);
 
   const handleSelectPlan = (variation: VtpassDataVariation) => {

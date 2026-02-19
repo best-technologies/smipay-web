@@ -33,6 +33,7 @@ import {
   Monitor,
   GraduationCap,
 } from "lucide-react";
+import { useDashboard } from "@/hooks/useDashboard";
 
 interface MenuItem {
   id: string;
@@ -148,7 +149,7 @@ export default function Sidebar() {
   // By default, only keep VTU expanded; others collapsed
   const [openMenus, setOpenMenus] = useState<string[]>(["vtu"]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const { dashboardData } = useDashboard();
   // Lock body scroll when mobile sidebar is open so the dashboard behind doesn’t scroll
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -211,7 +212,7 @@ export default function Sidebar() {
               {user?.first_name} {user?.last_name}
             </p>
             <p className="text-xs text-dashboard-muted">
-              Balance: <span className="font-semibold text-emerald-600">₦{user?.wallet?.current_balance?.toLocaleString() || "0.00"}</span>
+              Balance: <span className="font-semibold text-emerald-600">₦{(dashboardData?.wallet_card?.current_balance) || "0.00"}</span>
             </p>
           </div>
         </div>

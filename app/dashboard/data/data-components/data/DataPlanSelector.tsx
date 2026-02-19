@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { VtpassDataVariation, VtpassDataVariationCategory } from "@/types/vtpass/vtu/vtpass-data";
@@ -17,7 +18,7 @@ interface DataPlanSelectorProps {
   selectedVariationCode?: string | null;
 }
 
-const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string; accent: string }> = {
+const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string; accent: string }> = {
   Daily: { label: "Daily", icon: Calendar, color: "bg-sky-50 text-sky-600 border-sky-200", accent: "bg-sky-500" },
   Weekly: { label: "Weekly", icon: Calendar, color: "bg-emerald-50 text-emerald-600 border-emerald-200", accent: "bg-emerald-500" },
   Monthly: { label: "Monthly", icon: Calendar, color: "bg-violet-50 text-violet-600 border-violet-200", accent: "bg-violet-500" },
@@ -57,9 +58,9 @@ export function DataPlanSelector({
     const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
     if (saved) {
       try {
-        setFavorites(new Set(JSON.parse(saved)));
+        queueMicrotask(() => setFavorites(new Set(JSON.parse(saved))));
       } catch {
-        setFavorites(new Set());
+        queueMicrotask(() => setFavorites(new Set()));
       }
     }
   }, []);
@@ -73,7 +74,8 @@ export function DataPlanSelector({
     e.stopPropagation();
     setFavorites((prev) => {
       const next = new Set(prev);
-      next.has(variationCode) ? next.delete(variationCode) : next.add(variationCode);
+      if (next.has(variationCode)) next.delete(variationCode);
+      else next.add(variationCode);
       return next;
     });
   };
