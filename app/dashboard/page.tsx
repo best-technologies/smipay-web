@@ -7,21 +7,20 @@ import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
 import {
-  Wallet,
-  TrendingUp,
   ArrowUpRight,
   ArrowDownLeft,
   Zap,
   Phone,
   Wifi,
   Tv,
-  ArrowRightLeft,
   Receipt,
-  FileText,
   ChevronRight,
   Copy,
   Check,
   Loader2,
+  Landmark,
+  Hash,
+  Send,
 } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
@@ -29,23 +28,19 @@ import type { DashboardData, Transaction as DashboardTransaction } from "@/types
 import { getNetworkLogo } from "@/lib/network-logos";
 import { motion } from "motion/react";
 
-const QUICK_ACTIONS = [
-  { id: "transfer", name: "Transfer", icon: ArrowRightLeft, href: "/dashboard/transfer", comingSoon: true },
-  { id: "airtime", name: "Buy Airtime", icon: Phone, href: "/dashboard/airtime" },
-  { id: "data", name: "Buy Data", icon: Wifi, href: "/dashboard/data" },
-  { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv" },
-  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity" },
-  { id: "transactions", name: "Transactions", icon: Receipt, href: "/dashboard/transactions" },
+const TRANSFER_ACTIONS = [
+  { id: "to-smipay", name: "To Smipay", icon: Send, href: "/dashboard/transfer/smipay", comingSoon: true, bg: "var(--quick-action-1-bg)", color: "var(--quick-action-1)" },
+  { id: "to-bank", name: "To Bank", icon: Landmark, href: "/dashboard/transfer/bank", comingSoon: true, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
+  { id: "to-tag", name: "To Tag", icon: Hash, href: "/dashboard/transfer/tag", comingSoon: true, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
 ];
 
-const QUICK_ACTION_COLORS = [
-  { bg: "var(--quick-action-1-bg)", icon: "var(--quick-action-1)" },
-  { bg: "var(--quick-action-2-bg)", icon: "var(--quick-action-2)" },
-  { bg: "var(--quick-action-3-bg)", icon: "var(--quick-action-3)" },
-  { bg: "var(--quick-action-4-bg)", icon: "var(--quick-action-4)" },
-  { bg: "var(--quick-action-5-bg)", icon: "var(--quick-action-5)" },
-  { bg: "var(--quick-action-6-bg)", icon: "var(--quick-action-6)" },
-] as const;
+const SERVICE_ACTIONS = [
+  { id: "airtime", name: "Airtime", icon: Phone, href: "/dashboard/airtime", bg: "var(--quick-action-3-bg)", color: "var(--quick-action-3)" },
+  { id: "data", name: "Data", icon: Wifi, href: "/dashboard/data", bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
+  { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv", bg: "var(--quick-action-5-bg)", color: "var(--quick-action-5)" },
+  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity", bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
+  { id: "transactions", name: "History", icon: Receipt, href: "/dashboard/transactions", bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
+];
 
 const container = {
   hidden: { opacity: 0 },
@@ -67,7 +62,7 @@ const item = {
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const { dashboardData, isLoading: loading, error, refetch } = useDashboard();
   const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
@@ -134,10 +129,10 @@ function DashboardContent() {
         </header>
 
         <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 sm:space-y-8">
-          {/* Wallet card skeleton – premium dark card */}
+          {/* Wallet card skeleton */}
           <div
             className="rounded-2xl overflow-hidden shadow-xl animate-pulse"
-            style={{ background: "linear-gradient(152deg, #1e293b 0%, #0f172a 100%)" }}
+            style={{ background: "linear-gradient(152deg, #14532d 0%, #052e1c 100%)" }}
           >
             <div className="p-4 sm:p-5">
               <div className="flex justify-between mb-4">
@@ -167,41 +162,50 @@ function DashboardContent() {
             ))}
           </div>
 
-          {/* Quick actions skeleton */}
-          <section>
-            <div className="h-4 w-24 bg-dashboard-border/60 rounded mb-3 animate-pulse" />
-            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 p-3 sm:p-4 animate-pulse"
-                >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-dashboard-border/60 mb-2" />
-                  <div className="h-3 w-full max-w-[60px] bg-dashboard-border/50 rounded" />
+          {/* Transfer actions skeleton */}
+          <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface p-3 sm:p-4 animate-pulse">
+            <div className="grid grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex flex-col items-center">
+                  <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-dashboard-border/50" />
+                  <div className="h-2.5 w-12 mt-2 rounded bg-dashboard-border/40" />
                 </div>
               ))}
             </div>
-          </section>
+          </div>
+
+          {/* Service actions skeleton */}
+          <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 py-3 sm:px-4 sm:py-4 animate-pulse">
+            <div className="grid grid-cols-5 gap-y-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex flex-col items-center">
+                  <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-dashboard-border/50" />
+                  <div className="h-2.5 w-10 mt-2 rounded bg-dashboard-border/40" />
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Recent transactions skeleton */}
-          <section className="bg-dashboard-surface rounded-2xl border border-dashboard-border/60 overflow-hidden">
-            <div className="p-4 sm:p-5 border-b border-dashboard-border/60 flex items-center justify-between">
-              <div className="h-4 w-36 bg-dashboard-border/60 rounded animate-pulse" />
-              <div className="h-8 w-16 bg-dashboard-border/50 rounded animate-pulse" />
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="h-3.5 w-32 bg-dashboard-border/60 rounded animate-pulse" />
+                <div className="h-2.5 w-20 mt-1.5 bg-dashboard-border/40 rounded animate-pulse" />
+              </div>
+              <div className="h-3 w-12 bg-dashboard-border/50 rounded animate-pulse" />
             </div>
-            <div className="divide-y divide-dashboard-border/50">
+            <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="p-3 sm:p-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-lg bg-dashboard-border/60 animate-pulse" />
-                    <div className="space-y-1.5">
-                      <div className="h-3.5 w-32 sm:w-40 bg-dashboard-border/50 rounded animate-pulse" />
-                      <div className="h-3 w-24 bg-dashboard-border/40 rounded animate-pulse" />
-                    </div>
+                <div key={i} className={`px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-3 ${i > 1 ? "border-t border-dashboard-border/40" : ""}`}>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-dashboard-border/50 animate-pulse shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="h-3 w-28 sm:w-36 bg-dashboard-border/50 rounded animate-pulse" />
+                    <div className="h-2.5 w-20 bg-dashboard-border/40 rounded animate-pulse" />
                   </div>
-                  <div className="text-right space-y-1">
-                    <div className="h-3.5 w-14 bg-dashboard-border/50 rounded animate-pulse ml-auto" />
-                    <div className="h-5 w-14 bg-dashboard-border/40 rounded-full animate-pulse ml-auto" />
+                  <div className="text-right space-y-1.5">
+                    <div className="h-3 w-12 bg-dashboard-border/50 rounded animate-pulse ml-auto" />
+                    <div className="h-2.5 w-10 bg-dashboard-border/40 rounded animate-pulse ml-auto" />
                   </div>
                 </div>
               ))}
@@ -260,20 +264,19 @@ function DashboardContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: 0.12 }}
-                className="relative overflow-hidden rounded-2xl shadow-xl shadow-slate-900/20"
+                className="relative overflow-hidden rounded-2xl shadow-xl"
                 style={{
-                  background: "linear-gradient(152deg, #1e293b 0%, #0f172a 45%, #0c1222 100%)",
-                  boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06) inset",
+                  background: "linear-gradient(152deg, #14532d 0%, #0a3622 45%, #052e1c 100%)",
+                  boxShadow: "0 25px 50px -12px rgba(5, 46, 28, 0.45), 0 0 0 1px rgba(255,255,255,0.07) inset",
                 }}
               >
-                {/* Premium gradient overlay – warm glow (ALAT/OPay/Kuda style) */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
-                    background: "radial-gradient(ellipse 120% 100% at 80% -20%, rgba(234, 88, 12, 0.18) 0%, transparent 45%), radial-gradient(ellipse 80% 60% at 20% 100%, rgba(14, 165, 233, 0.08) 0%, transparent 40%)",
+                    background: "radial-gradient(ellipse 130% 90% at 85% -10%, rgba(234, 88, 12, 0.22) 0%, transparent 50%), radial-gradient(ellipse 90% 70% at 5% 105%, rgba(5, 150, 105, 0.12) 0%, transparent 45%)",
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
 
                 <div className="relative p-4 sm:p-5">
                   {/* Row 1: Bank name (left) | Active + Fund Wallet pills (right) */}
@@ -412,150 +415,143 @@ function DashboardContent() {
           <WalletAnalysisCards />
         </motion.section> */}
 
-        {/* Quick Actions – icon on top, text below, 3 per row, colored from globals */}
-        <section>
-          <h2 className="text-base font-semibold text-dashboard-heading tracking-tight mb-1">
-            Quick actions
-          </h2>
-          <p className="text-xs text-dashboard-muted mb-4">
-            Airtime, data, bills & transfers
-          </p>
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-3 gap-3"
-          >
-            {QUICK_ACTIONS.map((action, index) => {
-              const colors = QUICK_ACTION_COLORS[index % QUICK_ACTION_COLORS.length];
-              const isDisabled = "comingSoon" in action && action.comingSoon;
-              return (
-                <motion.div key={action.id} variants={item} className="relative w-full overflow-hidden rounded-xl">
-                  {isDisabled && (
-                    <div className="absolute top-0 left-0 right-0 rounded-t-xl bg-amber-500 px-1.5 py-0.5 text-center text-[9px] font-semibold uppercase tracking-wide text-white z-10">
-                      Coming soon
-                    </div>
-                  )}
-                  <motion.button
-                    type="button"
-                    onClick={() => !isDisabled && router.push(action.href)}
-                    whileHover={isDisabled ? undefined : { y: -2 }}
-                    whileTap={isDisabled ? undefined : { scale: 0.98 }}
-                    disabled={isDisabled}
-                    className={`group flex w-full flex-col items-center rounded-xl border border-dashboard-border/80 bg-dashboard-surface p-4 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-dashboard-accent focus:ring-offset-2 ${
-                      isDisabled
-                        ? "cursor-not-allowed opacity-80 pt-5"
-                        : "hover:shadow-md hover:border-dashboard-border"
-                    }`}
-                  >
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl mb-3 transition-transform duration-200 group-hover:scale-105"
-                      style={{ backgroundColor: colors.bg, color: colors.icon }}
-                    >
-                      <action.icon className="h-5 w-5" strokeWidth={1.75} />
-                    </div>
-                    <span className="text-center text-sm font-medium text-dashboard-heading leading-tight">
-                      {action.name}
-                    </span>
-                  </motion.button>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </section>
-
-        {/* Recent Transactions */}
-        <section className="rounded-2xl border border-dashboard-border bg-dashboard-surface shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-4 border-b border-dashboard-border">
-            <div>
-              <h2 className="text-base font-semibold text-dashboard-heading tracking-tight">
-                Recent transactions
-              </h2>
-              <p className="text-xs text-dashboard-muted mt-0.5">
-                Your latest activity
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/dashboard/transactions")}
-              className="text-dashboard-accent hover:bg-dashboard-accent/10 text-xs h-8 shrink-0"
-            >
-              View all
-              <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
-            </Button>
-          </div>
-          <div className="divide-y divide-dashboard-border">
-            {dashboardData.transaction_history.length > 0 ? (
-              dashboardData.transaction_history.slice(0, 5).map((transaction) => {
-                const logo = getTransactionLogo(transaction);
-                const isCredit = transaction.credit_debit === "credit";
-                const statusStyle =
-                  transaction.status === "success"
-                    ? "bg-[var(--tx-success-bg)] text-[var(--tx-success-text)]"
-                    : transaction.status === "pending"
-                      ? "bg-[var(--tx-pending-bg)] text-[var(--tx-pending-text)]"
-                      : "bg-[var(--tx-failed-bg)] text-[var(--tx-failed-text)]";
-                return (
+        {/* Transfer Actions – 3 across, circular icons, no header */}
+        <motion.section
+          variants={container}
+          initial="hidden"
+          animate="visible"
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface p-3 sm:p-4"
+        >
+          <div className="grid grid-cols-3">
+            {TRANSFER_ACTIONS.map((action) => (
+              <motion.div key={action.id} variants={item} className="flex flex-col items-center">
+                <div className="relative">
                   <button
-                    key={transaction.id}
                     type="button"
-                    className="flex w-full items-center gap-4 px-4 py-3.5 sm:px-5 sm:py-4 text-left hover:bg-dashboard-bg/60 active:bg-dashboard-bg/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent focus-visible:ring-inset"
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`
-                      )
-                    }
+                    disabled
+                    className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full opacity-75 cursor-not-allowed transition-transform"
+                    style={{ backgroundColor: action.bg, color: action.color }}
                   >
-                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dashboard-bg ring-1 ring-dashboard-border/80">
-                      {logo ? (
-                        <img
-                          src={logo}
-                          alt=""
-                          className="h-full w-full object-contain p-1"
-                        />
-                      ) : (
-                        <span className="flex items-center justify-center">
-                          {isCredit ? (
-                            <ArrowDownLeft className="h-5 w-5 text-[var(--tx-success-text)]" />
-                          ) : (
-                            <ArrowUpRight className="h-5 w-5 text-[var(--tx-failed-text)]" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-dashboard-heading text-sm truncate">
-                        {transaction.description}
-                      </p>
-                      <p className="text-xs text-dashboard-muted mt-0.5">
-                        {formatDate(transaction.date)}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1.5">
-                      <p
-                        className={`text-sm font-semibold tabular-nums ${
-                          isCredit ? "text-[var(--tx-success-text)]" : "text-dashboard-heading"
-                        }`}
-                      >
-                        {isCredit ? "+" : "−"}₦{Number(transaction.amount).toLocaleString()}
-                      </p>
-                      <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${statusStyle}`}
-                      >
-                        {transaction.status}
-                      </span>
-                    </div>
+                    <action.icon className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.8} />
                   </button>
-                );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-dashboard-border/50 text-dashboard-muted">
-                  <Receipt className="h-6 w-6" />
+                  <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
+                    Soon
+                  </span>
                 </div>
-                <p className="mt-3 text-sm font-medium text-dashboard-heading">No transactions yet</p>
-                <p className="mt-1 text-xs text-dashboard-muted">Your recent activity will appear here</p>
+                <span className="mt-1.5 text-[11px] sm:text-xs font-medium text-dashboard-heading leading-tight text-center">
+                  {action.name}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Service Actions – compact grid, circular icons, no header */}
+        <motion.section
+          variants={container}
+          initial="hidden"
+          animate="visible"
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 py-3 sm:px-4 sm:py-4"
+        >
+          <div className="grid grid-cols-5 gap-y-1">
+            {SERVICE_ACTIONS.map((action) => (
+              <motion.div key={action.id} variants={item} className="flex flex-col items-center">
+                <motion.button
+                  type="button"
+                  onClick={() => router.push(action.href)}
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
+                  style={{ backgroundColor: action.bg, color: action.color }}
+                >
+                  <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+                </motion.button>
+                <span className="mt-1.5 text-[10px] sm:text-[11px] font-medium text-dashboard-heading leading-tight text-center">
+                  {action.name}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Recent Transactions – no header, just the list */}
+        <section>
+
+          <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
+            {dashboardData.transaction_history.length > 0 ? (
+              <div>
+                {dashboardData.transaction_history.slice(0, 5).map((transaction, idx) => {
+                  const logo = getTransactionLogo(transaction);
+                  const isCredit = transaction.credit_debit === "credit";
+                  const statusStyle =
+                    transaction.status === "success"
+                      ? "text-[var(--tx-success-text)]"
+                      : transaction.status === "pending"
+                        ? "text-[var(--tx-pending-text)]"
+                        : "text-[var(--tx-failed-text)]";
+                  return (
+                    <button
+                      key={transaction.id}
+                      type="button"
+                      className={`flex w-full items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-left hover:bg-dashboard-bg/50 active:bg-dashboard-bg/70 transition-colors focus:outline-none focus-visible:bg-dashboard-bg/50 touch-manipulation ${
+                        idx > 0 ? "border-t border-dashboard-border/40" : ""
+                      }`}
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/transactions/${transaction.id}${transaction.provider ? `?provider=${transaction.provider}` : ""}`
+                        )
+                      }
+                    >
+                      <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dashboard-bg/80">
+                        {logo ? (
+                          <img
+                            src={logo}
+                            alt=""
+                            className="h-full w-full object-contain p-[5px]"
+                          />
+                        ) : (
+                          <span className="flex items-center justify-center">
+                            {isCredit ? (
+                              <ArrowDownLeft className="h-3.5 w-3.5 text-[var(--tx-success-text)]" />
+                            ) : (
+                              <ArrowUpRight className="h-3.5 w-3.5 text-[var(--tx-failed-text)]" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-dashboard-heading text-xs sm:text-[13px] truncate leading-tight">
+                          {transaction.description}
+                        </p>
+                        <p className="text-[10px] sm:text-[11px] text-dashboard-muted mt-0.5 leading-tight">
+                          {formatDate(transaction.date)}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-0.5">
+                        <p
+                          className={`text-xs sm:text-[13px] font-semibold tabular-nums leading-tight ${
+                            isCredit ? "text-[var(--tx-success-text)]" : "text-dashboard-heading"
+                          }`}
+                        >
+                          {isCredit ? "+" : "−"}₦{Number(transaction.amount).toLocaleString()}
+                        </p>
+                        <span
+                          className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider ${statusStyle}`}
+                        >
+                          {transaction.status}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-dashboard-bg text-dashboard-muted">
+                  <Receipt className="h-4.5 w-4.5" />
+                </div>
+                <p className="mt-2.5 text-xs font-medium text-dashboard-heading">No transactions yet</p>
+                <p className="mt-0.5 text-[11px] text-dashboard-muted">Your recent activity will appear here</p>
               </div>
             )}
           </div>

@@ -99,8 +99,7 @@ export default function VtpassAirtimePage() {
 
       {/* Content – same padding as dashboard main, safe-area for mobile */}
       <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
-        {/* Wallet strip – compact on mobile, one row */}
-        <section className="max-w-4xl w-full min-w-0">
+        <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>
 

@@ -202,7 +202,7 @@ export default function Sidebar() {
       {/* User Profile */}
       <div className="p-4 bg-dashboard-surface border-b border-dashboard-border">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-lg font-semibold relative">
+          <div className="h-12 w-12 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-lg font-semibold relative">
             {user?.first_name?.[0]}{user?.last_name?.[0]}
             <span className="absolute bottom-0 right-0 h-3 w-3 bg-emerald-500 rounded-full border-2 border-white"></span>
           </div>
@@ -254,7 +254,7 @@ export default function Sidebar() {
                               onClick={() => setIsMobileMenuOpen(false)}
                               className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                                 pathname === subitem.href
-                                  ? "bg-slate-100 text-dashboard-heading font-medium"
+                                  ? "bg-orange-50 text-orange-700 font-medium"
                                   : "text-dashboard-muted hover:bg-dashboard-bg hover:text-dashboard-heading"
                               }`}
                             >
@@ -285,7 +285,7 @@ export default function Sidebar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
                       pathname === item.href
-                        ? "bg-dashboard-heading text-white font-medium"
+                        ? "bg-brand-bg-primary text-white font-medium shadow-sm"
                         : "text-dashboard-heading hover:bg-dashboard-bg"
                     }`}
                   >
@@ -345,7 +345,7 @@ export default function Sidebar() {
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                               pathname === subitem.href
-                                ? "bg-slate-100 text-dashboard-heading font-medium"
+                                ? "bg-orange-50 text-orange-700 font-medium"
                                 : "text-dashboard-muted hover:bg-dashboard-bg hover:text-dashboard-heading"
                             }`}
                           >
