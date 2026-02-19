@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -149,6 +149,16 @@ export default function Sidebar() {
   const [openMenus, setOpenMenus] = useState<string[]>(["vtu"]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Lock body scroll when mobile sidebar is open so the dashboard behind doesn’t scroll
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobileMenuOpen]);
+
   const toggleMenu = (menuId: string) => {
     setOpenMenus((prev) =>
       prev.includes(menuId)
@@ -175,7 +185,7 @@ export default function Sidebar() {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Mobile: in-panel header with close button */}
       <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-dashboard-border bg-dashboard-surface">
         <span className="text-sm font-semibold text-dashboard-heading">Menu</span>
@@ -207,8 +217,8 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Main Menu - Scrollable */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Main Menu - Scrollable; min-h-0 lets this flex item shrink so overflow works */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="p-4">
           <h3 className="text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-3">
             Main Menu
@@ -299,8 +309,8 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Other Menu - Pinned to Bottom */}
-      <div className="p-4 border-t border-dashboard-border bg-dashboard-surface">
+      {/* Other Menu - Pinned to Bottom; shrink-0 keeps it visible */}
+      <div className="flex-shrink-0 p-4 border-t border-dashboard-border bg-dashboard-surface">
         <h3 className="text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-3">
           Other Menu
         </h3>
@@ -411,10 +421,10 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* Mobile Overlay – covers entire screen behind sidebar; tap to close */}
+      {/* Mobile Overlay – covers entire screen behind sidebar; tap to close; prevent scroll pass-through */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-[45]"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[45] touch-none"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-hidden
         />
@@ -425,9 +435,9 @@ export default function Sidebar() {
         <SidebarContent />
       </aside>
 
-      {/* Mobile Sidebar – solid opaque background so nothing shows through */}
+      {/* Mobile Sidebar – solid opaque background; full viewport height, content scrolls inside; overflow-y-auto so only this panel scrolls */}
       <aside
-        className={`lg:hidden fixed top-0 left-0 w-[min(288px,85vw)] max-w-full h-screen z-50 transform transition-transform duration-300 ease-out ${
+        className={`lg:hidden fixed top-0 left-0 w-[min(288px,85vw)] max-w-full h-dvh max-h-screen z-50 transform transition-transform duration-300 ease-out overscroll-contain ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
@@ -435,7 +445,7 @@ export default function Sidebar() {
         aria-label="Navigation menu"
       >
         <div
-          className="h-full w-full border-r border-slate-200 overflow-auto"
+          className="h-full min-h-0 w-full border-r border-slate-200 flex flex-col overflow-hidden overscroll-contain"
           style={{ backgroundColor: "#ffffff" }}
         >
           <SidebarContent />

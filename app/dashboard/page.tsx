@@ -281,7 +281,7 @@ function DashboardContent() {
                     Available balance
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight mb-4">
-                    ₦{parseBalance(primaryAccount.balance).toLocaleString()}
+                    ₦{parseBalance(dashboardData.wallet_card.current_balance).toLocaleString()}
                   </p>
 
                   {/* Account number + copy */}
