@@ -398,13 +398,13 @@ export default function Sidebar() {
       {/* Mobile Menu Button – top-right on mobile (replaces Fund Wallet in header) */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 right-4 z-50 p-2.5 bg-dashboard-surface rounded-lg shadow-md border border-dashboard-border touch-manipulation"
+        className="lg:hidden fixed top-3 right-3 z-50 p-1.5 bg-dashboard-surface/90 backdrop-blur-sm rounded-lg shadow-sm border border-dashboard-border/60 touch-manipulation active:scale-95 transition-transform"
         aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
       >
         {isMobileMenuOpen ? (
-          <X className="h-6 w-6 text-dashboard-heading" />
+          <X className="h-4.5 w-4.5 text-dashboard-heading" />
         ) : (
-          <Menu className="h-6 w-6 text-dashboard-heading" />
+          <Menu className="h-4.5 w-4.5 text-dashboard-heading" />
         )}
       </button>
 

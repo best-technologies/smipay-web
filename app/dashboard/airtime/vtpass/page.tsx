@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
+import { WalletCard } from "@/components/dashboard/WalletCard";
 import { AirtimeForm } from "@/app/dashboard/airtime/airtime-components/airtime/AirtimeForm";
 import { TransactionStatusModal } from "@/app/dashboard/airtime/airtime-components/airtime/TransactionStatusModal";
 import { Phone, ArrowLeft } from "lucide-react";
@@ -99,25 +100,37 @@ export default function VtpassAirtimePage() {
 
       {/* Content – same padding as dashboard main, safe-area for mobile */}
       <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
+        {/* Compact wallet card — always visible */}
+        {dashboardData && (
+          <section className="max-w-xl w-full min-w-0">
+            <WalletCard
+              bankName={dashboardData.accounts[0]?.bank_name}
+              accountNumber={dashboardData.accounts[0]?.account_number}
+              accountHolderName={dashboardData.accounts[0]?.account_holder_name}
+              balance={walletBalance}
+              isActive={dashboardData.accounts[0]?.isActive ?? true}
+              compact
+            />
+          </section>
+        )}
+
         <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>
 
-        {/* Main form card – focused width, works on mobile and web */}
+        {/* Main form card */}
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.05 }}
           className="max-w-xl w-full min-w-0"
         >
-          <div className="rounded-2xl border border-dashboard-border/80 bg-dashboard-surface shadow-sm overflow-hidden">
-            <div className="p-4 sm:p-6 lg:p-8">
-              <AirtimeForm
-                onSuccess={handleTransactionSuccess}
-                onError={handleTransactionError}
-                walletBalance={walletBalance}
-              />
-            </div>
+          <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface shadow-sm p-4 sm:p-6">
+            <AirtimeForm
+              onSuccess={handleTransactionSuccess}
+              onError={handleTransactionError}
+              walletBalance={walletBalance}
+            />
           </div>
         </motion.section>
       </div>

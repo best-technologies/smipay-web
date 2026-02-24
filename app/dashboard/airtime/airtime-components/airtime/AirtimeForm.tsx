@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useMemo } from "react";
 import { NetworkSelector } from "./NetworkSelector";
 import { PhoneNumberInput } from "./PhoneNumberInput";
 import { AmountInput } from "./AmountInput";
 import { FormError } from "@/components/auth/FormError";
-import { Loader2 } from "lucide-react";
+import { Loader2, Zap, ShieldCheck } from "lucide-react";
 import { useVtpassServiceIds } from "@/hooks/vtpass/vtu/useVtpassServiceIds";
 import { vtpassAirtimeApi } from "@/services/vtpass/vtu/vtpass-airtime-api";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
@@ -20,12 +19,14 @@ interface AirtimeFormProps {
 
 export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormProps) {
   const { serviceIds: allServices, isLoading: loadingServices, error: servicesError } = useVtpassServiceIds();
-  
-  // Filter out international/foreign-airtime provider for now
-  const services = allServices.filter(
-    (service) => service.serviceID !== "foreign-airtime" && service.serviceID !== "international"
+
+  const services = useMemo(
+    () => allServices.filter(
+      (service) => service.serviceID !== "foreign-airtime" && service.serviceID !== "international"
+    ),
+    [allServices],
   );
-  
+
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
@@ -38,14 +39,12 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
   const [serverError, setServerError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Auto-select first service when services are loaded
   useEffect(() => {
     if (services.length > 0 && !selectedServiceId) {
       setSelectedServiceId(services[0].serviceID);
     }
   }, [services, selectedServiceId]);
 
-  // Update amount limits when service changes
   useEffect(() => {
     if (selectedServiceId && services.length > 0) {
       const service = services.find((s) => s.serviceID === selectedServiceId);
@@ -54,15 +53,14 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         const maxAmount = parseFloat(service.maximum_amount);
         const currentAmount = parseFloat(amount) || 0;
 
-        // Clear amount if it's outside new limits
         if (currentAmount > 0 && (currentAmount < minAmount || currentAmount > maxAmount)) {
           setAmount("");
         }
       }
     }
-  }, [selectedServiceId, services, amount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedServiceId, services]);
 
-  // Set server error if services failed to load
   useEffect(() => {
     if (servicesError) {
       setServerError(servicesError);
@@ -88,25 +86,25 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
 
     if (!amount) {
       newErrors.amount = "Amount is required";
-      } else {
-        const numericAmount = parseFloat(amount);
-        if (isNaN(numericAmount) || numericAmount <= 0) {
-          newErrors.amount = "Please enter a valid amount";
-        } else if (services.length > 0) {
-          const service = services.find((s) => s.serviceID === selectedServiceId);
-          if (service) {
-            const minAmount = parseFloat(service.minimium_amount);
-            const maxAmount = parseFloat(service.maximum_amount);
-            if (numericAmount < minAmount) {
-              newErrors.amount = `Minimum amount is ₦${minAmount.toLocaleString()}`;
-            } else if (numericAmount > maxAmount) {
-              newErrors.amount = `Maximum amount is ₦${maxAmount.toLocaleString()}`;
-            } else if (numericAmount > walletBalance) {
-              newErrors.amount = "Insufficient wallet balance";
-            }
+    } else {
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        newErrors.amount = "Please enter a valid amount";
+      } else if (services.length > 0) {
+        const service = services.find((s) => s.serviceID === selectedServiceId);
+        if (service) {
+          const minAmount = parseFloat(service.minimium_amount);
+          const maxAmount = parseFloat(service.maximum_amount);
+          if (numericAmount < minAmount) {
+            newErrors.amount = `Minimum ₦${minAmount.toLocaleString()}`;
+          } else if (numericAmount > maxAmount) {
+            newErrors.amount = `Maximum ₦${maxAmount.toLocaleString()}`;
+          } else if (numericAmount > walletBalance) {
+            newErrors.amount = "Insufficient balance";
           }
         }
       }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -120,7 +118,6 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
       return;
     }
 
-    // Show confirmation modal instead of submitting directly
     setShowConfirmation(true);
   };
 
@@ -129,7 +126,6 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
     setShowConfirmation(false);
 
     try {
-      // Generate request ID for idempotency (format: YYYYMMDDHHII<random>)
       const now = new Date();
       const dateStr = now.toISOString().slice(0, 16).replace(/[-:T]/g, "");
       const randomStr = Math.random().toString(36).substring(2, 8);
@@ -144,7 +140,6 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
 
       if (response.success) {
         onSuccess(response.data);
-        // Reset form on success
         setPhoneNumber("");
         setAmount("");
         setErrors({});
@@ -167,73 +162,65 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
   const minAmount = selectedService ? parseFloat(selectedService.minimium_amount) : 50;
   const maxAmount = selectedService ? parseFloat(selectedService.maximum_amount) : 100000;
 
+  const isFormReady = selectedServiceId && phoneNumber && amount && !isSubmitting && !loadingServices;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {serverError && <FormError message={serverError} />}
 
-      {/* Network Selection */}
+      {/* Row 1: Network dropdown + Phone number */}
       <div>
-        <label className="label-auth mb-2 sm:mb-3 block text-dashboard-heading">
-          Select network
-          <span className="text-red-500 ml-0.5">*</span>
-        </label>
-        <NetworkSelector
-          services={services}
-          selectedServiceId={selectedServiceId}
-          onSelect={setSelectedServiceId}
-          isLoading={loadingServices}
-        />
+        <div className="flex items-end gap-3">
+          <NetworkSelector
+            services={services}
+            selectedServiceId={selectedServiceId}
+            onSelect={setSelectedServiceId}
+            isLoading={loadingServices}
+          />
+          <PhoneNumberInput
+            value={phoneNumber}
+            onChange={setPhoneNumber}
+            error={errors.phoneNumber}
+            disabled={isSubmitting || loadingServices}
+          />
+        </div>
         {errors.serviceId && (
-          <p className="text-xs text-red-600 mt-2">{errors.serviceId}</p>
+          <p className="text-[12px] text-red-500 font-medium mt-1.5">{errors.serviceId}</p>
         )}
       </div>
 
-      {/* Phone & Amount – stacked on mobile, side-by-side from md */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-        <PhoneNumberInput
-          value={phoneNumber}
-          onChange={setPhoneNumber}
-          error={errors.phoneNumber}
-          disabled={isSubmitting || loadingServices}
-        />
-        <AmountInput
-          value={amount}
-          onChange={setAmount}
-          error={errors.amount}
-          disabled={isSubmitting || loadingServices}
-          min={minAmount}
-          max={maxAmount}
-          presetAmounts={[100, 200, 500, 1000, 2000, 5000]}
-        />
-      </div>
+      {/* Row 2: Amount */}
+      <AmountInput
+        value={amount}
+        onChange={setAmount}
+        error={errors.amount}
+        disabled={isSubmitting || loadingServices}
+        min={minAmount}
+        max={maxAmount}
+        presetAmounts={[100, 200, 500, 1000, 2000, 5000]}
+      />
 
-      {/* Primary CTA – touch-friendly height */}
-      <Button
+      {/* Pay button */}
+      <button
         type="submit"
-        className="w-full min-h-12 h-12 sm:min-h-[52px] sm:h-[52px] rounded-xl bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-white text-base sm:text-lg font-semibold shadow-sm transition-all active:scale-[0.99] touch-manipulation"
-        disabled={
-          isSubmitting ||
-          loadingServices ||
-          !selectedServiceId ||
-          !phoneNumber ||
-          !amount
-        }
+        disabled={!isFormReady}
+        className="w-full flex items-center justify-center gap-2 h-12 sm:h-[52px] rounded-xl bg-brand-bg-primary text-white font-semibold text-[15px] sm:text-base transition-all active:scale-[0.99] touch-manipulation shadow-lg shadow-brand-bg-primary/20 hover:shadow-xl hover:shadow-brand-bg-primary/25 hover:bg-brand-bg-primary/90 disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
-          <>
-            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            Processing...
-          </>
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          "Purchase Airtime"
+          <>
+            <Zap className="h-4 w-4" strokeWidth={2.5} />
+            Purchase Airtime
+          </>
         )}
-      </Button>
+      </button>
 
-      {/* Info */}
-      <div className="rounded-xl border border-dashboard-border/80 bg-dashboard-bg/80 p-3 sm:p-4">
-        <p className="text-xs sm:text-sm text-dashboard-muted">
-          <strong className="text-dashboard-heading">Note:</strong> Airtime is delivered
-          instantly. Double-check the number before paying.
+      {/* Info footer */}
+      <div className="flex items-center gap-2.5">
+        <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+        <p className="text-[12px] text-dashboard-muted">
+          Instant delivery &middot; Double-check number before paying
         </p>
       </div>
 

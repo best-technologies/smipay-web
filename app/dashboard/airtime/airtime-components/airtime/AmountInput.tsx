@@ -1,8 +1,6 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { AlertCircle } from "lucide-react";
 
 interface AmountInputProps {
   value: string;
@@ -23,14 +21,7 @@ export function AmountInput({
   min = 50,
   max = 100000,
   presetAmounts = [100, 200, 500, 1000, 2000, 5000],
-  required = true,
 }: AmountInputProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow digits
-    const input = e.target.value.replace(/\D/g, "");
-    onChange(input);
-  };
-
   const handlePresetClick = (amount: number) => {
     if (amount >= min && amount <= max) {
       onChange(amount.toString());
@@ -41,76 +32,68 @@ export function AmountInput({
   const isValid = numericValue >= min && numericValue <= max && value !== "";
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor="amount" className="label-auth text-dashboard-heading">
-        Amount (₦)
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </Label>
-      <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-dashboard-muted font-semibold text-base pointer-events-none">
-          ₦
-        </span>
-        <input
-          id="amount"
-          type="text"
-          inputMode="numeric"
-          placeholder="0"
-          value={value}
-          onChange={handleChange}
-          disabled={disabled}
-          className={cn(
-            "w-full rounded-xl border-2 bg-dashboard-bg/80 py-3 pl-9 pr-10 text-base text-dashboard-heading placeholder:text-dashboard-muted shadow-sm transition-all duration-200",
-            "focus:outline-none hover:border-dashboard-border",
-            error
-              ? "border-red-500 focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]"
-              : isValid && !error
-                ? "border-[var(--tx-success-text)] focus:border-[var(--tx-success-text)] focus:shadow-[0_0_0_4px_rgba(5,150,105,0.12)]"
-                : "border-dashboard-border focus:border-dashboard-accent focus:shadow-[0_0_0_4px_rgba(14,165,233,0.12)]"
-          )}
-          aria-invalid={!!error}
-          aria-describedby={error ? "amount-error" : undefined}
-        />
-        {isValid && !error && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg className="h-5 w-5 text-[var(--tx-success-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
+    <div className="space-y-3">
+      <div className="flex-1 min-w-0">
+        <label className="text-[11px] font-medium text-dashboard-muted uppercase tracking-wider mb-1 block">
+          Amount
+        </label>
+        <div className="relative">
+          <span className="absolute left-0 bottom-2.5 text-dashboard-heading font-bold text-[17px] sm:text-lg pointer-events-none select-none">
+            ₦
+          </span>
+          <input
+            id="amount"
+            type="text"
+            inputMode="numeric"
+            placeholder="0"
+            value={value}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              onChange(raw);
+            }}
+            disabled={disabled}
+            className={cn(
+              "w-full bg-transparent border-0 border-b-2 rounded-none pl-5 pr-0 py-2.5 text-[17px] sm:text-lg font-semibold text-dashboard-heading placeholder:text-dashboard-muted/40 placeholder:font-normal tabular-nums transition-colors duration-200",
+              "focus:outline-none",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              error
+                ? "border-red-400"
+                : isValid
+                  ? "border-emerald-400"
+                  : "border-dashboard-border focus:border-brand-bg-primary"
+            )}
+            aria-invalid={!!error}
+          />
+        </div>
+        {error && (
+          <p className="text-[12px] text-red-500 font-medium mt-1.5">{error}</p>
         )}
       </div>
-      {error && (
-        <div id="amount-error" className="flex items-center gap-2 text-sm text-red-600">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-      {!error && value && !isValid && (
-        <p className="text-xs text-dashboard-muted">
-          Between ₦{min.toLocaleString()} and ₦{max.toLocaleString()}
-        </p>
-      )}
 
       {presetAmounts.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-1.5">
           {presetAmounts
-            .filter((amount) => amount >= min && amount <= max)
-            .map((amount) => (
-              <button
-                key={amount}
-                type="button"
-                onClick={() => handlePresetClick(amount)}
-                disabled={disabled}
-                className={cn(
-                  "min-h-[44px] px-3 py-2.5 sm:px-4 sm:py-2 text-sm font-medium border-2 rounded-xl transition-all duration-200",
-                  "disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]",
-                  value === amount.toString()
-                    ? "border-brand-bg-primary bg-brand-bg-primary/10 text-brand-bg-primary"
-                    : "border-dashboard-border/80 bg-dashboard-surface text-dashboard-heading hover:border-dashboard-border"
-                )}
-              >
-                ₦{amount.toLocaleString()}
-              </button>
-            ))}
+            .filter((a) => a >= min && a <= max)
+            .map((a) => {
+              const isActive = value === a.toString();
+              return (
+                <button
+                  key={a}
+                  type="button"
+                  onClick={() => handlePresetClick(a)}
+                  disabled={disabled}
+                  className={cn(
+                    "h-8 px-3 text-[12px] font-semibold rounded-full transition-all duration-150 tabular-nums",
+                    "disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] touch-manipulation",
+                    isActive
+                      ? "bg-brand-bg-primary text-white shadow-sm"
+                      : "bg-dashboard-bg text-dashboard-muted ring-1 ring-dashboard-border/50 hover:ring-dashboard-border hover:text-dashboard-heading"
+                  )}
+                >
+                  ₦{a >= 1000 ? `${a / 1000}k` : a}
+                </button>
+              );
+            })}
         </div>
       )}
     </div>

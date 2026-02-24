@@ -12,13 +12,16 @@ import {
   Wifi,
   Tv,
   Receipt,
-  Copy,
-  Check,
   Loader2,
   Landmark,
   Hash,
   Send,
+  GraduationCap,
+  Dices,
+  CreditCard,
+  Globe,
 } from "lucide-react";
+import { WalletCard } from "@/components/dashboard/WalletCard";
 import { useDashboard } from "@/hooks/useDashboard";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { Transaction as DashboardTransaction } from "@/types/dashboard";
@@ -36,7 +39,10 @@ const SERVICE_ACTIONS = [
   { id: "data", name: "Data", icon: Wifi, href: "/dashboard/data", comingSoon: false, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
   { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv", comingSoon: true, bg: "var(--quick-action-5-bg)", color: "var(--quick-action-5)" },
   { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity", comingSoon: true, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
-  { id: "transactions", name: "History", icon: Receipt, href: "/dashboard/transactions", comingSoon: true, bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
+  { id: "education", name: "Education", icon: GraduationCap, href: "/dashboard/education", comingSoon: true, bg: "var(--quick-action-1-bg)", color: "var(--quick-action-1)" },
+  { id: "betting", name: "Betting", icon: Dices, href: "/dashboard/betting", comingSoon: true, bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
+  { id: "cards", name: "Cards", icon: CreditCard, href: "/dashboard/cards", comingSoon: true, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
+  { id: "intl-airtime", name: "Intl. Airtime", icon: Globe, href: "/dashboard/intl-airtime", comingSoon: true, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
 ];
 
 const container = {
@@ -60,7 +66,6 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // const { user } = useAuth();
-  const [copied, setCopied] = useState(false);
   const { dashboardData, isLoading: loading, error, refetch } = useDashboard();
   const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
@@ -83,12 +88,6 @@ function DashboardContent() {
       }, 500);
     }
   }, [searchParams, router]);
-
-  const copyAccountNumber = (accountNumber: string) => {
-    navigator.clipboard.writeText(accountNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const parseBalance = (balance: string): number => {
     return parseFloat(balance.replace(/,/g, ""));
@@ -131,7 +130,7 @@ function DashboardContent() {
           {/* Wallet card skeleton */}
           <div
             className="rounded-2xl overflow-hidden shadow-xl animate-pulse"
-            style={{ background: "linear-gradient(152deg, #14532d 0%, #052e1c 100%)" }}
+            style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)" }}
           >
             <div className="p-4 sm:p-5">
               <div className="flex justify-between mb-4">
@@ -175,8 +174,8 @@ function DashboardContent() {
 
           {/* Service actions skeleton */}
           <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 py-3 sm:px-4 sm:py-4 animate-pulse">
-            <div className="grid grid-cols-5 gap-y-1">
-              {[1, 2, 3, 4, 5].map((i) => (
+            <div className="grid grid-cols-4 gap-y-3">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div key={i} className="flex flex-col items-center">
                   <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-dashboard-border/50" />
                   <div className="h-2.5 w-10 mt-2 rounded bg-dashboard-border/40" />
@@ -258,116 +257,14 @@ function DashboardContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Virtual Account Card - shown first on mobile */}
           <div className="lg:col-span-2 order-1">
-            {primaryAccount ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.12 }}
-                className="relative overflow-hidden rounded-2xl shadow-xl"
-                style={{
-                  background: "linear-gradient(152deg, #14532d 0%, #0a3622 45%, #052e1c 100%)",
-                  boxShadow: "0 25px 50px -12px rgba(5, 46, 28, 0.45), 0 0 0 1px rgba(255,255,255,0.07) inset",
-                }}
-              >
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: "radial-gradient(ellipse 130% 90% at 85% -10%, rgba(234, 88, 12, 0.22) 0%, transparent 50%), radial-gradient(ellipse 90% 70% at 5% 105%, rgba(5, 150, 105, 0.12) 0%, transparent 45%)",
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
-
-                <div className="relative p-4 sm:p-5">
-                  {/* Row 1: Bank name (left) | Active + Fund Wallet pills (right) */}
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <span className="text-xs font-medium text-slate-400">{primaryAccount.bank_name}</span>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span
-                        className={`px-2 py-1 rounded-full text-[10px] font-semibold ${
-                          primaryAccount.isActive ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
-                        }`}
-                      >
-                        {primaryAccount.isActive ? "Active" : "Inactive"}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setIsFundWalletModalOpen(true)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                      >
-                        <ArrowDownLeft className="h-3 w-3" />
-                        Fund
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Hero: Balance */}
-                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
-                    Available balance
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight mb-4">
-                    ₦{parseBalance(dashboardData.wallet_card.current_balance).toLocaleString()}
-                  </p>
-
-                  {/* Account number + copy */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs text-slate-500">Account number</span>
-                    <button
-                      onClick={() => copyAccountNumber(primaryAccount.account_number)}
-                      className="p-1 -m-1 rounded hover:bg-white/10 transition-colors"
-                      title="Copy"
-                    >
-                      {copied ? (
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5 text-slate-400" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="text-sm sm:text-base font-mono font-semibold text-white tracking-wider mb-3">
-                    {primaryAccount.account_number}
-                  </p>
-                  <p className="text-xs text-slate-500 truncate">{primaryAccount.account_holder_name}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.12 }}
-                className="relative overflow-hidden rounded-2xl shadow-xl"
-                style={{
-                  background: "linear-gradient(152deg, #14532d 0%, #0a3622 45%, #052e1c 100%)",
-                  boxShadow: "0 25px 50px -12px rgba(5, 46, 28, 0.45), 0 0 0 1px rgba(255,255,255,0.07) inset",
-                }}
-              >
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: "radial-gradient(ellipse 130% 90% at 85% -10%, rgba(234, 88, 12, 0.22) 0%, transparent 50%), radial-gradient(ellipse 90% 70% at 5% 105%, rgba(5, 150, 105, 0.12) 0%, transparent 45%)",
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
-                <div className="relative p-4 sm:p-5">
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <div className="h-3 w-24 rounded bg-white/10 animate-pulse" />
-                    <div className="h-5 w-16 rounded-full bg-white/10 animate-pulse" />
-                  </div>
-                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
-                    Available balance
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight mb-4">
-                    ₦{parseBalance(dashboardData.wallet_card.current_balance).toLocaleString()}
-                  </p>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs text-slate-500">Account number</span>
-                  </div>
-                  <div className="h-5 w-40 rounded bg-white/10 animate-pulse mb-3" />
-                  <p className="text-[11px] text-amber-400/80 font-medium animate-pulse">
-                    Setting up your bank account...
-                  </p>
-                </div>
-              </motion.div>
-            )}
+            <WalletCard
+              bankName={primaryAccount?.bank_name}
+              accountNumber={primaryAccount?.account_number}
+              accountHolderName={primaryAccount?.account_holder_name}
+              balance={parseBalance(dashboardData.wallet_card.current_balance)}
+              isActive={primaryAccount?.isActive ?? true}
+              onFundWallet={() => setIsFundWalletModalOpen(true)}
+            />
           </div>
 
           {/* User Info Card */}
@@ -482,7 +379,7 @@ function DashboardContent() {
           animate="visible"
           className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 py-3 sm:px-4 sm:py-4"
         >
-          <div className="grid grid-cols-5 gap-y-1">
+          <div className="grid grid-cols-4 gap-y-3 sm:gap-y-4">
             {SERVICE_ACTIONS.map((action) => (
               <motion.div key={action.id} variants={item} className="flex flex-col items-center">
                 {action.comingSoon ? (
@@ -517,9 +414,20 @@ function DashboardContent() {
           </div>
         </motion.section>
 
-        {/* Recent Transactions – no header, just the list */}
+        {/* Recent Transactions */}
         <section>
-
+          {dashboardData.transaction_history.length > 0 && (
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-[13px] font-semibold text-dashboard-heading">Recent Transactions</h2>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/transactions")}
+                className="text-[12px] font-medium text-brand-bg-primary hover:text-brand-bg-primary/80 transition-colors touch-manipulation"
+              >
+                View all
+              </button>
+            </div>
+          )}
           <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
             {dashboardData.transaction_history.length > 0 ? (
               <div>
@@ -546,7 +454,9 @@ function DashboardContent() {
                       }
                     >
                       <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dashboard-bg/80">
-                        {logo ? (
+                        {isCredit ? (
+                          <ArrowDownLeft className="h-3.5 w-3.5 text-blue-500" />
+                        ) : logo ? (
                           // eslint-disable-next-line @next/next/no-img-element -- dynamic network/transaction logo
                           <img
                             src={logo}
@@ -554,13 +464,7 @@ function DashboardContent() {
                             className="h-full w-full object-contain p-[5px]"
                           />
                         ) : (
-                          <span className="flex items-center justify-center">
-                            {isCredit ? (
-                              <ArrowDownLeft className="h-3.5 w-3.5 text-[var(--tx-success-text)]" />
-                            ) : (
-                              <ArrowUpRight className="h-3.5 w-3.5 text-[var(--tx-failed-text)]" />
-                            )}
-                          </span>
+                          <ArrowUpRight className="h-3.5 w-3.5 text-[var(--tx-failed-text)]" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -577,7 +481,7 @@ function DashboardContent() {
                             isCredit ? "text-[var(--tx-success-text)]" : "text-dashboard-heading"
                           }`}
                         >
-                          {isCredit ? "+" : "−"}₦{Number(transaction.amount).toLocaleString()}
+                          {isCredit ? "+" : "−"}₦{Number(String(transaction.amount).replace(/,/g, "")).toLocaleString()}
                         </p>
                         <span
                           className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider ${statusStyle}`}
