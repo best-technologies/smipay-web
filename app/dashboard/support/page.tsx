@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,6 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supportApi } from "@/services/support-api";
+import {
+  connectUserSupportSocket,
+  disconnectUserSupportSocket,
+} from "@/lib/user-support-socket";
 import type {
   SupportTicketListItem,
   CreateTicketPayload,
@@ -340,6 +344,31 @@ export default function SupportPage() {
 
   useEffect(() => {
     fetchTickets();
+  }, [fetchTickets]);
+
+  // Socket.IO: listen for real-time ticket updates (new reply, status change)
+  const socketConnected = useRef(false);
+  useEffect(() => {
+    if (socketConnected.current) return;
+    socketConnected.current = true;
+
+    const socket = connectUserSupportSocket();
+
+    const handleTicketUpdated = (data: {
+      ticket_id: string;
+      event: string;
+    }) => {
+      if (data.event === "new_reply" || data.event === "status_changed") {
+        fetchTickets();
+      }
+    };
+
+    socket.on("ticket_updated", handleTicketUpdated);
+
+    return () => {
+      socket.off("ticket_updated", handleTicketUpdated);
+      socketConnected.current = false;
+    };
   }, [fetchTickets]);
 
   const handleCreateSuccess = (ticketNumber: string) => {

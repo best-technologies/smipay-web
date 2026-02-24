@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminSupportStore } from "@/store/admin/admin-support-store";
+import { useAdminSupportNotifications } from "@/store/admin/admin-support-notifications-store";
 import { useAdminSupportDetailSocket } from "@/hooks/admin/useAdminSupportSocket";
 import { adminSupportApi } from "@/services/admin/support-api";
 import { SUPPORT_STATUSES, SUPPORT_PRIORITIES } from "@/types/admin/support";
@@ -105,6 +106,11 @@ export default function SupportDetailPage() {
   const router = useRouter();
   const { user: currentAdmin } = useAuth();
   const ticketId = params.id;
+  const dismissByTicket = useAdminSupportNotifications((s) => s.dismissByTicket);
+
+  useEffect(() => {
+    if (ticketId) dismissByTicket(ticketId);
+  }, [ticketId, dismissByTicket]);
 
   const { fetchDetail, invalidateDetail, detailLoading, detailError } =
     useAdminSupportStore();

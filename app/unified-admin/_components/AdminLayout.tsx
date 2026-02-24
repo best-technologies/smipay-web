@@ -8,6 +8,8 @@ import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { SessionWarning } from "@/components/auth/SessionWarning";
 import { SessionExpired } from "@/components/auth/SessionExpired";
 import AdminSidebar from "./AdminSidebar";
+import SupportNotificationBanner from "./SupportNotificationBanner";
+import { useAdminSupportGlobalSocket } from "@/hooks/admin/useAdminSupportGlobalSocket";
 import { Loader2, Monitor, ArrowLeft } from "lucide-react";
 
 const MIN_VIEWPORT_WIDTH = 1024;
@@ -145,6 +147,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { isTooSmall, checked } = useViewportGuard();
+  useAdminSupportGlobalSocket();
   const {
     showWarning,
     sessionExpired,
@@ -175,6 +178,7 @@ export default function AdminLayout({
       }
     >
       <AdminAuthGuard sessionExpired={sessionExpired}>
+        <SupportNotificationBanner />
         <div className="flex min-h-screen bg-dashboard-bg">
           <AdminSidebar />
           <main className="flex-1 overflow-auto">{children}</main>

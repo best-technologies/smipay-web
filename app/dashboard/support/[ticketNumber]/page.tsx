@@ -14,10 +14,16 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
 import { supportApi } from "@/services/support-api";
+import {
+  connectUserSupportSocket,
+  joinTicketRoom,
+  leaveTicketRoom,
+  emitUserTyping,
+  emitUserStopTyping,
+} from "@/lib/user-support-socket";
 import type { SupportTicketDetail, SupportMessage } from "@/types/support";
 import { TICKET_STATUS_DISPLAY } from "@/types/support";
 
-// --- Helpers ---
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
@@ -60,7 +66,6 @@ const STATUS_COLOR_CLASSES: Record<string, string> = {
   slate: "bg-slate-100 text-slate-700 border-slate-200",
 };
 
-// Local message type for optimistic updates
 interface LocalMessage extends SupportMessage {
   _tempId?: string;
   _sending?: boolean;
@@ -86,11 +91,16 @@ export default function TicketDetailPage() {
   const [ratingValue, setRatingValue] = useState(0);
   const [ratingFeedback, setRatingFeedback] = useState("");
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [supportTyping, setSupportTyping] = useState(false);
+
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ticketIdRef = useRef<string | null>(null);
 
   const scrollToBottom = useCallback(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  // Initial fetch via REST to load conversation history
   const fetchTicket = useCallback(async () => {
     if (!ticketNumber) return;
     setLoading(true);
@@ -100,6 +110,7 @@ export default function TicketDetailPage() {
       if (res.success && res.data?.ticket) {
         const t = res.data.ticket;
         setTicket(t);
+        ticketIdRef.current = t.id;
         setMessages(
           (t.messages ?? []).map((m) => ({ ...m, _tempId: undefined }))
         );
@@ -122,13 +133,106 @@ export default function TicketDetailPage() {
     fetchTicket();
   }, [fetchTicket]);
 
+  // Socket.IO: connect, join room, listen for events
+  useEffect(() => {
+    if (!ticketIdRef.current) return;
+    const ticketId = ticketIdRef.current;
+
+    const socket = connectUserSupportSocket();
+    joinTicketRoom(ticketId);
+
+    const handleNewMessage = (data: {
+      ticket_id: string;
+      message: {
+        id: string;
+        message: string;
+        is_from_user: boolean;
+        sender_name: string | null;
+        sender_email: string | null;
+        attachments: string[] | null;
+        createdAt: string;
+      };
+    }) => {
+      if (data.ticket_id !== ticketId) return;
+
+      setMessages((prev) => {
+        // If this message confirms an optimistic one, replace it
+        const optimisticIdx = prev.findIndex(
+          (m) => m._tempId && m._sending && m.message === data.message.message
+        );
+        if (optimisticIdx >= 0) {
+          const next = [...prev];
+          next[optimisticIdx] = {
+            ...data.message,
+            created_at: data.message.createdAt,
+          };
+          return next;
+        }
+
+        // Don't add duplicates
+        if (prev.some((m) => m.id === data.message.id)) return prev;
+
+        return [
+          ...prev,
+          { ...data.message, created_at: data.message.createdAt },
+        ];
+      });
+      setSupportTyping(false);
+    };
+
+    const handleStatusChanged = (data: {
+      ticket_id: string;
+      new_status: string;
+      resolution_notes?: string;
+    }) => {
+      if (data.ticket_id !== ticketId) return;
+      setTicket((prev) =>
+        prev ? { ...prev, status: data.new_status } : prev
+      );
+    };
+
+    const handleTyping = (data: {
+      ticket_id: string;
+      is_admin?: boolean;
+    }) => {
+      if (data.ticket_id !== ticketId || !data.is_admin) return;
+      setSupportTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(
+        () => setSupportTyping(false),
+        4000
+      );
+    };
+
+    const handleStopTyping = (data: { ticket_id: string }) => {
+      if (data.ticket_id !== ticketId) return;
+      setSupportTyping(false);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+
+    socket.on("new_message", handleNewMessage);
+    socket.on("status_changed", handleStatusChanged);
+    socket.on("typing", handleTyping);
+    socket.on("stop_typing", handleStopTyping);
+
+    return () => {
+      leaveTicketRoom(ticketId);
+      socket.off("new_message", handleNewMessage);
+      socket.off("status_changed", handleStatusChanged);
+      socket.off("typing", handleTyping);
+      socket.off("stop_typing", handleStopTyping);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, [ticket?.id]);
+
+  // Auto-scroll on new messages
   useEffect(() => {
     if (!loading && messages.length > 0) {
       scrollToBottom();
     }
   }, [loading, messages.length, scrollToBottom]);
 
-  // Auto-grow textarea (min 1 line, max 4 lines)
+  // Auto-grow textarea
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -138,7 +242,8 @@ export default function TicketDetailPage() {
     el.style.height = `${Math.min(Math.max(el.scrollHeight, 40), maxHeight)}px`;
   }, [inputValue]);
 
-  const isClosed = ticket?.status === "resolved" || ticket?.status === "closed";
+  const isClosed =
+    ticket?.status === "resolved" || ticket?.status === "closed";
   const showRatingForm =
     ticket?.status === "resolved" &&
     !hasRated &&
@@ -150,6 +255,8 @@ export default function TicketDetailPage() {
     e.preventDefault();
     const msg = inputValue.trim();
     if (!msg || sending || !user?.email || !ticketNumber) return;
+
+    emitUserStopTyping(ticketIdRef.current ?? "");
 
     const tempId = `opt-${Date.now()}`;
     const displayName =
@@ -225,6 +332,17 @@ export default function TicketDetailPage() {
     setMessages((prev) => prev.filter((x) => x._tempId !== tempId));
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+      return;
+    }
+    if (ticketIdRef.current) {
+      emitUserTyping(ticketIdRef.current);
+    }
+  };
+
   const handleRateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (ratingValue < 1 || ratingValue > 5) return;
@@ -237,7 +355,7 @@ export default function TicketDetailPage() {
       setHasRated(true);
       setRatingSubmitted(true);
     } catch {
-      // Could show error; spec says show "Thank you" after success
+      // non-critical
     } finally {
       setRatingSubmitting(false);
     }
@@ -458,6 +576,28 @@ export default function TicketDetailPage() {
                   </div>
                 );
               })}
+
+              {/* Support typing indicator */}
+              <AnimatePresence>
+                {supportTyping && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    className="flex justify-start"
+                  >
+                    <div className="bg-dashboard-surface border border-dashboard-border/60 rounded-2xl rounded-br-2xl px-3.5 py-2.5 inline-flex items-center gap-2">
+                      <span className="flex gap-0.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:0ms]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:150ms]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:300ms]" />
+                      </span>
+                      <span className="text-xs text-dashboard-muted">Support is typing...</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div ref={chatEndRef} />
             </>
           )}
@@ -530,7 +670,6 @@ export default function TicketDetailPage() {
         )}
       </AnimatePresence>
 
-      {/* Thank you message after rating */}
       {ratingSubmitted && (
         <div className="shrink-0 px-3 py-4 sm:px-4 bg-dashboard-surface border-t border-dashboard-border">
           <p className="text-sm font-medium text-dashboard-heading text-center text-emerald-600">
@@ -542,7 +681,7 @@ export default function TicketDetailPage() {
       {/* Message input */}
       {canSend && (
         <div
-          className={`shrink-0 px-3 py-3 sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 bg-dashboard-surface border-t border-dashboard-border`}
+          className="shrink-0 px-3 py-3 sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 bg-dashboard-surface border-t border-dashboard-border"
         >
           <form
             onSubmit={handleSendMessage}
@@ -552,12 +691,7 @@ export default function TicketDetailPage() {
               ref={textareaRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage(e);
-                }
-              }}
+              onKeyDown={handleInputKeyDown}
               placeholder="Type a message..."
               rows={1}
               maxLength={5000}
@@ -565,9 +699,7 @@ export default function TicketDetailPage() {
             />
             <button
               type="submit"
-              disabled={
-                !inputValue.trim() || sending
-              }
+              disabled={!inputValue.trim() || sending}
               className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-brand-bg-primary text-white hover:bg-brand-bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
               aria-label="Send message"
             >
