@@ -95,9 +95,15 @@ function SignInForm() {
         const user = mapNewAuthUserToUser(apiUser);
         login(user, access_token);
         setSuccessMessage("Login successful! Redirecting...");
-        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+        let redirectUrl = "/dashboard";
+        if (user.role && user.role !== "user") {
+          redirectUrl = "/";
+        } else {
+          const callbackUrl = searchParams.get("callbackUrl");
+          if (callbackUrl) redirectUrl = callbackUrl;
+        }
         setTimeout(() => {
-          router.push(callbackUrl);
+          router.push(redirectUrl);
           router.refresh();
         }, 1000);
       } else {

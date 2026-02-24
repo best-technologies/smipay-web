@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, Menu, LogOut, User } from "lucide-react";
+import { ChevronDown, Menu, X, LogOut, User, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
@@ -88,6 +88,18 @@ export default function HeaderNew() {
                     >
                       Settings
                     </Link>
+                    {user.role && user.role !== "user" && (
+                      <>
+                        <hr className="my-2" />
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 rounded px-3 py-2 hover:bg-zinc-100 text-orange-600 font-medium"
+                        >
+                          <ShieldCheck className="h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </>
+                    )}
                     <hr className="my-2" />
                     <button
                       onClick={handleSignOut}
@@ -167,6 +179,16 @@ export default function HeaderNew() {
                     >
                       Settings
                     </Link>
+                    {user.role && user.role !== "user" && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-2 py-2 hover:opacity-90 text-orange-300 font-medium"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleSignOut();

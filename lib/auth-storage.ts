@@ -13,6 +13,7 @@ export interface User {
   is_email_verified: boolean;
   is_phone_verified: boolean;
   account_status: string;
+  role: string;
   wallet?: {
     current_balance: number;
     isActive: boolean;
@@ -50,6 +51,7 @@ export function mapNewAuthUserToUser(api: NewAuthUser): User {
     is_email_verified: api.is_email_verified,
     is_phone_verified: ext.is_phone_verified === true,
     account_status: (typeof ext.account_status === "string" ? ext.account_status : "active"),
+    role: api.role ?? "user",
     wallet: ext.wallet as User["wallet"] | undefined,
   };
 }
