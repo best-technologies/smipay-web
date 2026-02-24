@@ -89,7 +89,6 @@ export function useActivityTracker() {
 
     const events = [
       "mousedown",
-      "mousemove",
       "keypress",
       "scroll",
       "touchstart",

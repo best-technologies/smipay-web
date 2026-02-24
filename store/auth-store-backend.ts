@@ -7,6 +7,7 @@ import {
   clearAuth as clearAuthStorage,
   getUser,
   getToken,
+  isSessionExpired,
 } from "@/lib/auth-storage";
 import { authApi } from "@/services/auth-api";
 
@@ -76,13 +77,16 @@ export const useAuthStore = create<AuthState>()(
         const token = getToken();
         const user = getUser();
 
-        if (token && user) {
+        if (token && user && !isSessionExpired()) {
           set({
             user,
             isAuthenticated: true,
             isLoading: false,
           });
         } else {
+          if (token || user) {
+            clearAuthStorage();
+          }
           set({
             user: null,
             isAuthenticated: false,
@@ -95,7 +99,6 @@ export const useAuthStore = create<AuthState>()(
       name: "smipay-auth",
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
       }),
     }
   )
