@@ -21,6 +21,7 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  ScrollText,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -40,6 +41,13 @@ interface AdminMenuItem {
 
 const adminMenuItems: AdminMenuItem[] = [
   {
+    id: "audit-logs",
+    label: "Audit Logs",
+    icon: ScrollText,
+    href: "/unified-admin/audit-logs",
+    enabled: true,
+  },
+  {
     id: "dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
@@ -51,14 +59,21 @@ const adminMenuItems: AdminMenuItem[] = [
     label: "Users",
     icon: Users,
     href: "/unified-admin/users",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "transactions",
     label: "Transactions",
     icon: ArrowLeftRight,
     href: "/unified-admin/transactions",
-    enabled: false,
+    enabled: true,
+  },
+  {
+    id: "support",
+    label: "Support Tickets",
+    icon: Headphones,
+    href: "/unified-admin/support",
+    enabled: true,
   },
   {
     id: "kyc",
@@ -68,24 +83,17 @@ const adminMenuItems: AdminMenuItem[] = [
     enabled: false,
   },
   {
-    id: "support",
-    label: "Support Tickets",
-    icon: Headphones,
-    href: "/unified-admin/support",
-    enabled: false,
+    id: "referrals",
+    label: "Referrals",
+    icon: UserPlus,
+    href: "/unified-admin/referrals",
+    enabled: true,
   },
   {
     id: "cards",
     label: "Virtual Cards",
     icon: CreditCard,
     href: "/unified-admin/cards",
-    enabled: false,
-  },
-  {
-    id: "referrals",
-    label: "Referrals",
-    icon: UserPlus,
-    href: "/unified-admin/referrals",
     enabled: false,
   },
   {

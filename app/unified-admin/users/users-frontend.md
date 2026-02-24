@@ -7,8 +7,10 @@
 
 ---
 
-## 1. List Users (Paginated, Filterable, Searchable)
+## 1. List Users (Analytics + Table — Single Endpoint)
 **GET** `/api/v1/unified-admin/users`
+
+Returns both the **analytics** (for the cards/charts above the table) and the **paginated user list** (for the table) in a single response. One call, everything you need.
 
 ### Query Params
 
@@ -37,6 +39,49 @@ GET /api/v1/unified-admin/users?page=1&limit=20&search=john&account_status=activ
   "success": true,
   "message": "Users fetched",
   "data": {
+    "analytics": {
+      "overview": {
+        "total_users": 3250,
+        "active_users": 3100,
+        "suspended_users": 150
+      },
+      "growth": {
+        "new_today": 12,
+        "new_this_week": 87,
+        "new_this_month": 340,
+        "new_prev_month": 290,
+        "month_over_month_percent": 17
+      },
+      "kyc": {
+        "verified": 2800,
+        "pending": 200,
+        "rejected": 50,
+        "none": 200
+      },
+      "by_role": {
+        "user": 3100,
+        "agent": 80,
+        "support": 15,
+        "compliance_officer": 5,
+        "finance": 10,
+        "operations": 8,
+        "admin": 32
+      },
+      "by_tier": [
+        { "tier": "UNVERIFIED", "name": "Unverified Tier", "count": 400 },
+        { "tier": "VERIFIED", "name": "Verified Tier", "count": 2500 },
+        { "tier": "PREMIUM", "name": "Premium Tier", "count": 350 }
+      ],
+      "recent_signups": [
+        {
+          "id": "uuid",
+          "first_name": "Jane",
+          "last_name": "Doe",
+          "email": "jane@example.com",
+          "createdAt": "2026-02-24T09:15:00.000Z"
+        }
+      ]
+    },
     "users": [
       {
         "id": "uuid",
@@ -67,6 +112,14 @@ GET /api/v1/unified-admin/users?page=1&limit=20&search=john&account_status=activ
           "is_verified": true,
           "bvn_verified": true,
           "id_type": "NIGERIAN_NIN"
+        },
+        "last_activity": {
+          "action": "WALLET_FUND",
+          "description": "User funded wallet via Paystack — ₦10,000.00",
+          "status": "SUCCESS",
+          "timestamp": "2026-02-24T09:42:00.000Z",
+          "ip_address": "105.112.45.67",
+          "platform": "android"
         }
       }
     ],
@@ -80,7 +133,53 @@ GET /api/v1/unified-admin/users?page=1&limit=20&search=john&account_status=activ
 }
 ```
 
-### User Object (List View)
+### Analytics Object (`data.analytics`)
+
+Rendered above the table as cards and charts. Analytics reflect the full user base — they are **not** affected by filters/search/pagination.
+
+| Field | Type | Description |
+|---|---|---|
+| `overview.total_users` | number | Total registered users |
+| `overview.active_users` | number | Users with `active` status |
+| `overview.suspended_users` | number | Users with `suspended` status |
+| `growth.new_today` | number | Signups since midnight today |
+| `growth.new_this_week` | number | Signups in the last 7 days |
+| `growth.new_this_month` | number | Signups in the last 30 days |
+| `growth.new_prev_month` | number | Signups in the 30 days before that (for comparison) |
+| `growth.month_over_month_percent` | number | Percentage change from prev month to this month (positive = growth, negative = decline) |
+| `kyc.verified` | number | Users with fully verified KYC |
+| `kyc.pending` | number | Users with pending KYC |
+| `kyc.rejected` | number | Users with rejected KYC |
+| `kyc.none` | number | Users who haven't submitted KYC |
+| `by_role` | object | User count per role. Keys: `user`, `agent`, `support`, `compliance_officer`, `finance`, `operations`, `admin` |
+| `by_tier` | array | `{ tier, name, count }` — breakdown by tier level |
+| `recent_signups` | array | Last 5 signups this week — `{ id, first_name, last_name, email, createdAt }` |
+
+### Analytics UI Layout Suggestion
+
+```
+┌───────────────┬───────────────┬───────────────┬───────────────┐
+│  Total Users  │ Active Users  │  Suspended    │  New Today    │
+│    3,250      │    3,100      │     150       │      12       │
+│               │               │               │  +17% MoM ▲   │
+└───────────────┴───────────────┴───────────────┴───────────────┘
+
+┌──────────────────────────┬──────────────────────────┐
+│  KYC Breakdown (donut)   │  Role Distribution (bar) │
+│  ● Verified  2800        │  ██████████ user   3100  │
+│  ● Pending    200        │  ██ agent            80  │
+│  ● Rejected    50        │  █ support           15  │
+│  ● None       200        │  █ admin             32  │
+└──────────────────────────┴──────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│  Recent Signups  (last 5 this week)                  │
+│  Jane Doe — jane@example.com — 2 hours ago           │
+│  ...                                                 │
+└──────────────────────────────────────────────────────┘
+```
+
+### User Object (`data.users[]`)
 
 | Field | Type | Description |
 |---|---|---|
@@ -102,6 +201,31 @@ GET /api/v1/unified-admin/users?page=1&limit=20&search=john&account_status=activ
 | `tier` | object \| null | `{ id, tier, name }` — current tier |
 | `profile_image` | object \| null | `{ secure_url }` — profile image URL |
 | `kyc_verification` | object \| null | `{ status, is_verified, bvn_verified, id_type }` — KYC summary |
+| `last_activity` | object \| null | Most recent audit log entry for this user (see below) |
+
+### Last Activity Object (`last_activity`)
+
+Included on every user in the list. `null` if the user has no audit log entries yet.
+
+| Field | Type | Description |
+|---|---|---|
+| `action` | string | Audit action code (e.g. `WALLET_FUND`, `LOGIN`, `PROFILE_UPDATE`, `TRANSACTION_HISTORY_VIEW`) |
+| `description` | string | Human-readable summary of what the user did |
+| `status` | string | `SUCCESS`, `FAILURE`, or `DENIED` |
+| `timestamp` | string | ISO datetime of the activity |
+| `ip_address` | string \| null | IP address the action came from |
+| `platform` | string \| null | Platform: `ios`, `android`, `web`, or `null` |
+
+**Table column suggestion:** Display as a truncated description + relative time (e.g. "Funded wallet — 2h ago"). Full details on hover/tooltip.
+
+### Pagination (`data.meta`)
+
+| Field | Type | Description |
+|---|---|---|
+| `total` | number | Total users matching current filters |
+| `page` | number | Current page |
+| `limit` | number | Items per page |
+| `total_pages` | number | Total pages |
 
 ---
 
@@ -332,10 +456,24 @@ Returns the full user profile including wallet, address, full KYC details, and c
 
 ## Frontend Implementation Notes
 
-- **Search:** Debounce search input (300-500ms) before making API calls. The search covers first name, last name, email, phone, and Smipay tag.
-- **Filters:** Stack filters — they are AND-combined. Search + role + status + tier + kyc_status + date range all work together.
+### Page Load
+One call does everything — `GET /unified-admin/users` returns `analytics` + `users` + `meta`. Render analytics at the top, then the table below.
+
+When the user changes page/filters/search, the same endpoint is called again. The `analytics` section is always returned with global numbers (not affected by table filters), so you can keep it updated on every fetch for free.
+
+### Analytics Section (Above Table)
+- **Overview cards:** Total users, Active, Suspended, New Today — display as stat cards with icons. Use `growth.month_over_month_percent` to show a green/red arrow indicator.
+- **KYC breakdown:** Donut or pie chart — verified (green), pending (yellow), rejected (red), none (gray).
+- **Role distribution:** Horizontal bar chart or chip-style badges with counts.
+- **Tier distribution:** Stacked bar or donut. Useful for seeing what percentage of users are verified.
+- **Recent signups:** Small table or list showing the latest 5 signups this week with relative timestamps.
+
+### Users Table (Below Analytics)
+- **Search:** Debounce search input (300-500ms) before making API calls. Searches first name, last name, email, phone, and Smipay tag.
+- **Filters:** Stack filters — they are AND-combined. Search + role + status + tier + kyc_status + date range all work together. Show active filters as removable chips.
 - **Pagination:** Use `meta.total_pages` to render pagination controls. Show `meta.total` as "X users found".
-- **User detail:** Navigate to the detail view when a user row is clicked. The detail endpoint returns wallet balance, full KYC, address, and activity counts.
-- **Status/role/tier updates:** After a successful update, the response contains the updated user object — use it to update the UI without refetching.
-- **Profile image:** May be `null` — show a default avatar placeholder when missing.
-- **Tier:** May be `null` for users created before the tier system — display "No tier" or similar.
+- **Last Activity column:** Show `last_activity.description` truncated + relative time (e.g. "Funded wallet — 2h ago"). Full details on hover tooltip. If `null`, show "No activity" in muted text.
+- **Row click:** Navigate to the user detail view (`GET /users/:id`). The detail endpoint returns wallet balance, full KYC, address, and activity counts.
+- **Status/role/tier updates:** After a successful update, the response contains the updated user object — use it to update the row in-place without refetching the whole table.
+- **Profile image:** May be `null` — show a default avatar placeholder (first letter of name).
+- **Tier:** May be `null` for users created before the tier system — display "No tier" in muted text.
