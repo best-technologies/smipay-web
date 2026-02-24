@@ -14,6 +14,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
 import { supportApi } from "@/services/support-api";
+import { useUserSupportStore } from "@/store/user-support-store";
 import {
   connectUserSupportSocket,
   joinTicketRoom,
@@ -80,6 +81,8 @@ export default function TicketDetailPage() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const { fetchDetail, invalidateDetail } = useUserSupportStore();
+
   const [ticket, setTicket] = useState<SupportTicketDetail | null>(null);
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +90,7 @@ export default function TicketDetailPage() {
   const [inputValue, setInputValue] = useState("");
   const [sending, setSending] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  const [existingRating, setExistingRating] = useState<number | null>(null);
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [ratingValue, setRatingValue] = useState(0);
   const [ratingFeedback, setRatingFeedback] = useState("");
@@ -100,34 +104,41 @@ export default function TicketDetailPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  // Initial fetch via REST to load conversation history
-  const fetchTicket = useCallback(async () => {
-    if (!ticketNumber) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await supportApi.getTicket(ticketNumber);
-      if (res.success && res.data?.ticket) {
-        const t = res.data.ticket;
+  const fetchTicket = useCallback(
+    async (force = false) => {
+      if (!ticketNumber) return;
+      setLoading(true);
+      setError(null);
+      const t = await fetchDetail(ticketNumber, force);
+      if (t) {
         setTicket(t);
         ticketIdRef.current = t.id;
         setMessages(
           (t.messages ?? []).map((m) => ({ ...m, _tempId: undefined }))
         );
+
         if (t.satisfaction_rating != null) {
           setHasRated(true);
+          setExistingRating(t.satisfaction_rating);
+        } else {
+          try {
+            const stored = sessionStorage.getItem(`rated:${ticketNumber}`);
+            if (stored) {
+              setHasRated(true);
+              setExistingRating(Number(stored));
+            }
+          } catch {
+            // sessionStorage unavailable
+          }
         }
       } else {
-        setError(res.message ?? "Failed to load ticket");
+        const storeErr = useUserSupportStore.getState().detailError;
+        setError(storeErr ?? "Failed to load conversation");
       }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load conversation"
-      );
-    } finally {
       setLoading(false);
-    }
-  }, [ticketNumber]);
+    },
+    [ticketNumber, fetchDetail],
+  );
 
   useEffect(() => {
     fetchTicket();
@@ -245,7 +256,7 @@ export default function TicketDetailPage() {
   const isClosed =
     ticket?.status === "resolved" || ticket?.status === "closed";
   const showRatingForm =
-    ticket?.status === "resolved" &&
+    (ticket?.status === "resolved" || ticket?.status === "closed") &&
     !hasRated &&
     !ratingSubmitted &&
     !ratingSubmitting;
@@ -322,6 +333,7 @@ export default function TicketDetailPage() {
     } finally {
       setSending(false);
       scrollToBottom();
+      invalidateDetail(ticketNumber);
     }
   };
 
@@ -352,12 +364,30 @@ export default function TicketDetailPage() {
         rating: ratingValue,
         feedback: ratingFeedback.trim() || undefined,
       });
-      setHasRated(true);
-      setRatingSubmitted(true);
-    } catch {
-      // non-critical
+      markAsRated(ratingValue);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes("already rated")) {
+        markAsRated(ratingValue || existingRating || 5);
+      }
     } finally {
       setRatingSubmitting(false);
+    }
+  };
+
+  const markAsRated = (rating: number) => {
+    setHasRated(true);
+    setRatingSubmitted(true);
+    setExistingRating(rating);
+    setTicket((prev) =>
+      prev ? { ...prev, satisfaction_rating: rating } : prev
+    );
+    invalidateDetail(ticketNumber);
+    try {
+      sessionStorage.setItem(`rated:${ticketNumber}`, String(rating));
+    } catch {
+      // sessionStorage unavailable
     }
   };
 
@@ -441,7 +471,7 @@ export default function TicketDetailPage() {
           </p>
           <button
             type="button"
-            onClick={fetchTicket}
+            onClick={() => fetchTicket(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashboard-border bg-dashboard-surface text-dashboard-heading hover:bg-dashboard-surface/90 transition-colors text-sm"
           >
             <RefreshCw className="h-4 w-4" />
@@ -670,13 +700,33 @@ export default function TicketDetailPage() {
         )}
       </AnimatePresence>
 
-      {ratingSubmitted && (
-        <div className="shrink-0 px-3 py-4 sm:px-4 bg-dashboard-surface border-t border-dashboard-border">
-          <p className="text-sm font-medium text-dashboard-heading text-center text-emerald-600">
-            Thank you for your feedback
-          </p>
-        </div>
-      )}
+      {(ratingSubmitted || (hasRated && !showRatingForm)) && (() => {
+        const displayRating =
+          existingRating ?? ticket?.satisfaction_rating ?? ratingValue;
+        return (
+          <div className="shrink-0 px-3 py-4 sm:px-4 bg-dashboard-surface border-t border-dashboard-border">
+            <div className="max-w-md mx-auto text-center">
+              <p className="text-sm font-medium text-emerald-600 mb-1.5">
+                {ratingSubmitted
+                  ? "Thank you for your feedback"
+                  : "You rated this ticket"}
+              </p>
+              <div className="flex justify-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-5 w-5 ${
+                      star <= displayRating
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-dashboard-muted/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Message input */}
       {canSend && (

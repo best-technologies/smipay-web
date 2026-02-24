@@ -3,7 +3,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import {
   connectAdminSupportSocket,
-  disconnectAdminSupportSocket,
   joinTicketRoom,
   leaveTicketRoom,
   emitAdminTyping,

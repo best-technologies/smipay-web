@@ -154,9 +154,8 @@ export async function generateSecurityHeaders(
   const deviceId = getDeviceId();
   const deviceFingerprint = await getDeviceFingerprint();
 
-  // Generate signature if body is provided
   const secret = process.env.NEXT_PUBLIC_API_SECRET || "default-secret-key";
-  const signature = body ? await generateSignature(body, secret) : "";
+  const signature = await generateSignature(body ?? "", secret);
 
   return {
     "x-timestamp": timestamp,

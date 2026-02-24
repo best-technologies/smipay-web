@@ -17,10 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supportApi } from "@/services/support-api";
-import {
-  connectUserSupportSocket,
-  disconnectUserSupportSocket,
-} from "@/lib/user-support-socket";
+import { useUserSupportStore } from "@/store/user-support-store";
+import { connectUserSupportSocket } from "@/lib/user-support-socket";
 import type {
   SupportTicketListItem,
   CreateTicketPayload,
@@ -312,38 +310,21 @@ function CreateTicketModal({
 
 export default function SupportPage() {
   const router = useRouter();
-  const [tickets, setTickets] = useState<SupportTicketListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    tickets,
+    listLoading: loading,
+    listError: error,
+    fetchTickets,
+    invalidateList,
+  } = useUserSupportStore();
   const [modalOpen, setModalOpen] = useState(false);
-
-  const fetchTickets = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await supportApi.getMyTickets();
-      console.log("[Support] getMyTickets response:", JSON.stringify(res, null, 2));
-
-      const ticketsList =
-        res.data?.tickets ??
-        (res as unknown as { tickets?: SupportTicketListItem[] }).tickets ??
-        [];
-
-      if (res.success) {
-        setTickets(ticketsList);
-      } else {
-        setError(res.message ?? "Failed to load tickets");
-      }
-    } catch (err) {
-      console.error("[Support] getMyTickets error:", err);
-      setError(err instanceof Error ? err.message : "Failed to load tickets");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchTickets();
+  }, [fetchTickets]);
+
+  const handleRetry = useCallback(() => {
+    fetchTickets(true);
   }, [fetchTickets]);
 
   // Socket.IO: listen for real-time ticket updates (new reply, status change)
@@ -359,7 +340,8 @@ export default function SupportPage() {
       event: string;
     }) => {
       if (data.event === "new_reply" || data.event === "status_changed") {
-        fetchTickets();
+        invalidateList();
+        fetchTickets(true);
       }
     };
 
@@ -369,9 +351,10 @@ export default function SupportPage() {
       socket.off("ticket_updated", handleTicketUpdated);
       socketConnected.current = false;
     };
-  }, [fetchTickets]);
+  }, [fetchTickets, invalidateList]);
 
   const handleCreateSuccess = (ticketNumber: string) => {
+    invalidateList();
     router.push(`/dashboard/support/${ticketNumber}`);
   };
 
@@ -421,7 +404,7 @@ export default function SupportPage() {
               {error}
             </p>
             <Button
-              onClick={fetchTickets}
+              onClick={handleRetry}
               variant="outline"
               className="gap-2"
             >

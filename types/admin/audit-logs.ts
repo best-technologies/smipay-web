@@ -350,7 +350,7 @@ export interface AuditListResponse {
   success: boolean;
   message?: string;
   data: {
-    data: AuditLogItem[];
+    logs: AuditLogItem[];
     meta: AuditListMeta;
     analytics: AuditAnalytics;
   };

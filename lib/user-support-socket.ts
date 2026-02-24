@@ -6,13 +6,14 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 let socket: Socket | null = null;
+let currentTicketId: string | null = null;
 
 export function getUserSupportSocket(): Socket | null {
   return socket;
 }
 
 export function connectUserSupportSocket(): Socket {
-  if (socket?.connected) return socket;
+  if (socket && (socket.connected || socket.active)) return socket;
 
   if (socket) {
     socket.removeAllListeners();
@@ -28,12 +29,17 @@ export function connectUserSupportSocket(): Socket {
     auth: { token: token ?? "" },
     transports: ["websocket"],
     reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 2000,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
   });
 
   socket.on("connect", () => {
-    console.log("[UserSupportSocket] connected");
+    console.log("[UserSupportSocket] connected, sid:", socket?.id);
+    if (currentTicketId) {
+      console.log("[UserSupportSocket] re-joining ticket room:", currentTicketId);
+      socket?.emit("join_ticket", { ticket_id: currentTicketId });
+    }
   });
 
   socket.on("connect_error", (err) => {
@@ -48,6 +54,7 @@ export function connectUserSupportSocket(): Socket {
 }
 
 export function disconnectUserSupportSocket() {
+  currentTicketId = null;
   if (socket) {
     socket.removeAllListeners();
     socket.disconnect();
@@ -56,10 +63,12 @@ export function disconnectUserSupportSocket() {
 }
 
 export function joinTicketRoom(ticketId: string) {
+  currentTicketId = ticketId;
   socket?.emit("join_ticket", { ticket_id: ticketId });
 }
 
 export function leaveTicketRoom(ticketId: string) {
+  if (currentTicketId === ticketId) currentTicketId = null;
   socket?.emit("leave_ticket", { ticket_id: ticketId });
 }
 

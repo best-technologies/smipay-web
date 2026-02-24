@@ -90,6 +90,8 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
   const { overview, financial, fraud_indicators, recent_high_severity } =
     analytics;
   const [fraudOpen, setFraudOpen] = useState(true);
+  const [highSevExpanded, setHighSevExpanded] = useState(false);
+  const HIGH_SEV_PREVIEW = 5;
 
   return (
     <div className="space-y-3">
@@ -343,46 +345,69 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
         </motion.div>
       </div>
 
-      {/* ── Row 4: Recent High-Severity ── */}
-      {recent_high_severity.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.25 }}
-          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3"
-        >
-          <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
-            Recent High-Severity Events
-          </h3>
-          <div className="space-y-1">
-            {recent_high_severity.map((event) => {
-              const dot = SEVERITY_DOT[event.severity] ?? SEVERITY_DOT.HIGH;
-              return (
-                <Link
-                  key={event.id}
-                  href={`/unified-admin/audit-logs/${event.id}`}
-                  className="flex items-center gap-2.5 rounded-lg p-1.5 -mx-1.5 hover:bg-dashboard-bg/50 transition-colors"
-                >
-                  <span
-                    className={`h-2 w-2 rounded-full flex-shrink-0 ${dot.color} ${dot.pulse ? "animate-pulse" : ""}`}
-                  />
-                  <span className="text-xs font-medium text-dashboard-heading whitespace-nowrap">
-                    {formatAction(event.action)}
-                  </span>
-                  {event.description && (
-                    <span className="text-[11px] text-dashboard-muted truncate flex-1 min-w-0">
-                      {event.description}
+      {/* ── Row 4: Recent High-Severity (collapsed by default) ── */}
+      {recent_high_severity.length > 0 && (() => {
+        const visibleEvents = highSevExpanded
+          ? recent_high_severity
+          : recent_high_severity.slice(0, HIGH_SEV_PREVIEW);
+        const hasMore = recent_high_severity.length > HIGH_SEV_PREVIEW;
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.25 }}
+            className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
+                Recent High-Severity Events
+              </h3>
+              <span className="text-[10px] text-dashboard-muted tabular-nums">
+                {recent_high_severity.length} events
+              </span>
+            </div>
+            <div className={`space-y-1 ${highSevExpanded ? "max-h-60 overflow-y-auto" : ""}`}>
+              {visibleEvents.map((event) => {
+                const dot = SEVERITY_DOT[event.severity] ?? SEVERITY_DOT.HIGH;
+                return (
+                  <Link
+                    key={event.id}
+                    href={`/unified-admin/audit-logs/${event.id}`}
+                    className="flex items-center gap-2.5 rounded-lg p-1.5 -mx-1.5 hover:bg-dashboard-bg/50 transition-colors"
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full flex-shrink-0 ${dot.color} ${dot.pulse ? "animate-pulse" : ""}`}
+                    />
+                    <span className="text-xs font-medium text-dashboard-heading whitespace-nowrap">
+                      {formatAction(event.action)}
                     </span>
-                  )}
-                  <span className="text-[10px] text-dashboard-muted whitespace-nowrap flex-shrink-0">
-                    {relativeTime(event.created_at)}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
+                    {event.description && (
+                      <span className="text-[11px] text-dashboard-muted truncate flex-1 min-w-0">
+                        {event.description}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-dashboard-muted whitespace-nowrap flex-shrink-0">
+                      {relativeTime(event.created_at)}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => setHighSevExpanded((v) => !v)}
+                className="mt-2 text-[11px] font-medium text-brand-bg-primary hover:underline"
+              >
+                {highSevExpanded
+                  ? "Show less"
+                  : `Show all ${recent_high_severity.length} events`}
+              </button>
+            )}
+          </motion.div>
+        );
+      })()}
     </div>
   );
 }

@@ -82,7 +82,7 @@ export const useAdminAuditLogsStore = create<AdminAuditLogsState>(
 
       try {
         const res = await adminAuditLogsApi.list(state.filters);
-        const { data: logs, meta, analytics } = res.data;
+        const { logs, meta, analytics } = res.data;
 
         const cache = new Map(get().cache);
         if (cache.size >= MAX_CACHE_ENTRIES) {

@@ -2,10 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import {
-  connectAdminSupportSocket,
-  disconnectAdminSupportSocket,
-} from "@/lib/admin-support-socket";
+import { connectAdminSupportSocket } from "@/lib/admin-support-socket";
 import { useAdminSupportNotifications } from "@/store/admin/admin-support-notifications-store";
 
 interface TicketUpdatedEvent {
@@ -81,7 +78,6 @@ export function useAdminSupportGlobalSocket() {
     return () => {
       socket.off("ticket_updated", handleTicketUpdated);
       socket.off("ticket_created", handleTicketCreated);
-      disconnectAdminSupportSocket();
       connectedRef.current = false;
     };
   }, [push]);
