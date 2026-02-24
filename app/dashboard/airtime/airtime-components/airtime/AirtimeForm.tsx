@@ -232,6 +232,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         network={selectedService || null}
         phoneNumber={phoneNumber}
         amount={parseFloat(amount) || 0}
+        walletBalance={walletBalance}
         isLoading={isSubmitting}
       />
     </form>

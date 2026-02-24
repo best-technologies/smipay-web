@@ -2,15 +2,19 @@
 
 import { X, Smartphone, Wallet, CheckCircle2, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getNetworkLogo } from "@/lib/network-logos";
 
 interface PurchaseConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   networkName: string;
+  serviceID?: string;
+  networkImage?: string;
   planName: string;
   phoneNumber: string;
   amount: number;
+  walletBalance?: number;
   isLoading?: boolean;
 }
 
@@ -19,9 +23,12 @@ export function PurchaseConfirmationModal({
   onClose,
   onConfirm,
   networkName,
+  serviceID,
+  networkImage,
   planName,
   phoneNumber,
   amount,
+  walletBalance,
   isLoading = false,
 }: PurchaseConfirmationModalProps) {
   if (!isOpen) return null;
@@ -55,9 +62,21 @@ export function PurchaseConfirmationModal({
           <div className="rounded-xl border border-dashboard-border/80 bg-dashboard-bg/60 p-4 space-y-4">
             {/* Network */}
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 bg-quick-action-1-bg rounded-xl shrink-0">
-                <Wifi className="h-5 w-5 text-quick-action-1" />
-              </div>
+              {(() => {
+                const logo = serviceID
+                  ? getNetworkLogo(serviceID) || networkImage
+                  : networkImage;
+                return logo ? (
+                  <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 bg-white ring-1 ring-dashboard-border/40">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logo} alt={networkName} className="h-full w-full object-contain p-1" />
+                  </div>
+                ) : (
+                  <div className="p-2 bg-quick-action-1-bg rounded-xl shrink-0">
+                    <Wifi className="h-5 w-5 text-quick-action-1" />
+                  </div>
+                );
+              })()}
               <div className="min-w-0">
                 <p className="text-xs text-dashboard-muted">Network</p>
                 <p className="font-semibold text-dashboard-heading truncate">
@@ -106,6 +125,23 @@ export function PurchaseConfirmationModal({
               <strong className="text-dashboard-heading">₦{amount.toLocaleString()}</strong>.
             </p>
           </div>
+
+          {/* Balance preview */}
+          {walletBalance != null && (
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-dashboard-bg/40 px-3 py-2">
+              <div className="text-center flex-1">
+                <p className="text-[10px] text-dashboard-muted uppercase tracking-wider">Current bal.</p>
+                <p className="text-[13px] font-semibold text-dashboard-heading tabular-nums">₦{walletBalance.toLocaleString()}</p>
+              </div>
+              <div className="text-dashboard-muted/30 text-xs">→</div>
+              <div className="text-center flex-1">
+                <p className="text-[10px] text-dashboard-muted uppercase tracking-wider">After purchase</p>
+                <p className={`text-[13px] font-semibold tabular-nums ${walletBalance - amount >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                  ₦{(walletBalance - amount).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-1 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-0">

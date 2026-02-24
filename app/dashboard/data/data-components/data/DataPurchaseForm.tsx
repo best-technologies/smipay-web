@@ -13,6 +13,7 @@ interface DataPurchaseFormProps {
   selectedServiceId: string;
   selectedVariation: VtpassDataVariation;
   serviceName: string;
+  serviceImage?: string;
   onSuccess: (data: VtpassDataPurchaseResponse) => void;
   onError: (error: string) => void;
   walletBalance: number;
@@ -22,6 +23,7 @@ export function DataPurchaseForm({
   selectedServiceId,
   selectedVariation,
   serviceName,
+  serviceImage,
   onSuccess,
   onError,
   walletBalance,
@@ -145,9 +147,12 @@ export function DataPurchaseForm({
         onClose={() => setShowConfirmation(false)}
         onConfirm={handleConfirmPurchase}
         networkName={serviceName}
+        serviceID={selectedServiceId}
+        networkImage={serviceImage}
         planName={selectedVariation.name}
         phoneNumber={phoneNumber}
         amount={amount}
+        walletBalance={walletBalance}
         isLoading={isSubmitting}
       />
     </form>

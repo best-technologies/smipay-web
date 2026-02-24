@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowDownLeft,
   ArrowUpRight,
-  Loader2,
   Receipt,
   ChevronLeft,
   ChevronRight,
@@ -15,67 +14,109 @@ import {
 } from "lucide-react";
 import { transactionApi } from "@/services/transaction-api";
 import { getNetworkLogo } from "@/lib/network-logos";
-import type { Transaction, PaginationMeta } from "@/types/transaction";
+import type {
+  Transaction,
+  PaginationMeta,
+  CategoryCounts,
+} from "@/types/transaction";
 
 const PAGE_SIZE = 15;
 
+const CATEGORY_LABELS: Record<string, string> = {
+  all: "All",
+  deposit: "Deposits",
+  transfer: "Transfers",
+  airtime: "Airtime",
+  data: "Data",
+  cable: "Cable TV",
+  education: "Education",
+  betting: "Betting",
+  referral_bonus: "Rewards",
+};
+
+const statusStyle = (s: string) =>
+  s === "success"
+    ? "text-emerald-600"
+    : s === "pending"
+      ? "text-amber-600"
+      : "text-red-500";
+
 export default function TransactionsPage() {
   const router = useRouter();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const [categories, setCategories] = useState<CategoryCounts>({});
   const [page, setPage] = useState(1);
+  const [activeType, setActiveType] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
 
-  const fetchTransactions = useCallback(async (p: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await transactionApi.getAllTransactions(p, PAGE_SIZE);
-      if (res.success && res.data) {
-        setTransactions(res.data.transactions);
-        setMeta(res.data.pagination);
-      } else {
-        setError(res.message || "Failed to load transactions");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchTransactions = useCallback(
+    async (p: number, type: string, search: string) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await transactionApi.getAllTransactions({
+          page: p,
+          limit: PAGE_SIZE,
+          type: type !== "all" ? type : undefined,
+          search: search || undefined,
+        });
+        if (res.success && res.data) {
+          setTransactions(res.data.transactions);
+          setMeta(res.data.pagination);
+          setCategories(res.data.categories);
+        } else {
+          setError(res.message || "Failed to load transactions");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchTransactions(page);
-  }, [page, fetchTransactions]);
+    fetchTransactions(page, activeType, searchQuery);
+  }, [page, activeType, searchQuery, fetchTransactions]);
 
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(1);
+      setSearchQuery(value.trim());
+    }, 400);
   };
 
-  const filtered = search.trim()
-    ? transactions.filter(
-        (t) =>
-          t.description.toLowerCase().includes(search.toLowerCase()) ||
-          t.type.toLowerCase().includes(search.toLowerCase()) ||
-          t.reference.toLowerCase().includes(search.toLowerCase())
-      )
-    : transactions;
+  const clearSearch = () => {
+    setSearchInput("");
+    setSearchQuery("");
+    setPage(1);
+  };
 
-  const statusStyle = (s: string) =>
-    s === "success"
-      ? "text-emerald-600"
-      : s === "pending"
-        ? "text-amber-600"
-        : "text-red-500";
+  const handleTabChange = (type: string) => {
+    setActiveType(type);
+    setPage(1);
+  };
+
+  const categoryTabs = [
+    { key: "all", label: "All", count: categories.all ?? 0 },
+    ...Object.entries(categories)
+      .filter(([k]) => k !== "all")
+      .map(([key, count]) => ({
+        key,
+        label: CATEGORY_LABELS[key] || key,
+        count,
+      })),
+  ];
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
@@ -97,19 +138,19 @@ export default function TransactionsPage() {
       </header>
 
       <div className="px-4 py-4 max-w-2xl mx-auto space-y-3">
-        {/* Search */}
+        {/* Search — server-side with debounce */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dashboard-muted/50 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search transactions…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by description, reference, phone…"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-8 pr-8 h-9 text-[13px] rounded-xl border border-dashboard-border/50 bg-dashboard-surface text-dashboard-heading placeholder:text-dashboard-muted/40 outline-none focus:border-brand-bg-primary/50 focus:ring-1 focus:ring-brand-bg-primary/20 transition-colors"
           />
-          {search && (
+          {searchInput && (
             <button
-              onClick={() => setSearch("")}
+              onClick={clearSearch}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-dashboard-bg/60 transition-colors"
             >
               <X className="h-3.5 w-3.5 text-dashboard-muted/60" />
@@ -117,19 +158,55 @@ export default function TransactionsPage() {
           )}
         </div>
 
+        {/* Category filter tabs */}
+        {categoryTabs.length > 1 && (
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-0.5">
+            {categoryTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => handleTabChange(tab.key)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors touch-manipulation ${
+                  activeType === tab.key
+                    ? "bg-brand-bg-primary text-white shadow-sm"
+                    : "bg-dashboard-surface text-dashboard-muted ring-1 ring-dashboard-border/50 hover:ring-brand-bg-primary/30"
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`text-[10px] tabular-nums ${
+                    activeType === tab.key
+                      ? "text-white/70"
+                      : "text-dashboard-muted/60"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Summary bar */}
         {meta && !loading && (
           <div className="flex items-center justify-between text-[11px] text-dashboard-muted px-0.5">
             <span>
               {meta.totalItems} transaction{meta.totalItems !== 1 && "s"}
+              {activeType !== "all" && (
+                <span className="text-dashboard-muted/50">
+                  {" "}
+                  in {CATEGORY_LABELS[activeType] || activeType}
+                </span>
+              )}
             </span>
-            <span>
-              Page {meta.currentPage} of {meta.totalPages}
-            </span>
+            {meta.totalPages > 1 && (
+              <span>
+                Page {meta.currentPage} of {meta.totalPages}
+              </span>
+            )}
           </div>
         )}
 
-        {/* Loading */}
+        {/* Loading skeleton */}
         {loading && (
           <div className="rounded-2xl border border-dashboard-border/50 bg-dashboard-surface overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -156,7 +233,7 @@ export default function TransactionsPage() {
           <div className="rounded-2xl border border-red-200/60 bg-red-50/50 p-6 text-center">
             <p className="text-sm text-red-500 mb-3">{error}</p>
             <button
-              onClick={() => fetchTransactions(page)}
+              onClick={() => fetchTransactions(page, activeType, searchQuery)}
               className="text-sm font-medium text-brand-bg-primary hover:underline"
             >
               Retry
@@ -164,25 +241,40 @@ export default function TransactionsPage() {
           </div>
         )}
 
-        {/* Empty */}
-        {!loading && !error && filtered.length === 0 && (
+        {/* Empty state */}
+        {!loading && !error && transactions.length === 0 && (
           <div className="rounded-2xl border border-dashboard-border/50 bg-dashboard-surface p-10 text-center">
             <Receipt className="h-8 w-8 text-dashboard-muted/30 mx-auto mb-2.5" />
             <p className="text-sm font-medium text-dashboard-heading mb-0.5">
-              {search ? "No matching transactions" : "No transactions yet"}
+              {searchQuery || activeType !== "all"
+                ? "No matching transactions"
+                : "No transactions yet"}
             </p>
             <p className="text-[12px] text-dashboard-muted">
-              {search
+              {searchQuery
                 ? "Try a different search term"
-                : "Your transaction history will appear here"}
+                : activeType !== "all"
+                  ? `No ${CATEGORY_LABELS[activeType]?.toLowerCase() || activeType} transactions found`
+                  : "Your transaction history will appear here"}
             </p>
+            {(searchQuery || activeType !== "all") && (
+              <button
+                onClick={() => {
+                  clearSearch();
+                  setActiveType("all");
+                }}
+                className="mt-3 text-[12px] font-medium text-brand-bg-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
 
         {/* Transaction list */}
-        {!loading && !error && filtered.length > 0 && (
+        {!loading && !error && transactions.length > 0 && (
           <div className="rounded-2xl border border-dashboard-border/50 bg-dashboard-surface overflow-hidden">
-            {filtered.map((tx, idx) => {
+            {transactions.map((tx, idx) => {
               const isCredit = tx.credit_debit === "credit";
               const logo =
                 !isCredit && tx.icon
@@ -202,7 +294,6 @@ export default function TransactionsPage() {
                     idx > 0 ? "border-t border-dashboard-border/30" : ""
                   }`}
                 >
-                  {/* Icon */}
                   <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dashboard-bg/80">
                     {isCredit ? (
                       <ArrowDownLeft className="h-3.5 w-3.5 text-blue-500" />
@@ -218,17 +309,15 @@ export default function TransactionsPage() {
                     )}
                   </div>
 
-                  {/* Description + date */}
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-medium text-dashboard-heading truncate leading-tight">
                       {tx.description}
                     </p>
                     <p className="text-[11px] text-dashboard-muted mt-0.5 leading-tight">
-                      {formatDate(tx.date)}
+                      {tx.date}
                     </p>
                   </div>
 
-                  {/* Amount + status */}
                   <div className="flex shrink-0 flex-col items-end gap-0.5">
                     <p
                       className={`text-[13px] font-semibold tabular-nums leading-tight ${
@@ -236,7 +325,7 @@ export default function TransactionsPage() {
                       }`}
                     >
                       {isCredit ? "+" : "−"}₦
-                      {Number(String(tx.amount).replace(/,/g, "")).toLocaleString()}
+                      {(tx.raw_amount ?? Number(String(tx.amount).replace(/,/g, ""))).toLocaleString()}
                     </p>
                     <span
                       className={`text-[10px] font-semibold uppercase tracking-wider ${statusStyle(tx.status)}`}

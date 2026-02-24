@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
+import { WalletCard } from "@/components/dashboard/WalletCard";
 import { Wifi, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -64,16 +65,30 @@ export default function VtpassDataPage() {
   };
 
   const handleTransactionSuccess = (data: VtpassDataPurchaseResponse) => {
-    setTransactionData(data);
-    if (data.status === "processing" || data.content?.transactions?.status === "pending" || data.content?.transactions?.status === "initiated") {
-      setTransactionStatus("processing");
-    } else if (data.code === "000" && data.content?.transactions?.status === "delivered") {
-      setTransactionStatus("success");
-    } else {
+    refetch();
+
+    const isError =
+      data.code !== "000" &&
+      data.status !== "processing" &&
+      data.content?.transactions?.status !== "pending" &&
+      data.content?.transactions?.status !== "initiated" &&
+      data.content?.transactions?.status !== "delivered";
+
+    if (isError) {
+      setTransactionData(data);
       setTransactionStatus("error");
       setErrorMessage(data.response_description || "Transaction failed");
+      return;
     }
-    refetch();
+
+    if (data.id) {
+      router.replace(`/dashboard/transactions/${data.id}`);
+    } else {
+      setTransactionData(data);
+      setTransactionStatus(
+        data.content?.transactions?.status === "delivered" ? "success" : "processing"
+      );
+    }
   };
 
   const handleTransactionError = (error: string) => {
@@ -138,6 +153,19 @@ export default function VtpassDataPage() {
 
       {/* Content */}
       <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
+        {dashboardData && (
+          <section className="max-w-xl w-full min-w-0">
+            <WalletCard
+              bankName={dashboardData.accounts[0]?.bank_name}
+              accountNumber={dashboardData.accounts[0]?.account_number}
+              accountHolderName={dashboardData.accounts[0]?.account_holder_name}
+              balance={walletBalance}
+              isActive={dashboardData.accounts[0]?.isActive ?? true}
+              compact
+            />
+          </section>
+        )}
+
         <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>
@@ -224,6 +252,7 @@ export default function VtpassDataPage() {
                   selectedServiceId={selectedServiceId}
                   selectedVariation={currentVariation}
                   serviceName={selectedService.name}
+                  serviceImage={selectedService.image}
                   onSuccess={handleTransactionSuccess}
                   onError={handleTransactionError}
                   walletBalance={walletBalance}

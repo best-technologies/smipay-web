@@ -28,23 +28,30 @@ export default function VtpassAirtimePage() {
     : 0;
 
   const handleTransactionSuccess = (data: VtpassPurchaseResponse) => {
-    setTransactionData(data);
-    if (
-      data.status === "processing" ||
-      data.content?.transactions?.status === "pending" ||
-      data.content?.transactions?.status === "initiated"
-    ) {
-      setTransactionStatus("processing");
-    } else if (
-      data.code === "000" &&
-      data.content?.transactions?.status === "delivered"
-    ) {
-      setTransactionStatus("success");
-    } else {
+    refetch();
+
+    const isError =
+      data.code !== "000" &&
+      data.status !== "processing" &&
+      data.content?.transactions?.status !== "pending" &&
+      data.content?.transactions?.status !== "initiated" &&
+      data.content?.transactions?.status !== "delivered";
+
+    if (isError) {
+      setTransactionData(data);
       setTransactionStatus("error");
       setErrorMessage(data.response_description || "Transaction failed");
+      return;
     }
-    refetch();
+
+    if (data.id) {
+      router.replace(`/dashboard/transactions/${data.id}`);
+    } else {
+      setTransactionData(data);
+      setTransactionStatus(
+        data.content?.transactions?.status === "delivered" ? "success" : "processing"
+      );
+    }
   };
 
   const handleTransactionError = (error: string) => {

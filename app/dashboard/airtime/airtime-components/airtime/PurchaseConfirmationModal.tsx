@@ -2,6 +2,7 @@
 
 import { X, Smartphone, Wallet, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getNetworkLogo } from "@/lib/network-logos";
 import type { VtpassService } from "@/services/vtpass/vtu/vtpass-airtime-api";
 
 interface PurchaseConfirmationModalProps {
@@ -11,6 +12,7 @@ interface PurchaseConfirmationModalProps {
   network: VtpassService | null;
   phoneNumber: string;
   amount: number;
+  walletBalance?: number;
   isLoading?: boolean;
 }
 
@@ -21,6 +23,7 @@ export function PurchaseConfirmationModal({
   network,
   phoneNumber,
   amount,
+  walletBalance,
   isLoading = false,
 }: PurchaseConfirmationModalProps) {
   if (!isOpen) return null;
@@ -56,9 +59,21 @@ export function PurchaseConfirmationModal({
           <div className="rounded-xl border border-dashboard-border/80 bg-dashboard-bg/60 p-4 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 bg-quick-action-1-bg rounded-xl shrink-0">
-                  <Smartphone className="h-5 w-5 text-quick-action-1" />
-                </div>
+                {(() => {
+                  const logo = network
+                    ? getNetworkLogo(network.serviceID) || network.image
+                    : null;
+                  return logo ? (
+                    <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 bg-white ring-1 ring-dashboard-border/40">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={logo} alt={network?.name || ""} className="h-full w-full object-contain p-1" />
+                    </div>
+                  ) : (
+                    <div className="p-2 bg-quick-action-1-bg rounded-xl shrink-0">
+                      <Smartphone className="h-5 w-5 text-quick-action-1" />
+                    </div>
+                  );
+                })()}
                 <div className="min-w-0">
                   <p className="text-xs text-dashboard-muted">Network</p>
                   <p className="font-semibold text-dashboard-heading truncate">
@@ -105,6 +120,22 @@ export function PurchaseConfirmationModal({
               .
             </p>
           </div>
+
+          {walletBalance != null && (
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-dashboard-bg/40 px-3 py-2">
+              <div className="text-center flex-1">
+                <p className="text-[10px] text-dashboard-muted uppercase tracking-wider">Current bal.</p>
+                <p className="text-[13px] font-semibold text-dashboard-heading tabular-nums">₦{walletBalance.toLocaleString()}</p>
+              </div>
+              <div className="text-dashboard-muted/30 text-xs">→</div>
+              <div className="text-center flex-1">
+                <p className="text-[10px] text-dashboard-muted uppercase tracking-wider">After purchase</p>
+                <p className={`text-[13px] font-semibold tabular-nums ${walletBalance - amount >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                  ₦{(walletBalance - amount).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-1 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-0">
             <Button

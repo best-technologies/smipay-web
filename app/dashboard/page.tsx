@@ -481,7 +481,7 @@ function DashboardContent() {
                             isCredit ? "text-[var(--tx-success-text)]" : "text-dashboard-heading"
                           }`}
                         >
-                          {isCredit ? "+" : "−"}₦{Number(String(transaction.amount).replace(/,/g, "")).toLocaleString()}
+                          {isCredit ? "+" : "−"}₦{Number(transaction.amount).toLocaleString()}
                         </p>
                         <span
                           className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider ${statusStyle}`}

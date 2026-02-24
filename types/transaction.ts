@@ -3,14 +3,15 @@
  * Matches backend API response structure
  */
 
-export type TransactionType = 
-  | "deposit" 
-  | "transfer" 
-  | "airtime" 
-  | "data" 
-  | "cable" 
-  | "education" 
+export type TransactionType =
+  | "deposit"
+  | "transfer"
+  | "airtime"
+  | "data"
+  | "cable"
+  | "education"
   | "betting"
+  | "referral_bonus"
   | "withdrawal";
 
 export type TransactionStatus = "pending" | "success" | "failed" | "cancelled";
@@ -19,18 +20,19 @@ export type CreditDebit = "credit" | "debit";
 
 export interface Transaction {
   id: string;
-  amount: string; // Formatted string e.g., "5,000.00"
+  amount: string;
+  raw_amount: number;
   type: TransactionType;
   credit_debit: CreditDebit;
   transaction_type: TransactionType;
   description: string;
   status: TransactionStatus;
-  date: string; // Formatted date string
+  date: string;
   reference: string;
   sender: string | null;
   icon?: string | null;
-  payment_channel?: string;
-  payment_method?: string;
+  payment_channel?: string | null;
+  payment_method?: string | null;
 }
 
 export interface TransactionDetail {
@@ -53,12 +55,16 @@ export interface PaginationMeta {
   currentPage: number;
   totalItems: number;
   totalPages: number;
+  activeFilter?: string;
 }
+
+export type CategoryCounts = Record<string, number>;
 
 export interface TransactionHistoryResponse {
   success: boolean;
   message: string;
   data: {
+    categories: CategoryCounts;
     pagination: PaginationMeta;
     transactions: Transaction[];
   };
@@ -70,3 +76,11 @@ export interface TransactionDetailResponse {
   data: TransactionDetail;
 }
 
+export interface TransactionFilters {
+  page?: number;
+  limit?: number;
+  type?: string;
+  status?: TransactionStatus;
+  credit_debit?: CreditDebit;
+  search?: string;
+}
