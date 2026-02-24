@@ -13,26 +13,33 @@ import {
 
 /**
  * Activity Tracker Hook
- * Monitors user activity and automatically logs out after inactivity
- * Shows warning before session expires (fintech security)
+ * Monitors user activity and automatically logs out after inactivity.
+ * When session expires: silently clears auth, freezes page, shows expired modal.
+ * User must acknowledge before being redirected to sign-in.
  */
 export function useActivityTracker() {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuthStore();
   const [showWarning, setShowWarning] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const warningIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handle user activity
   const handleActivity = useCallback(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !sessionExpired) {
       updateLastActivity();
       setShowWarning(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, sessionExpired]);
 
-  // Handle logout (declared before checkSession so it can be used there)
+  const silentLogout = useCallback(() => {
+    clearAuth();
+    logout();
+    setShowWarning(false);
+    setSessionExpired(true);
+  }, [logout]);
+
   const handleLogout = useCallback((message?: string) => {
     clearAuth();
     logout();
@@ -46,12 +53,15 @@ export function useActivityTracker() {
     router.push(url.toString());
   }, [logout, router]);
 
-  // Check session and show warning if needed
+  const acknowledgeExpiry = useCallback(() => {
+    router.push("/auth/signin");
+  }, [router]);
+
   const checkSession = useCallback(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || sessionExpired) return;
 
     if (isSessionExpired()) {
-      handleLogout("Your session has expired due to inactivity.");
+      silentLogout();
       return;
     }
 
@@ -63,28 +73,20 @@ export function useActivityTracker() {
     } else {
       setShowWarning(false);
     }
-  }, [isAuthenticated, handleLogout]);
+  }, [isAuthenticated, sessionExpired, silentLogout]);
 
-  // Extend session (user clicked "Stay logged in")
   const extendSession = useCallback(() => {
     updateLastActivity();
     setShowWarning(false);
   }, []);
 
-  // Setup activity listeners
   useEffect(() => {
-    if (!isAuthenticated) {
-      // Clear intervals if not authenticated
-      if (checkIntervalRef.current) {
-        clearInterval(checkIntervalRef.current);
-      }
-      if (warningIntervalRef.current) {
-        clearInterval(warningIntervalRef.current);
-      }
+    if ((!isAuthenticated && !sessionExpired) || sessionExpired) {
+      if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+      if (warningIntervalRef.current) clearInterval(warningIntervalRef.current);
       return;
     }
 
-    // Activity events to monitor
     const events = [
       "mousedown",
       "mousemove",
@@ -94,9 +96,8 @@ export function useActivityTracker() {
       "click",
     ];
 
-    // Add throttle to prevent too many updates
     let lastUpdate = 0;
-    const throttleTime = 5000; // Update every 5 seconds max
+    const throttleTime = 5000;
 
     const throttledHandleActivity = () => {
       const now = Date.now();
@@ -106,50 +107,41 @@ export function useActivityTracker() {
       }
     };
 
-    // Add event listeners
     events.forEach((event) => {
       window.addEventListener(event, throttledHandleActivity);
     });
 
-    // Check session every 10 seconds
     checkIntervalRef.current = setInterval(checkSession, 10000);
 
-    // Update countdown when warning is shown
     warningIntervalRef.current = setInterval(() => {
       if (showWarning) {
         const timeLeft = getTimeUntilExpiry();
         setTimeRemaining(Math.ceil(timeLeft / 1000));
-        
+
         if (timeLeft <= 0) {
-          handleLogout("Your session has expired due to inactivity.");
+          silentLogout();
         }
       }
     }, 1000);
 
-    // Initial check (defer to avoid synchronous setState in effect)
     queueMicrotask(() => checkSession());
 
-    // Cleanup
     return () => {
       events.forEach((event) => {
         window.removeEventListener(event, throttledHandleActivity);
       });
-      
-      if (checkIntervalRef.current) {
-        clearInterval(checkIntervalRef.current);
-      }
-      
-      if (warningIntervalRef.current) {
-        clearInterval(warningIntervalRef.current);
-      }
+      if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+      if (warningIntervalRef.current) clearInterval(warningIntervalRef.current);
     };
-  }, [isAuthenticated, handleActivity, checkSession, showWarning, handleLogout]);
+  }, [isAuthenticated, sessionExpired, handleActivity, checkSession, showWarning, silentLogout]);
 
   return {
     showWarning,
+    sessionExpired,
     timeRemaining,
     extendSession,
     handleLogout,
+    acknowledgeExpiry,
   };
 }
 

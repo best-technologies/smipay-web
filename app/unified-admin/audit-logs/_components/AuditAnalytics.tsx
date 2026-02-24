@@ -185,8 +185,8 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
         />
       </div>
 
-      {/* ── Row 2: Charts ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+      {/* ── Row 2: Category + Severity + Fraud side-by-side ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
         {/* Category breakdown */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -212,142 +212,136 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
           </h3>
           <SeverityStackedBar bySeverity={analytics.by_severity} />
         </motion.div>
-      </div>
 
-      {/* ── Row 3: Fraud Indicators ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.2 }}
-        className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3"
-      >
-        <button
-          type="button"
-          onClick={() => setFraudOpen((v) => !v)}
-          className="flex items-center justify-between w-full"
+        {/* Fraud Indicators */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
+          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3 overflow-hidden"
         >
-          <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
-            Fraud Indicators
-          </h3>
-          {fraudOpen ? (
-            <ChevronUp className="h-4 w-4 text-dashboard-muted" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-dashboard-muted" />
-          )}
-        </button>
-
-        {fraudOpen && (
-          <div className="mt-3 space-y-4">
-            {/* Top Failed Actions */}
-            {fraud_indicators.top_failed_actions.length > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">
-                  Top Failed Actions
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {fraud_indicators.top_failed_actions.map((item) => (
-                    <span
-                      key={item.action}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-[10px] font-semibold text-red-700"
-                    >
-                      {formatAction(item.action)}
-                      <span className="bg-red-200 text-red-800 px-1.5 py-0.5 rounded-full text-[9px] font-bold">
-                        {item.failure_count.toLocaleString()}
-                      </span>
-                    </span>
-                  ))}
-                </div>
-              </div>
+          <button
+            type="button"
+            onClick={() => setFraudOpen((v) => !v)}
+            className="flex items-center justify-between w-full"
+          >
+            <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
+              Fraud Indicators
+            </h3>
+            {fraudOpen ? (
+              <ChevronUp className="h-4 w-4 text-dashboard-muted" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-dashboard-muted" />
             )}
+          </button>
 
-            {/* Suspicious Users */}
-            {fraud_indicators.top_failed_users.length > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">
-                  Suspicious Users
-                </p>
-                <div className="space-y-2">
-                  {fraud_indicators.top_failed_users.map((entry) => {
-                    const { user } = entry;
-                    const initials = getInitials(
-                      user.first_name,
-                      user.last_name,
-                    );
-                    const fullName =
-                      [user.first_name, user.last_name]
-                        .filter(Boolean)
-                        .join(" ") || "Unknown";
-                    const avatarBg = getAvatarColor(initials[0] || "A");
-                    const statusCls =
-                      accountStatusStyles[
-                        user.account_status?.toLowerCase()
-                      ] ?? "bg-slate-100 text-slate-600";
-
-                    return (
-                      <Link
-                        key={user.id}
-                        href={`/unified-admin/audit-logs/user/${user.id}`}
-                        className="flex items-center gap-2.5 rounded-lg p-1.5 -mx-1.5 hover:bg-dashboard-bg/50 transition-colors"
+          {fraudOpen && (
+            <div className="mt-3 space-y-3">
+              {fraud_indicators.top_failed_actions.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">
+                    Top Failed Actions
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {fraud_indicators.top_failed_actions.map((item) => (
+                      <span
+                        key={item.action}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-[10px] font-semibold text-red-700"
                       >
-                        <div
-                          className={`h-7 w-7 rounded-full ${avatarBg} flex items-center justify-center flex-shrink-0`}
+                        {formatAction(item.action)}
+                        <span className="bg-red-200 text-red-800 px-1.5 py-0.5 rounded-full text-[9px] font-bold">
+                          {item.failure_count.toLocaleString()}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {fraud_indicators.top_failed_users.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">
+                    Suspicious Users
+                  </p>
+                  <div className="space-y-1.5">
+                    {fraud_indicators.top_failed_users.map((entry) => {
+                      const { user } = entry;
+                      const initials = getInitials(
+                        user.first_name,
+                        user.last_name,
+                      );
+                      const fullName =
+                        [user.first_name, user.last_name]
+                          .filter(Boolean)
+                          .join(" ") || "Unknown";
+                      const avatarBg = getAvatarColor(initials[0] || "A");
+                      const statusCls =
+                        accountStatusStyles[
+                          user.account_status?.toLowerCase()
+                        ] ?? "bg-slate-100 text-slate-600";
+
+                      return (
+                        <Link
+                          key={user.id}
+                          href={`/unified-admin/audit-logs/user/${user.id}`}
+                          className="flex items-center gap-2 rounded-lg p-1.5 -mx-1.5 hover:bg-dashboard-bg/50 transition-colors"
                         >
-                          <span className="text-[10px] font-bold text-white">
-                            {initials}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-dashboard-heading truncate">
-                            {fullName}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[10px] text-red-600 font-semibold">
-                              {entry.failure_count} failures
-                            </span>
-                            <span
-                              className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold ${statusCls}`}
-                            >
-                              {formatAction(user.account_status)}
+                          <div
+                            className={`h-6 w-6 rounded-full ${avatarBg} flex items-center justify-center flex-shrink-0`}
+                          >
+                            <span className="text-[9px] font-bold text-white">
+                              {initials}
                             </span>
                           </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-medium text-dashboard-heading truncate">
+                              {fullName}
+                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] text-red-600 font-semibold">
+                                {entry.failure_count} failures
+                              </span>
+                              <span
+                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold ${statusCls}`}
+                              >
+                                {formatAction(user.account_status)}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Multi-Account IPs */}
-            {fraud_indicators.suspicious_ips.length > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">
-                  Multi-Account IPs
-                </p>
-                <div className="space-y-1.5">
-                  {fraud_indicators.suspicious_ips.map((ip) => (
-                    <Link
-                      key={ip.ip_address}
-                      href={`/unified-admin/audit-logs/ip/${encodeURIComponent(ip.ip_address)}`}
-                      className="flex items-center gap-3 rounded-lg p-1.5 -mx-1.5 hover:bg-dashboard-bg/50 transition-colors"
-                    >
-                      <span className="text-[11px] font-mono text-blue-600 hover:text-blue-800">
-                        {ip.ip_address}
-                      </span>
-                      <span className="text-[10px] text-dashboard-muted">
-                        {ip.distinct_users} users
-                      </span>
-                      <span className="text-[10px] text-dashboard-muted">
-                        {ip.total_actions.toLocaleString()} actions
-                      </span>
-                    </Link>
-                  ))}
+              {fraud_indicators.suspicious_ips.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">
+                    Multi-Account IPs
+                  </p>
+                  <div className="space-y-1">
+                    {fraud_indicators.suspicious_ips.map((ip) => (
+                      <Link
+                        key={ip.ip_address}
+                        href={`/unified-admin/audit-logs/ip/${encodeURIComponent(ip.ip_address)}`}
+                        className="flex items-center gap-2 rounded-lg p-1 -mx-1 hover:bg-dashboard-bg/50 transition-colors"
+                      >
+                        <span className="text-[10px] font-mono text-blue-600 hover:text-blue-800">
+                          {ip.ip_address}
+                        </span>
+                        <span className="text-[10px] text-dashboard-muted">
+                          {ip.distinct_users}u &middot; {ip.total_actions.toLocaleString()}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </motion.div>
+              )}
+            </div>
+          )}
+        </motion.div>
+      </div>
 
       {/* ── Row 4: Recent High-Severity ── */}
       {recent_high_severity.length > 0 && (

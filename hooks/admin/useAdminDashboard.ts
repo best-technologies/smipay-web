@@ -1,67 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { adminDashboardApi } from "@/services/admin/dashboard-api";
-import type { AdminDashboardData } from "@/types/admin/dashboard";
-
-const POLL_INTERVAL = 60_000; // 60 seconds
+import { useEffect, useRef, useCallback } from "react";
+import { useAdminDashboardStore } from "@/store/admin/admin-dashboard-store";
 
 export function useAdminDashboard() {
-  const [data, setData] = useState<AdminDashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isRecalculating, setIsRecalculating] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { data, isLoading, isRecalculating, error, fetchDashboard, recalculate } =
+    useAdminDashboardStore();
 
-  const fetchStats = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    setError(null);
-    try {
-      const response = await adminDashboardApi.getStats();
-      if (response.success && response.data) {
-        setData(response.data);
-      } else {
-        setError(response.message || "Failed to load dashboard stats");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load dashboard stats");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const recalculate = useCallback(async () => {
-    setIsRecalculating(true);
-    try {
-      const response = await adminDashboardApi.recalculateStats();
-      if (response.success && response.data) {
-        setData(response.data);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to recalculate stats",
-      );
-    } finally {
-      setIsRecalculating(false);
-    }
-  }, []);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    fetchStats(true);
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchDashboard();
+    }
+  }, [fetchDashboard]);
 
-    intervalRef.current = setInterval(() => fetchStats(false), POLL_INTERVAL);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [fetchStats]);
+  const refetch = useCallback(() => {
+    fetchDashboard(true);
+  }, [fetchDashboard]);
 
   return {
     data,
     isLoading,
     error,
     isRecalculating,
-    refetch: () => fetchStats(true),
+    refetch,
     recalculate,
   };
 }

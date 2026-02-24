@@ -135,7 +135,13 @@ export function SupportAnalytics({ analytics }: SupportAnalyticsProps) {
           icon={UserX}
           iconBg="bg-dashboard-surface"
           iconColor="text-dashboard-muted"
-          subtitle="needs assignment"
+          subtitle={
+            overview.unassigned > 5 ? (
+              <span className="text-red-600 font-medium">needs assignment</span>
+            ) : (
+              <span className="text-dashboard-muted">needs assignment</span>
+            )
+          }
           badge={overview.unassigned > 0 ? overview.unassigned : undefined}
           badgeColor="bg-red-500"
           index={2}
@@ -269,7 +275,7 @@ function OverviewCard({
 }
 
 function StatusStackedBar({ byStatus }: { byStatus: Record<string, number> }) {
-  const order = [...STATUS_ORDER];
+  const order: string[] = [...STATUS_ORDER];
   const entries = order
     .filter((key) => (byStatus[key] ?? 0) > 0)
     .map((key) => ({
@@ -342,7 +348,7 @@ function PriorityStackedBar({
 }: {
   byPriority: Record<string, number>;
 }) {
-  const order = [...PRIORITY_ORDER];
+  const order: string[] = [...PRIORITY_ORDER];
   const entries = order
     .filter((key) => (byPriority[key] ?? 0) > 0)
     .map((key) => ({

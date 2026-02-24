@@ -67,6 +67,8 @@ const TYPE_CHIP: Record<string, string> = {
 
 const SORTABLE_COLS: string[] = ["createdAt", "updatedAt", "priority", "status", "support_type"];
 
+const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+
 export function SupportTable({
   tickets,
   sortBy,
@@ -103,6 +105,7 @@ export function SupportTable({
                 { key: "priority", label: "Priority" },
                 { key: "assigned", label: "Assigned" },
                 { key: "messages", label: "Messages" },
+                { key: "updatedAt", label: "Last Response" },
                 { key: "createdAt", label: "Created" },
               ].map(({ key, label }) => {
                 const sortable = SORTABLE_COLS.includes(key);
@@ -201,6 +204,15 @@ export function SupportTable({
                   </span>
                 </td>
 
+                {/* Last Response */}
+                <td className="px-3 py-2.5 whitespace-nowrap">
+                  <LastResponseCell
+                    lastResponseAt={ticket.last_response_at}
+                    status={ticket.status}
+                    createdAt={ticket.createdAt}
+                  />
+                </td>
+
                 {/* Created */}
                 <td className="px-3 py-2.5 whitespace-nowrap text-dashboard-muted" title={new Date(ticket.createdAt).toLocaleString()}>
                   {relativeTime(ticket.createdAt)}
@@ -211,6 +223,37 @@ export function SupportTable({
         </table>
       </div>
     </motion.div>
+  );
+}
+
+function LastResponseCell({
+  lastResponseAt,
+  status,
+  createdAt,
+}: {
+  lastResponseAt: string | null;
+  status: string;
+  createdAt: string;
+}) {
+  if (lastResponseAt) {
+    return (
+      <span
+        className="text-dashboard-muted"
+        title={new Date(lastResponseAt).toLocaleString()}
+      >
+        {relativeTime(lastResponseAt)}
+      </span>
+    );
+  }
+
+  const isPending = status === "pending" || status === "in_progress" || status === "escalated";
+  const waitingSince = Date.now() - new Date(createdAt).getTime();
+  const isOverdue = isPending && waitingSince > FOUR_HOURS_MS;
+
+  return (
+    <span className={isOverdue ? "text-red-600 font-medium" : "text-dashboard-muted"}>
+      {isOverdue ? "No response" : "—"}
+    </span>
   );
 }
 

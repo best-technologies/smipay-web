@@ -334,9 +334,38 @@ function DashboardContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: 0.12 }}
-                className="rounded-2xl border border-dashboard-border bg-dashboard-surface p-6 text-center text-dashboard-muted text-sm"
+                className="relative overflow-hidden rounded-2xl shadow-xl"
+                style={{
+                  background: "linear-gradient(152deg, #14532d 0%, #0a3622 45%, #052e1c 100%)",
+                  boxShadow: "0 25px 50px -12px rgba(5, 46, 28, 0.45), 0 0 0 1px rgba(255,255,255,0.07) inset",
+                }}
               >
-                No bank account available
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "radial-gradient(ellipse 130% 90% at 85% -10%, rgba(234, 88, 12, 0.22) 0%, transparent 50%), radial-gradient(ellipse 90% 70% at 5% 105%, rgba(5, 150, 105, 0.12) 0%, transparent 45%)",
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
+                <div className="relative p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <div className="h-3 w-24 rounded bg-white/10 animate-pulse" />
+                    <div className="h-5 w-16 rounded-full bg-white/10 animate-pulse" />
+                  </div>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
+                    Available balance
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight mb-4">
+                    ₦{parseBalance(dashboardData.wallet_card.current_balance).toLocaleString()}
+                  </p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-slate-500">Account number</span>
+                  </div>
+                  <div className="h-5 w-40 rounded bg-white/10 animate-pulse mb-3" />
+                  <p className="text-[11px] text-amber-400/80 font-medium animate-pulse">
+                    Setting up your bank account...
+                  </p>
+                </div>
               </motion.div>
             )}
           </div>

@@ -1,10 +1,10 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { TxnListMeta } from "@/types/admin/transactions";
+import type { TransactionListMeta } from "@/types/admin/transactions";
 
 interface TransactionsPaginationProps {
-  meta: TxnListMeta;
+  meta: TransactionListMeta;
   onPageChange: (page: number) => void;
 }
 

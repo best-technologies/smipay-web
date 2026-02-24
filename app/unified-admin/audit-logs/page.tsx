@@ -35,7 +35,7 @@ function pillClasses(color: string, active: boolean): string {
 
 export default function AuditLogsPage() {
   const {
-    logs,
+    logs: rawLogs,
     meta,
     analytics,
     filters,
@@ -48,6 +48,7 @@ export default function AuditLogsPage() {
     refetch,
   } = useAdminAuditLogs();
 
+  const logs = rawLogs ?? [];
   const safeMeta = meta ?? { total: 0, page: 1, limit: 20, total_pages: 0, has_next: false, has_previous: false };
 
   const [flagTarget, setFlagTarget] = useState<string | null>(null);

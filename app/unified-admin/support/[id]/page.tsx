@@ -20,7 +20,9 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useAdminSupportStore } from "@/store/admin/admin-support-store";
+import { useAdminSupportDetailSocket } from "@/hooks/admin/useAdminSupportSocket";
 import { adminSupportApi } from "@/services/admin/support-api";
 import { SUPPORT_STATUSES, SUPPORT_PRIORITIES } from "@/types/admin/support";
 import type { SupportTicketDetail, SupportMessage } from "@/types/admin/support";
@@ -101,6 +103,7 @@ function fullDate(iso: string): string {
 export default function SupportDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { user: currentAdmin } = useAuth();
   const ticketId = params.id;
 
   const { fetchDetail, invalidateDetail, detailLoading, detailError } =
@@ -118,6 +121,81 @@ export default function SupportDetailPage() {
   const [pendingStatus, setPendingStatus] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleSocketNewMessage = useCallback(
+    (msg: {
+      id: string;
+      message: string;
+      is_from_user: boolean;
+      is_internal: boolean;
+      sender_name: string;
+      sender_email: string;
+      createdAt: string;
+    }) => {
+      setTicket((prev) => {
+        if (!prev) return prev;
+        const exists = prev.messages.some((m) => m.id === msg.id);
+        if (exists) return prev;
+        return {
+          ...prev,
+          messages: [
+            ...prev.messages,
+            {
+              ...msg,
+              user_id: null,
+              sender_email: msg.sender_email,
+              sender_name: msg.sender_name,
+              attachments: null,
+            } as SupportMessage,
+          ],
+          message_count: prev.message_count + 1,
+        };
+      });
+    },
+    [],
+  );
+
+  const handleSocketStatusChanged = useCallback(
+    (data: { new_status: string; resolution_notes?: string }) => {
+      setTicket((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: data.new_status,
+              resolution_notes: data.resolution_notes ?? prev.resolution_notes,
+            }
+          : prev,
+      );
+    },
+    [],
+  );
+
+  const handleSocketAssigned = useCallback(
+    (data: { assigned_to: string; assigned_admin_name: string }) => {
+      setTicket((prev) =>
+        prev
+          ? {
+              ...prev,
+              assigned_to: data.assigned_to,
+              assigned_admin: {
+                id: data.assigned_to,
+                first_name: data.assigned_admin_name.split(" ")[0] ?? "",
+                last_name: data.assigned_admin_name.split(" ").slice(1).join(" ") ?? "",
+                email: "",
+              },
+            }
+          : prev,
+      );
+    },
+    [],
+  );
+
+  const { userTyping, sendTyping, sendStopTyping } = useAdminSupportDetailSocket(
+    ticketId,
+    handleSocketNewMessage,
+    handleSocketStatusChanged,
+    handleSocketAssigned,
+  );
 
   const load = useCallback(
     async (force = false) => {
@@ -141,6 +219,7 @@ export default function SupportDetailPage() {
     if (!replyText.trim() || sending) return;
     setSending(true);
     setActionError(null);
+    sendStopTyping();
     try {
       await adminSupportApi.reply(ticketId, {
         message: replyText.trim(),
@@ -160,7 +239,9 @@ export default function SupportDetailPage() {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       handleReply();
+      return;
     }
+    sendTyping();
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -215,6 +296,24 @@ export default function SupportDetailPage() {
       setMutating(false);
     }
   };
+
+  const handleAssignToMe = async () => {
+    if (!currentAdmin?.id || mutating) return;
+    setMutating(true);
+    setActionError(null);
+    try {
+      await adminSupportApi.assign(ticketId, { assigned_to: currentAdmin.id });
+      invalidateDetail(ticketId);
+      await load(true);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to assign ticket");
+    } finally {
+      setMutating(false);
+    }
+  };
+
+  const isAssignedToMe = ticket?.assigned_admin?.id === currentAdmin?.id;
+  const canInteract = isAssignedToMe;
 
   // --- Loading / Error states ---
 
@@ -325,100 +424,203 @@ export default function SupportDetailPage() {
             {ticket.messages.map((msg, i) => (
               <MessageBubble key={msg.id} message={msg} index={i} />
             ))}
+
+            {/* Typing indicator */}
+            <AnimatePresence>
+              {userTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-dashboard-surface border border-dashboard-border/60 rounded-xl px-3.5 py-2 inline-flex items-center gap-1.5">
+                    <span className="flex gap-0.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:0ms]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:150ms]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:300ms]" />
+                    </span>
+                    <span className="text-[10px] text-dashboard-muted">User is typing...</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Reply box */}
+          {/* Reply box / Claim prompt */}
           <div className="border-t border-dashboard-border/60 bg-dashboard-surface px-4 py-3 sm:px-6 lg:px-8">
-            <div className="flex items-start gap-2">
-              <div className="flex-1 relative">
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={isInternal ? "Write an internal note..." : "Type your reply..."}
-                  rows={3}
-                  className={`w-full px-3 py-2.5 text-xs rounded-lg border focus:outline-none focus:ring-2 resize-none ${
-                    isInternal
-                      ? "bg-amber-50/50 border-amber-200 focus:ring-amber-300/40 placeholder:text-amber-400"
-                      : "bg-dashboard-bg border-dashboard-border/60 focus:ring-brand-bg-primary/20 placeholder:text-dashboard-muted/60"
-                  } text-dashboard-heading`}
-                />
-                <div className="flex items-center justify-between mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsInternal(!isInternal)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
+            {canInteract ? (
+              <div className="flex items-start gap-2">
+                <div className="flex-1 relative">
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={isInternal ? "Write an internal note..." : "Type your reply..."}
+                    rows={3}
+                    className={`w-full px-3 py-2.5 text-xs rounded-lg border focus:outline-none focus:ring-2 resize-none ${
                       isInternal
-                        ? "bg-amber-100 text-amber-700 border border-amber-200"
-                        : "bg-dashboard-bg text-dashboard-muted border border-dashboard-border/60 hover:text-dashboard-heading"
-                    }`}
-                  >
-                    <Lock className="h-3 w-3" />
-                    {isInternal ? "Internal Note" : "Public Reply"}
-                  </button>
-                  <span className="text-[10px] text-dashboard-muted">
-                    Ctrl+Enter to send
-                  </span>
+                        ? "bg-amber-50/50 border-amber-200 focus:ring-amber-300/40 placeholder:text-amber-400"
+                        : "bg-dashboard-bg border-dashboard-border/60 focus:ring-brand-bg-primary/20 placeholder:text-dashboard-muted/60"
+                    } text-dashboard-heading`}
+                  />
+                  <div className="flex items-center justify-between mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsInternal(!isInternal)}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
+                        isInternal
+                          ? "bg-amber-100 text-amber-700 border border-amber-200"
+                          : "bg-dashboard-bg text-dashboard-muted border border-dashboard-border/60 hover:text-dashboard-heading"
+                      }`}
+                    >
+                      <Lock className="h-3 w-3" />
+                      {isInternal ? "Internal Note" : "Public Reply"}
+                    </button>
+                    <span className="text-[10px] text-dashboard-muted">
+                      Ctrl+Enter to send
+                    </span>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleReply}
+                  disabled={!replyText.trim() || sending}
+                  className="flex-shrink-0 p-2.5 rounded-lg bg-brand-bg-primary text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                >
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleReply}
-                disabled={!replyText.trim() || sending}
-                className="flex-shrink-0 p-2.5 rounded-lg bg-brand-bg-primary text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
-              >
-                {sending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+            ) : (
+              <div className="flex items-center gap-3 py-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-dashboard-heading">
+                    Assign this ticket to yourself to interact
+                  </p>
+                  <p className="text-[10px] text-dashboard-muted mt-0.5">
+                    You must claim this ticket before you can reply, change status, or take any action.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAssignToMe}
+                  disabled={mutating}
+                  className="flex-shrink-0 px-4 py-2 text-xs font-medium bg-brand-bg-primary text-white rounded-lg hover:bg-brand-bg-primary/90 disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
+                >
+                  {mutating ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <User className="h-3.5 w-3.5" />
+                  )}
+                  Assign to me
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Sidebar */}
         <aside className="lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-dashboard-border/60 bg-dashboard-surface overflow-y-auto">
           <div className="px-4 py-4 space-y-4">
-            {/* Actions */}
+            {/* Assignment */}
+            <SidebarSection title="Assignment">
+              {ticket.assigned_admin ? (
+                <div className="flex items-center gap-2 px-2.5 py-2 bg-dashboard-bg border border-dashboard-border/60 rounded-lg">
+                  <div className="h-6 w-6 rounded-full bg-brand-bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[9px] font-bold text-brand-bg-primary">
+                      {`${(ticket.assigned_admin.first_name ?? "")[0] ?? ""}${(ticket.assigned_admin.last_name ?? "")[0] ?? ""}`.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-medium text-dashboard-heading truncate block">
+                      {`${ticket.assigned_admin.first_name ?? ""} ${ticket.assigned_admin.last_name ?? ""}`.trim()}
+                    </span>
+                    {isAssignedToMe && (
+                      <span className="text-[10px] text-emerald-600 font-medium">You are handling this ticket</span>
+                    )}
+                    {ticket.assigned_admin && !isAssignedToMe && (
+                      <span className="text-[10px] text-dashboard-muted">Another admin is handling this</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                    <p className="text-[10px] font-semibold text-amber-800 mb-0.5">Unassigned Ticket</p>
+                    <p className="text-[10px] text-amber-700 leading-relaxed">
+                      Claim this ticket to reply, change status, priority, or take any action.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAssignToMe}
+                    disabled={mutating}
+                    className="w-full px-3 py-2 text-xs font-medium bg-brand-bg-primary text-white rounded-lg hover:bg-brand-bg-primary/90 disabled:opacity-50 transition-colors inline-flex items-center justify-center gap-1.5"
+                  >
+                    {mutating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <User className="h-3.5 w-3.5" />
+                    )}
+                    Assign to me
+                  </button>
+                </div>
+              )}
+            </SidebarSection>
+
+            {/* Actions — locked behind assignment */}
             <SidebarSection title="Actions">
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-[10px] font-medium text-dashboard-muted mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={ticket.status}
-                    onChange={(e) => handleStatusChange(e.target.value)}
-                    disabled={mutating}
-                    className="w-full px-2.5 py-1.5 text-xs bg-dashboard-bg border border-dashboard-border/60 rounded-lg text-dashboard-heading focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20 appearance-none disabled:opacity-50"
-                  >
-                    {SUPPORT_STATUSES.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
+              {canInteract ? (
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[10px] font-medium text-dashboard-muted mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={ticket.status}
+                      onChange={(e) => handleStatusChange(e.target.value)}
+                      disabled={mutating}
+                      className="w-full px-2.5 py-1.5 text-xs bg-dashboard-bg border border-dashboard-border/60 rounded-lg text-dashboard-heading focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20 appearance-none disabled:opacity-50"
+                    >
+                      {SUPPORT_STATUSES.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-dashboard-muted mb-1">
+                      Priority
+                    </label>
+                    <select
+                      value={ticket.priority}
+                      onChange={(e) => handlePriorityChange(e.target.value)}
+                      disabled={mutating}
+                      className="w-full px-2.5 py-1.5 text-xs bg-dashboard-bg border border-dashboard-border/60 rounded-lg text-dashboard-heading focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20 appearance-none disabled:opacity-50"
+                    >
+                      {SUPPORT_PRIORITIES.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-dashboard-muted mb-1">
-                    Priority
-                  </label>
-                  <select
-                    value={ticket.priority}
-                    onChange={(e) => handlePriorityChange(e.target.value)}
-                    disabled={mutating}
-                    className="w-full px-2.5 py-1.5 text-xs bg-dashboard-bg border border-dashboard-border/60 rounded-lg text-dashboard-heading focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20 appearance-none disabled:opacity-50"
-                  >
-                    {SUPPORT_PRIORITIES.map((p) => (
-                      <option key={p.value} value={p.value}>
-                        {p.label}
-                      </option>
-                    ))}
-                  </select>
+              ) : (
+                <div className="flex items-center gap-2 px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                  <Lock className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    Assign this ticket to yourself to change status, priority, or reply.
+                  </p>
                 </div>
-              </div>
+              )}
             </SidebarSection>
 
             {/* Ticket info */}
@@ -439,15 +641,6 @@ export default function SupportDetailPage() {
                 <InfoRow
                   label="Response Time"
                   value={formatResponseTime(ticket.response_time_seconds)}
-                />
-                <InfoRow
-                  label="Assigned"
-                  value={
-                    ticket.assigned_admin
-                      ? `${ticket.assigned_admin.first_name ?? ""} ${ticket.assigned_admin.last_name ?? ""}`.trim()
-                      : "Unassigned"
-                  }
-                  valueClassName={!ticket.assigned_admin ? "text-red-500 font-medium" : undefined}
                 />
                 {ticket.satisfaction_rating !== null && (
                   <InfoRow
@@ -610,7 +803,7 @@ export default function SupportDetailPage() {
             )}
 
             {/* Technical info */}
-            {(ticket.ip_address || ticket.device_metadata) && (
+            {(ticket.ip_address || ticket.device_metadata || ticket.user_agent) && (
               <SidebarSection title="Technical Info">
                 <div className="space-y-1.5">
                   {ticket.ip_address && (
@@ -620,6 +813,16 @@ export default function SupportDetailPage() {
                         <span className="inline-flex items-center gap-1">
                           <Globe className="h-3 w-3" />
                           {ticket.ip_address}
+                        </span>
+                      }
+                    />
+                  )}
+                  {ticket.user_agent && (
+                    <InfoRow
+                      label="User Agent"
+                      value={
+                        <span className="block text-[10px] leading-relaxed break-all" title={ticket.user_agent}>
+                          {ticket.user_agent}
                         </span>
                       }
                     />

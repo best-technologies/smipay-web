@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Headphones, RefreshCw } from "lucide-react";
+import { Headphones, RefreshCw, User, UserX, AlertTriangle, ArrowUpCircle, Clock3 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useAdminSupport } from "@/hooks/admin/useAdminSupport";
+import { useAdminSupportListSocket } from "@/hooks/admin/useAdminSupportSocket";
 import { SUPPORT_STATUSES, SUPPORT_PRIORITIES } from "@/types/admin/support";
 import { SupportAnalytics } from "./_components/SupportAnalytics";
 import { SupportFilters } from "./_components/SupportFilters";
@@ -38,6 +40,9 @@ const STATUS_PILL_COLORS: Record<string, { active: string; inactive: string }> =
 };
 
 export default function SupportPage() {
+  const { user: currentAdmin } = useAuth();
+  useAdminSupportListSocket();
+
   const {
     tickets,
     meta,
@@ -51,6 +56,29 @@ export default function SupportPage() {
     resetFilters,
     refetch,
   } = useAdminSupport();
+
+  const activeQuickFilter =
+    filters.assigned_to === currentAdmin?.id
+      ? "my_tickets"
+      : filters.assigned_to === "unassigned"
+        ? "unassigned"
+        : null;
+
+  const handleQuickFilter = (key: string) => {
+    if (key === "my_tickets") {
+      if (activeQuickFilter === "my_tickets") {
+        updateFilters({ assigned_to: "" });
+      } else {
+        updateFilters({ assigned_to: currentAdmin?.id ?? "" });
+      }
+    } else if (key === "unassigned") {
+      if (activeQuickFilter === "unassigned") {
+        updateFilters({ assigned_to: "" });
+      } else {
+        updateFilters({ assigned_to: "unassigned" });
+      }
+    }
+  };
 
   if (isLoading && !analytics) return <SupportSkeleton />;
 
@@ -102,6 +130,68 @@ export default function SupportPage() {
         )}
 
         {analytics && <SupportAnalytics analytics={analytics} />}
+
+        {/* Quick filter buttons */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mr-1">
+            Quick:
+          </span>
+          <button
+            type="button"
+            onClick={() => handleQuickFilter("my_tickets")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              activeQuickFilter === "my_tickets"
+                ? "bg-brand-bg-primary text-white"
+                : "bg-dashboard-surface border border-dashboard-border/60 text-dashboard-muted hover:text-dashboard-heading"
+            }`}
+          >
+            <User className="h-3 w-3" />
+            My Tickets
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickFilter("unassigned")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              activeQuickFilter === "unassigned"
+                ? "bg-red-500 text-white"
+                : "bg-dashboard-surface border border-dashboard-border/60 text-dashboard-muted hover:text-dashboard-heading"
+            }`}
+          >
+            <UserX className="h-3 w-3" />
+            Unassigned
+            {analytics && analytics.overview.unassigned > 0 && (
+              <span className={`ml-0.5 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold ${
+                activeQuickFilter === "unassigned" ? "bg-white/20" : "bg-red-100 text-red-700"
+              }`}>
+                {analytics.overview.unassigned}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => updateFilters({ status: "pending", priority: "urgent" })}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-dashboard-surface border border-dashboard-border/60 text-dashboard-muted hover:text-dashboard-heading transition-colors"
+          >
+            <AlertTriangle className="h-3 w-3" />
+            Urgent
+          </button>
+          <button
+            type="button"
+            onClick={() => updateFilters({ status: "escalated", priority: "" })}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-dashboard-surface border border-dashboard-border/60 text-dashboard-muted hover:text-dashboard-heading transition-colors"
+          >
+            <ArrowUpCircle className="h-3 w-3" />
+            Escalated
+          </button>
+          <button
+            type="button"
+            onClick={() => updateFilters({ status: "pending", priority: "" })}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-dashboard-surface border border-dashboard-border/60 text-dashboard-muted hover:text-dashboard-heading transition-colors"
+          >
+            <Clock3 className="h-3 w-3" />
+            Pending
+          </button>
+        </div>
 
         {/* Status pills */}
         <div className="flex flex-wrap items-center gap-1.5">

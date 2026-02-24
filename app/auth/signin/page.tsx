@@ -97,7 +97,7 @@ function SignInForm() {
         setSuccessMessage("Login successful! Redirecting...");
         let redirectUrl = "/dashboard";
         if (user.role && user.role !== "user") {
-          redirectUrl = "/unified-admin/dashboard";
+          redirectUrl = "/";
         } else {
           const callbackUrl = searchParams.get("callbackUrl");
           if (callbackUrl) redirectUrl = callbackUrl;

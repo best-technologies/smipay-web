@@ -2,8 +2,8 @@
 
 import { motion } from "motion/react";
 
-function Pulse({ className }: { className: string }) {
-  return <div className={`bg-dashboard-border/50 rounded animate-pulse ${className}`} />;
+function Pulse({ className, style }: { className: string; style?: React.CSSProperties }) {
+  return <div className={`bg-dashboard-border/50 rounded animate-pulse ${className}`} style={style} />;
 }
 
 export function AuditSkeleton() {

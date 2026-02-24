@@ -190,7 +190,7 @@ export default function SessionTracePage() {
                 Session Trace
               </h1>
               <p className="text-xs text-dashboard-muted mt-0.5 font-mono">
-                {data.session_id}
+                {sessionId}
               </p>
             </div>
           </div>

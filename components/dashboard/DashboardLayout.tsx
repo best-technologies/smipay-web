@@ -5,33 +5,41 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { SessionWarning } from "@/components/auth/SessionWarning";
+import { SessionExpired } from "@/components/auth/SessionExpired";
 import { isPaymentInProgress } from "@/lib/auth-storage";
 import Sidebar from "./Sidebar";
+import SupportFAB from "./SupportFAB";
 import { Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// Component that uses useSearchParams - wrapped in Suspense
-function DashboardAuthGuard({ children }: { children: React.ReactNode }) {
+function DashboardAuthGuard({
+  children,
+  sessionExpired,
+}: {
+  children: React.ReactNode;
+  sessionExpired: boolean;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Check if this is a payment callback
   const isPaymentCallback = searchParams.get("payment") === "callback";
 
   useEffect(() => {
-    // Don't redirect if payment is in progress or this is a payment callback
-    if (isPaymentCallback || isPaymentInProgress()) {
-      return;
-    }
-    
+    if (sessionExpired) return;
+    if (isPaymentCallback || isPaymentInProgress()) return;
+
     if (!isLoading && !isAuthenticated) {
       router.push("/auth/signin?callbackUrl=/dashboard");
     }
-  }, [isLoading, isAuthenticated, router, isPaymentCallback]);
+  }, [isLoading, isAuthenticated, router, isPaymentCallback, sessionExpired]);
+
+  if (sessionExpired) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
@@ -49,7 +57,14 @@ function DashboardAuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { showWarning, timeRemaining, extendSession, handleLogout } = useActivityTracker();
+  const {
+    showWarning,
+    sessionExpired,
+    timeRemaining,
+    extendSession,
+    handleLogout,
+    acknowledgeExpiry,
+  } = useActivityTracker();
 
   return (
     <Suspense fallback={
@@ -57,7 +72,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <Loader2 className="h-8 w-8 animate-spin text-dashboard-accent" />
       </div>
     }>
-      <DashboardAuthGuard>
+      <DashboardAuthGuard sessionExpired={sessionExpired}>
         <div className="flex min-h-screen bg-dashboard-bg">
           <Sidebar />
           <main className="flex-1 overflow-auto">
@@ -65,12 +80,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </main>
         </div>
 
-        {/* Session Warning Modal */}
+        {!sessionExpired && <SupportFAB />}
+
         <SessionWarning
-          showWarning={showWarning}
+          showWarning={showWarning && !sessionExpired}
           timeRemaining={timeRemaining}
           onExtend={extendSession}
           onLogout={() => handleLogout("You have been logged out.")}
+        />
+
+        <SessionExpired
+          show={sessionExpired}
+          onAcknowledge={acknowledgeExpiry}
         />
       </DashboardAuthGuard>
     </Suspense>

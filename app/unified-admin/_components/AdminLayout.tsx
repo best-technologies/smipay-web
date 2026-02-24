@@ -4,6 +4,9 @@ import { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
+import { SessionWarning } from "@/components/auth/SessionWarning";
+import { SessionExpired } from "@/components/auth/SessionExpired";
 import AdminSidebar from "./AdminSidebar";
 import { Loader2, Monitor, ArrowLeft } from "lucide-react";
 
@@ -93,11 +96,18 @@ function ViewportBarUpdater() {
   return null;
 }
 
-function AdminAuthGuard({ children }: { children: React.ReactNode }) {
+function AdminAuthGuard({
+  children,
+  sessionExpired,
+}: {
+  children: React.ReactNode;
+  sessionExpired: boolean;
+}) {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
+    if (sessionExpired) return;
     if (isLoading) return;
 
     if (!isAuthenticated) {
@@ -108,7 +118,11 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     if (user?.role === "user" || !user?.role) {
       router.push("/dashboard");
     }
-  }, [isLoading, isAuthenticated, user, router]);
+  }, [isLoading, isAuthenticated, user, router, sessionExpired]);
+
+  if (sessionExpired) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
@@ -131,6 +145,14 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { isTooSmall, checked } = useViewportGuard();
+  const {
+    showWarning,
+    sessionExpired,
+    timeRemaining,
+    extendSession,
+    handleLogout,
+    acknowledgeExpiry,
+  } = useActivityTracker();
 
   if (!checked) {
     return (
@@ -152,11 +174,23 @@ export default function AdminLayout({
         </div>
       }
     >
-      <AdminAuthGuard>
+      <AdminAuthGuard sessionExpired={sessionExpired}>
         <div className="flex min-h-screen bg-dashboard-bg">
           <AdminSidebar />
           <main className="flex-1 overflow-auto">{children}</main>
         </div>
+
+        <SessionWarning
+          showWarning={showWarning && !sessionExpired}
+          timeRemaining={timeRemaining}
+          onExtend={extendSession}
+          onLogout={() => handleLogout("You have been logged out.")}
+        />
+
+        <SessionExpired
+          show={sessionExpired}
+          onAcknowledge={acknowledgeExpiry}
+        />
       </AdminAuthGuard>
     </Suspense>
   );

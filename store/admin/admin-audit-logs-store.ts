@@ -82,7 +82,7 @@ export const useAdminAuditLogsStore = create<AdminAuditLogsState>(
 
       try {
         const res = await adminAuditLogsApi.list(state.filters);
-        const { data, meta, analytics } = res.data;
+        const { data: logs, meta, analytics } = res.data;
 
         const cache = new Map(get().cache);
         if (cache.size >= MAX_CACHE_ENTRIES) {
@@ -90,14 +90,14 @@ export const useAdminAuditLogsStore = create<AdminAuditLogsState>(
           if (oldestKey !== undefined) cache.delete(oldestKey);
         }
         cache.set(filtersKey, {
-          logs: data,
+          logs,
           meta,
           analytics,
           timestamp: Date.now(),
         });
 
         set({
-          logs: data,
+          logs,
           meta,
           analytics,
           cache,

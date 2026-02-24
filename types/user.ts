@@ -1,4 +1,32 @@
 // User Profile Types
+
+export interface TierLimits {
+  singleTransaction: number;
+  daily: number;
+  monthly: number;
+  airtimeDaily: number;
+}
+
+export interface CurrentTier {
+  tier: string;
+  name: string;
+  description: string;
+  requirements: string[];
+  limits: TierLimits;
+  is_active: boolean;
+}
+
+export interface AvailableTier {
+  id: string;
+  tier: string;
+  name: string;
+  description: string;
+  order: number;
+  requirements: string[];
+  limits: TierLimits;
+  is_current: boolean;
+}
+
 export interface UserProfile {
   user: {
     id: string;
@@ -47,6 +75,8 @@ export interface UserProfile {
     createdAt: string;
     updatedAt: string;
   };
+  current_tier?: CurrentTier;
+  available_tiers?: AvailableTier[];
 }
 
 export interface UserProfileResponse {
