@@ -62,11 +62,10 @@ const LAST_ACTIVITY_KEY = "smipay-last-activity";
 const TOKEN_EXPIRY_KEY = "smipay-token-expiry";
 const PAYMENT_IN_PROGRESS_KEY = "smipay-payment-in-progress";
 
-// Session timeout: 30 minutes of inactivity (fintech security standard)
-// Increased to 30 mins to accommodate external payment flows (Paystack, etc.)
-export const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
-// Warning before timeout: 5 minutes before expiry
-export const SESSION_WARNING_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
+// Session timeout: 5 minutes of inactivity
+export const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
+// Warning before timeout: 1 minute before expiry
+export const SESSION_WARNING_TIME = 1 * 60 * 1000; // 1 minute in milliseconds
 
 /**
  * Save authentication token
