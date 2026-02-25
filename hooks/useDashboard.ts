@@ -32,7 +32,7 @@ export function useDashboard(forceRefresh = false) {
     error,
     refetch: () => {
       hasFetched.current = false;
-      fetchDashboardData(true);
+      return fetchDashboardData(true);
     },
   };
 }

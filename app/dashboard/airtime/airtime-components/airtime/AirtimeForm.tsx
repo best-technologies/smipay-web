@@ -9,6 +9,8 @@ import { Loader2, Zap, ShieldCheck } from "lucide-react";
 import { useVtpassServiceIds } from "@/hooks/vtpass/vtu/useVtpassServiceIds";
 import { vtpassAirtimeApi } from "@/services/vtpass/vtu/vtpass-airtime-api";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
+import { getLastUsed, saveRecentEntry } from "@/lib/recent-numbers";
+import { RecentNumbers } from "@/components/dashboard/RecentNumbers";
 import type { VtpassPurchaseResponse } from "@/services/vtpass/vtu/vtpass-airtime-api";
 
 interface AirtimeFormProps {
@@ -41,9 +43,21 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
 
   useEffect(() => {
     if (services.length > 0 && !selectedServiceId) {
-      setSelectedServiceId(services[0].serviceID);
+      const last = getLastUsed("airtime");
+      if (last && services.some((s) => s.serviceID === last.serviceID)) {
+        setSelectedServiceId(last.serviceID);
+      } else {
+        setSelectedServiceId(services[0].serviceID);
+      }
     }
   }, [services, selectedServiceId]);
+
+  const handleSelectRecent = (entry: { serviceID: string; number: string }) => {
+    if (services.some((s) => s.serviceID === entry.serviceID)) {
+      setSelectedServiceId(entry.serviceID);
+    }
+    setPhoneNumber(entry.number);
+  };
 
   useEffect(() => {
     if (selectedServiceId && services.length > 0) {
@@ -139,8 +153,8 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
       });
 
       if (response.success) {
+        saveRecentEntry("airtime", selectedServiceId!, phoneNumber);
         onSuccess(response.data);
-        setPhoneNumber("");
         setAmount("");
         setErrors({});
       } else {
@@ -167,6 +181,8 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {serverError && <FormError message={serverError} />}
+
+      <RecentNumbers type="airtime" onSelect={handleSelectRecent} />
 
       {/* Row 1: Network dropdown + Phone number */}
       <div>

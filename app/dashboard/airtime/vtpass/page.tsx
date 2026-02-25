@@ -27,9 +27,7 @@ export default function VtpassAirtimePage() {
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
 
-  const handleTransactionSuccess = (data: VtpassPurchaseResponse) => {
-    refetch();
-
+  const handleTransactionSuccess = async (data: VtpassPurchaseResponse) => {
     const isError =
       data.code !== "000" &&
       data.status !== "processing" &&
@@ -41,12 +39,15 @@ export default function VtpassAirtimePage() {
       setTransactionData(data);
       setTransactionStatus("error");
       setErrorMessage(data.response_description || "Transaction failed");
+      refetch();
       return;
     }
 
     if (data.id) {
+      await refetch();
       router.replace(`/dashboard/transactions/${data.id}`);
     } else {
+      refetch();
       setTransactionData(data);
       setTransactionStatus(
         data.content?.transactions?.status === "delivered" ? "success" : "processing"

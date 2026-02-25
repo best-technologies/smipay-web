@@ -14,6 +14,7 @@ import { useVtpassDataServiceIds } from "@/hooks/vtpass/vtu/useVtpassDataService
 import { useVtpassDataVariationCodes } from "@/hooks/vtpass/vtu/useVtpassDataVariationCodes";
 import { useDashboard } from "@/hooks/useDashboard";
 import { FormError } from "@/components/auth/FormError";
+import { getLastUsed } from "@/lib/recent-numbers";
 import type { VtpassDataVariation, VtpassDataPurchaseResponse } from "@/types/vtpass/vtu/vtpass-data";
 import { motion } from "motion/react";
 
@@ -42,7 +43,12 @@ export default function VtpassDataPage() {
 
   useEffect(() => {
     if (services.length > 0 && !selectedServiceId) {
-      queueMicrotask(() => setSelectedServiceId(services[0].serviceID));
+      const last = getLastUsed("data");
+      if (last && services.some((s) => s.serviceID === last.serviceID)) {
+        queueMicrotask(() => setSelectedServiceId(last.serviceID));
+      } else {
+        queueMicrotask(() => setSelectedServiceId(services[0].serviceID));
+      }
     }
   }, [services, selectedServiceId]);
 
@@ -64,9 +70,7 @@ export default function VtpassDataPage() {
     setShowPurchaseView(false);
   };
 
-  const handleTransactionSuccess = (data: VtpassDataPurchaseResponse) => {
-    refetch();
-
+  const handleTransactionSuccess = async (data: VtpassDataPurchaseResponse) => {
     const isError =
       data.code !== "000" &&
       data.status !== "processing" &&
@@ -78,12 +82,15 @@ export default function VtpassDataPage() {
       setTransactionData(data);
       setTransactionStatus("error");
       setErrorMessage(data.response_description || "Transaction failed");
+      refetch();
       return;
     }
 
     if (data.id) {
+      await refetch();
       router.replace(`/dashboard/transactions/${data.id}`);
     } else {
+      refetch();
       setTransactionData(data);
       setTransactionStatus(
         data.content?.transactions?.status === "delivered" ? "success" : "processing"

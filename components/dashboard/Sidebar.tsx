@@ -119,11 +119,11 @@ const otherMenuItems: MenuItem[] = [
   // },
 ];
 
-// Active routes - only Dashboard, VTU (Airtime, Data), and Profile for now; Cable TV, Education, etc. show as Coming Soon
 const ENABLED_ROUTES = [
   "/dashboard",
   "/dashboard/airtime",
   "/dashboard/data",
+  "/dashboard/cabletv",
   "/dashboard/settings-profile",
 ];
 

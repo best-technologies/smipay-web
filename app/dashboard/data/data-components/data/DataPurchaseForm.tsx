@@ -6,6 +6,8 @@ import { PhoneNumberInput } from "@/app/dashboard/airtime/airtime-components/air
 import { FormError } from "@/components/auth/FormError";
 import { Loader2 } from "lucide-react";
 import { vtpassDataApi } from "@/services/vtpass/vtu/vtpass-data-api";
+import { saveRecentEntry } from "@/lib/recent-numbers";
+import { RecentNumbers } from "@/components/dashboard/RecentNumbers";
 import type { VtpassDataVariation, VtpassDataPurchaseResponse } from "@/types/vtpass/vtu/vtpass-data";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
 
@@ -79,8 +81,8 @@ export function DataPurchaseForm({
       });
 
       if (response.success) {
+        saveRecentEntry("data", selectedServiceId, phoneNumber);
         onSuccess(response.data);
-        setPhoneNumber("");
         setErrors({});
       } else {
         const errorMsg = response.message || "Transaction failed. Please try again.";
@@ -98,6 +100,8 @@ export function DataPurchaseForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+      <RecentNumbers type="data" onSelect={(entry) => setPhoneNumber(entry.number)} />
+
       <PhoneNumberInput
         value={phoneNumber}
         onChange={setPhoneNumber}
