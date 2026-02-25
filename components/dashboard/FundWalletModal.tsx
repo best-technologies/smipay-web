@@ -32,6 +32,7 @@ export function FundWalletModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(initialReference);
   const [error, setError] = useState<string | null>(null);
+  const [verificationDone, setVerificationDone] = useState(false);
 
   const primaryAccount = bankAccounts[0];
 
@@ -63,13 +64,14 @@ export function FundWalletModal({
   };
 
   const handleClose = () => {
-    if (isProcessing || currentStep === "card-verification") return;
+    if (isProcessing || (currentStep === "card-verification" && !verificationDone)) return;
     setCurrentStep("select-method");
     setSelectedMethod(null);
     setCopiedField(null);
     setPaymentReference(null);
     setError(null);
     setIsProcessing(false);
+    setVerificationDone(false);
     onClose();
   };
 
@@ -104,13 +106,12 @@ export function FundWalletModal({
 
   const handleVerificationSuccess = () => {
     clearPaymentInProgress();
-    setTimeout(() => {
-      handleClose();
-    }, 2000);
+    setVerificationDone(true);
   };
 
   const handleVerificationError = (message: string) => {
     setError(message);
+    setVerificationDone(true);
   };
 
   const handleVerificationRetry = () => {
@@ -167,7 +168,7 @@ export function FundWalletModal({
             </div>
             <button
               onClick={handleClose}
-              disabled={isProcessing || currentStep === "card-verification"}
+              disabled={isProcessing || (currentStep === "card-verification" && !verificationDone)}
               className="p-1.5 -mr-1.5 hover:bg-dashboard-bg rounded-lg transition-colors disabled:opacity-50"
             >
               <X className="h-5 w-5 text-dashboard-muted" />
