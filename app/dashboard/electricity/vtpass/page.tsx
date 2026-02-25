@@ -326,20 +326,20 @@ export default function VtpassElectricityPage() {
       refetch();
       return;
     }
+    if (data.id) {
+      await refetch();
+      router.replace(`/dashboard/transactions/${data.id}`);
+      return;
+    }
     if (data.electricity_token && meterType === "prepaid") {
       refetch();
       setTransactionData(data);
       setTransactionStatus("success");
       return;
     }
-    if (data.id) {
-      await refetch();
-      router.replace(`/dashboard/transactions/${data.id}`);
-    } else {
-      refetch();
-      setTransactionData(data);
-      setTransactionStatus(txStatus === "delivered" ? "success" : "processing");
-    }
+    refetch();
+    setTransactionData(data);
+    setTransactionStatus(txStatus === "delivered" ? "success" : "processing");
   };
 
   const handleSelectRecent = (entry: { serviceID: string; number: string }) => {

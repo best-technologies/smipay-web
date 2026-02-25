@@ -9,6 +9,7 @@ export type TransactionType =
   | "airtime"
   | "data"
   | "cable"
+  | "electricity"
   | "education"
   | "betting"
   | "referral_bonus"
@@ -36,20 +37,63 @@ export interface Transaction {
   payment_method?: string | null;
 }
 
+export interface ElectricityMeta {
+  electricity_token: string;
+  units: string;
+  meter_number: string;
+  meter_type: "prepaid" | "postpaid";
+  customer_name: string;
+  customer_address: string;
+  disco: string;
+}
+
+export interface CableMeta {
+  smartcard_number: string;
+  subscription_type: string;
+  bouquet: string;
+  customer_name: string;
+}
+
+export interface DataMeta {
+  phone: string;
+  network: string;
+  plan: string;
+}
+
+export interface AirtimeMeta {
+  phone: string;
+  network: string;
+}
+
+export type TransactionMeta =
+  | ElectricityMeta
+  | CableMeta
+  | DataMeta
+  | AirtimeMeta
+  | Record<string, never>;
+
 export interface TransactionDetail {
   id: string;
   amount: string;
+  raw_amount?: number;
   type: TransactionType;
   credit_debit: CreditDebit;
   description: string;
   status: TransactionStatus;
   recipient_mobile: string | null;
   tx_reference: string;
+  transaction_number?: string;
+  payment_method?: string;
+  payment_channel?: string;
+  fee?: number;
+  balance_before?: number;
+  balance_after?: number;
   created_on: string;
   updated_on: string;
   sender: string | null;
   icon: string;
   provider?: string | null;
+  meta?: TransactionMeta;
 }
 
 export interface PaginationMeta {
