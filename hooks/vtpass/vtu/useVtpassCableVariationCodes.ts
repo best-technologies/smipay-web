@@ -8,72 +8,63 @@ interface UseVariationCodesState {
   error: string | null;
 }
 
-/**
- * Hook to fetch and access VTPass cable TV variation codes for a specific service
- * Automatically fetches when serviceID changes
- * Includes caching per serviceID
- */
+// Module-level cache so data survives component unmount / page navigation.
+const cableVariationCache = new Map<string, { data: VtpassCableVariationCodesResponse["data"]; timestamp: number }>();
+let activeFetch: string | null = null;
+
+const CACHE_DURATION = 10 * 60 * 1000;
+
 export function useVtpassCableVariationCodes(serviceID: string | null) {
-  const [state, setState] = useState<UseVariationCodesState>({
-    data: null,
-    isLoading: false,
-    error: null,
+  const [state, setState] = useState<UseVariationCodesState>(() => {
+    if (serviceID) {
+      const cached = cableVariationCache.get(serviceID);
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        return { data: cached.data, isLoading: false, error: null };
+      }
+    }
+    return { data: null, isLoading: false, error: null };
   });
 
-  // Cache to store variation codes per serviceID
-  const cacheRef = useRef<Map<string, { data: VtpassCableVariationCodesResponse["data"]; timestamp: number }>>(new Map());
-  const fetchingRef = useRef<string | null>(null);
-  
-  // Cache duration: 10 minutes (variation codes don't change often)
-  const CACHE_DURATION = 10 * 60 * 1000;
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
     if (!serviceID) {
-      queueMicrotask(() => setState({ data: null, isLoading: false, error: null }));
+      setState({ data: null, isLoading: false, error: null });
       return;
     }
 
-    // Check cache first
-    const cached = cacheRef.current.get(serviceID);
+    const cached = cableVariationCache.get(serviceID);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       setState({ data: cached.data, isLoading: false, error: null });
       return;
     }
 
-    // Prevent duplicate requests
-    if (fetchingRef.current === serviceID) {
-      return;
-    }
+    if (activeFetch === serviceID) return;
 
-    fetchingRef.current = serviceID;
+    activeFetch = serviceID;
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     vtpassCableApi
       .getVariationCodes(serviceID)
       .then((response) => {
         if (response.success && response.data) {
-          // Update cache
-          cacheRef.current.set(serviceID, {
-            data: response.data,
-            timestamp: Date.now(),
-          });
-          setState({ data: response.data, isLoading: false, error: null });
+          cableVariationCache.set(serviceID, { data: response.data, timestamp: Date.now() });
+          if (mountedRef.current) setState({ data: response.data, isLoading: false, error: null });
         } else {
-          setState({
-            data: null,
-            isLoading: false,
-            error: "Failed to load subscription plans",
-          });
+          if (mountedRef.current) setState({ data: null, isLoading: false, error: "Failed to load subscription plans" });
         }
       })
       .catch((err) => {
-        const errorMessage = err instanceof Error ? err.message : "An error occurred";
-        setState({ data: null, isLoading: false, error: errorMessage });
+        const msg = err instanceof Error ? err.message : "An error occurred";
+        if (mountedRef.current) setState({ data: null, isLoading: false, error: msg });
       })
-      .finally(() => {
-        fetchingRef.current = null;
-      });
-  }, [serviceID, CACHE_DURATION]);
+      .finally(() => { activeFetch = null; });
+  }, [serviceID]);
 
   return {
     variationCodes: state.data,
@@ -81,9 +72,8 @@ export function useVtpassCableVariationCodes(serviceID: string | null) {
     error: state.error,
     refetch: () => {
       if (serviceID) {
-        cacheRef.current.delete(serviceID);
-        fetchingRef.current = null;
-        // Trigger re-fetch by updating state
+        cableVariationCache.delete(serviceID);
+        activeFetch = null;
         setState((prev) => ({ ...prev, isLoading: true }));
       }
     },

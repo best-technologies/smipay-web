@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, ArrowDownLeft, Eye, EyeOff } from "lucide-react";
+import { Copy, Check, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion } from "motion/react";
+import { AnimatedValue } from "./AnimatedValue";
 
 interface WalletCardProps {
   bankName?: string;
@@ -13,6 +14,7 @@ interface WalletCardProps {
   isLoading?: boolean;
   compact?: boolean;
   onFundWallet?: () => void;
+  onViewHistory?: () => void;
 }
 
 export function WalletCard({
@@ -24,6 +26,7 @@ export function WalletCard({
   isLoading = false,
   compact = false,
   onFundWallet,
+  onViewHistory,
 }: WalletCardProps) {
   const [copied, setCopied] = useState(false);
   const [balanceHidden, setBalanceHidden] = useState(false);
@@ -67,7 +70,9 @@ export function WalletCard({
             </p>
             <div className="flex items-center gap-2">
               <p className="text-xl font-bold text-white tabular-nums tracking-tight">
-                {balanceHidden ? "••••••" : `₦${balance.toLocaleString()}`}
+                {balanceHidden ? "••••••" : (
+                  <AnimatedValue value={`₦${balance.toLocaleString()}`} />
+                )}
               </p>
               <button
                 type="button"
@@ -115,8 +120,7 @@ export function WalletCard({
               onClick={onFundWallet}
               className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-xl text-[11px] font-semibold bg-[#ea580c] text-white hover:bg-[#c2410c] transition-colors shadow-lg shadow-orange-500/20"
             >
-              <ArrowDownLeft className="h-3.5 w-3.5" />
-              Fund
+              + Add Money
             </button>
           )}
         </div>
@@ -153,46 +157,34 @@ export function WalletCard({
 
       <div className="relative p-4 sm:p-5">
         {/* Row 1: Bank name + status + fund */}
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <span className="text-xs font-medium text-slate-400">
-            {isLoading ? (
-              <span className="inline-block h-3 w-20 rounded bg-white/10 animate-pulse" />
-            ) : (
-              bankName || "Smipay"
-            )}
-          </span>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span
-              className={`px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${
-                isActive
-                  ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20"
-                  : "bg-red-500/15 text-red-400 ring-1 ring-red-500/20"
-              }`}
-            >
-              {isActive ? "Active" : "Inactive"}
-            </span>
-            {onFundWallet && (
-              <button
-                type="button"
-                onClick={onFundWallet}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[#ea580c] text-white hover:bg-[#c2410c] transition-colors shadow-lg shadow-orange-500/20"
-              >
-                <ArrowDownLeft className="h-3 w-3" />
-                Fund
-              </button>
-            )}
-          </div>
-        </div>
+        {/* Bank name — hidden for now */}
+        {/* <span className="text-xs font-medium text-slate-400">
+          {isLoading ? (
+            <span className="inline-block h-3 w-20 rounded bg-white/10 animate-pulse" />
+          ) : (
+            bankName || "Smipay"
+          )}
+        </span> */}
+        {/* Active/Inactive badge — hidden for now */}
+        {/* <span
+          className={`px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${
+            isActive
+              ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20"
+              : "bg-red-500/15 text-red-400 ring-1 ring-red-500/20"
+          }`}
+        >
+          {isActive ? "Active" : "Inactive"}
+        </span> */}
 
         {/* Balance */}
         <p className="text-[11px] sm:text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
           Available balance
         </p>
-        <div className="flex items-center gap-2.5 mb-4">
+        <div className="flex items-center gap-2.5">
           <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
             {balanceHidden
               ? "••••••"
-              : `₦${balance.toLocaleString()}`}
+              : <AnimatedValue value={`₦${balance.toLocaleString()}`} />}
           </p>
           <button
             type="button"
@@ -207,8 +199,31 @@ export function WalletCard({
           </button>
         </div>
 
-        {/* Account number */}
-        {accountNumber ? (
+        {/* Transaction History + Add Money row */}
+        <div className="flex items-center justify-between mt-3">
+          {onViewHistory && (
+            <button
+              type="button"
+              onClick={onViewHistory}
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-slate-400 hover:text-white transition-colors"
+            >
+              Transaction History
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          )}
+          {onFundWallet && (
+            <button
+              type="button"
+              onClick={onFundWallet}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#ea580c] text-white hover:bg-[#c2410c] transition-colors shadow-lg shadow-orange-500/20"
+            >
+              + Add Money
+            </button>
+          )}
+        </div>
+
+        {/* Bank name, account number, account name — hidden for now */}
+        {/* {accountNumber ? (
           <>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[11px] text-slate-500">Account number</span>
@@ -239,7 +254,7 @@ export function WalletCard({
               Setting up your bank account...
             </p>
           </>
-        )}
+        )} */}
       </div>
     </motion.div>
   );

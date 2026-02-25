@@ -26,12 +26,16 @@ export function CardFundingAmount({
   const [amount, setAmount] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  const numericAmount = parseInt(amount, 10) || 0;
+  const numericAmount = parseInt(amount.replace(/,/g, ""), 10) || 0;
   const isValid = numericAmount >= MIN_AMOUNT && numericAmount <= MAX_AMOUNT;
 
+  const displayAmount = amount
+    ? numericAmount.toLocaleString()
+    : "";
+
   const handleAmountChange = (value: string) => {
-    const numericValue = value.replace(/[^0-9]/g, "");
-    setAmount(numericValue);
+    const raw = value.replace(/[^0-9]/g, "");
+    setAmount(raw);
     if (error) setError("");
   };
 
@@ -90,7 +94,7 @@ export function CardFundingAmount({
             type="text"
             inputMode="numeric"
             placeholder="0.00"
-            value={amount}
+            value={displayAmount}
             onChange={(e) => handleAmountChange(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isLoading}

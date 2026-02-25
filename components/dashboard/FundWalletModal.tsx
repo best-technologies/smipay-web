@@ -106,7 +106,6 @@ export function FundWalletModal({
     clearPaymentInProgress();
     setTimeout(() => {
       handleClose();
-      window.location.reload();
     }, 2000);
   };
 
@@ -138,7 +137,7 @@ export function FundWalletModal({
       />
 
       {/* Modal — bottom sheet on mobile, centered on sm+ */}
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={handleClose}>
         <div
           className="bg-dashboard-surface rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[92dvh] sm:max-h-[85vh] overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
@@ -180,8 +179,8 @@ export function FundWalletModal({
             {/* Step 1: Select Method */}
             {currentStep === "select-method" && (
               <div className="space-y-2.5">
-                {/* Bank Transfer */}
-                <button
+                {/* Bank Transfer — commented out for now */}
+                {/* <button
                   onClick={() => handleMethodSelect("bank-transfer")}
                   className="w-full flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border border-dashboard-border/60 hover:border-brand-bg-primary/40 hover:bg-brand-bg-primary/[0.03] transition-all group text-left touch-manipulation active:scale-[0.99]"
                 >
@@ -199,7 +198,7 @@ export function FundWalletModal({
                   <span className="text-dashboard-muted/40 group-hover:text-brand-bg-primary text-lg shrink-0 transition-colors">
                     →
                   </span>
-                </button>
+                </button> */}
 
                 {/* Card Funding */}
                 <button

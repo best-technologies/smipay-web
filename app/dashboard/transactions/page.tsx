@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -12,13 +12,8 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { transactionApi } from "@/services/transaction-api";
 import { getNetworkLogo } from "@/lib/network-logos";
-import type {
-  Transaction,
-  PaginationMeta,
-  CategoryCounts,
-} from "@/types/transaction";
+import { useTransactionStore } from "@/store/transaction-store";
 
 const PAGE_SIZE = 15;
 
@@ -44,48 +39,27 @@ const statusStyle = (s: string) =>
 export default function TransactionsPage() {
   const router = useRouter();
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta | null>(null);
-  const [categories, setCategories] = useState<CategoryCounts>({});
   const [page, setPage] = useState(1);
   const [activeType, setActiveType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchTransactions = useCallback(
-    async (p: number, type: string, search: string) => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await transactionApi.getAllTransactions({
-          page: p,
-          limit: PAGE_SIZE,
-          type: type !== "all" ? type : undefined,
-          search: search || undefined,
-        });
-        if (res.success && res.data) {
-          setTransactions(res.data.transactions);
-          setMeta(res.data.pagination);
-          setCategories(res.data.categories);
-        } else {
-          setError(res.message || "Failed to load transactions");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const { fetchTransactions, getCached, isLoading: loading, error } = useTransactionStore();
+
+  const cacheKey = `${page}|${activeType || "all"}|${searchQuery || ""}`;
+  const cached = getCached(cacheKey);
+
+  const transactions = cached?.transactions ?? [];
+  const meta = cached?.pagination ?? null;
+  const categories = cached?.categories ?? {};
 
   useEffect(() => {
-    fetchTransactions(page, activeType, searchQuery);
+    fetchTransactions({ page, limit: PAGE_SIZE, type: activeType, search: searchQuery });
   }, [page, activeType, searchQuery, fetchTransactions]);
+
+  const showSkeleton = loading && !cached;
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
@@ -186,8 +160,8 @@ export default function TransactionsPage() {
           </div>
         )}
 
-        {/* Summary bar */}
-        {meta && !loading && (
+        {/* Summary + compact pagination — single row */}
+        {meta && !showSkeleton && (
           <div className="flex items-center justify-between text-[11px] text-dashboard-muted px-0.5">
             <span>
               {meta.totalItems} transaction{meta.totalItems !== 1 && "s"}
@@ -199,15 +173,31 @@ export default function TransactionsPage() {
               )}
             </span>
             {meta.totalPages > 1 && (
-              <span>
-                Page {meta.currentPage} of {meta.totalPages}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded-md text-dashboard-muted hover:text-dashboard-heading disabled:opacity-25 disabled:pointer-events-none transition-colors touch-manipulation"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                <span className="tabular-nums text-dashboard-muted">
+                  {meta.currentPage}/{meta.totalPages}
+                </span>
+                <button
+                  disabled={page >= meta.totalPages}
+                  onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+                  className="p-1 rounded-md text-dashboard-muted hover:text-dashboard-heading disabled:opacity-25 disabled:pointer-events-none transition-colors touch-manipulation"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
             )}
           </div>
         )}
 
         {/* Loading skeleton */}
-        {loading && (
+        {showSkeleton && (
           <div className="rounded-2xl border border-dashboard-border/50 bg-dashboard-surface overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
@@ -229,11 +219,11 @@ export default function TransactionsPage() {
         )}
 
         {/* Error */}
-        {!loading && error && (
+        {!showSkeleton && error && (
           <div className="rounded-2xl border border-red-200/60 bg-red-50/50 p-6 text-center">
             <p className="text-sm text-red-500 mb-3">{error}</p>
             <button
-              onClick={() => fetchTransactions(page, activeType, searchQuery)}
+              onClick={() => fetchTransactions({ page, limit: PAGE_SIZE, type: activeType, search: searchQuery })}
               className="text-sm font-medium text-brand-bg-primary hover:underline"
             >
               Retry
@@ -242,7 +232,7 @@ export default function TransactionsPage() {
         )}
 
         {/* Empty state */}
-        {!loading && !error && transactions.length === 0 && (
+        {!showSkeleton && !error && transactions.length === 0 && (
           <div className="rounded-2xl border border-dashboard-border/50 bg-dashboard-surface p-10 text-center">
             <Receipt className="h-8 w-8 text-dashboard-muted/30 mx-auto mb-2.5" />
             <p className="text-sm font-medium text-dashboard-heading mb-0.5">
@@ -272,16 +262,15 @@ export default function TransactionsPage() {
         )}
 
         {/* Transaction list */}
-        {!loading && !error && transactions.length > 0 && (
+        {!showSkeleton && !error && transactions.length > 0 && (
           <div className="rounded-2xl border border-dashboard-border/50 bg-dashboard-surface overflow-hidden">
             {transactions.map((tx, idx) => {
               const isCredit = tx.credit_debit === "credit";
-              const logo =
-                !isCredit && tx.icon
-                  ? tx.icon
-                  : !isCredit
-                    ? getNetworkLogo(tx.type)
-                    : null;
+              const logo = isCredit
+                ? null
+                : (tx.provider ? getNetworkLogo(tx.provider) : null)
+                  ?? tx.icon
+                  ?? getNetworkLogo(tx.type);
 
               return (
                 <button
@@ -339,60 +328,6 @@ export default function TransactionsPage() {
           </div>
         )}
 
-        {/* Pagination */}
-        {meta && meta.totalPages > 1 && !loading && (
-          <div className="flex items-center justify-between pt-1">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="flex items-center gap-1 text-[12px] font-medium text-dashboard-muted hover:text-dashboard-heading disabled:opacity-30 disabled:pointer-events-none transition-colors touch-manipulation"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              Previous
-            </button>
-
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(meta.totalPages, 5) }).map(
-                (_, i) => {
-                  let p: number;
-                  if (meta.totalPages <= 5) {
-                    p = i + 1;
-                  } else if (page <= 3) {
-                    p = i + 1;
-                  } else if (page >= meta.totalPages - 2) {
-                    p = meta.totalPages - 4 + i;
-                  } else {
-                    p = page - 2 + i;
-                  }
-                  return (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`h-7 w-7 rounded-lg text-[12px] font-medium transition-colors touch-manipulation ${
-                        p === page
-                          ? "bg-brand-bg-primary text-white"
-                          : "text-dashboard-muted hover:bg-dashboard-bg/60"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  );
-                }
-              )}
-            </div>
-
-            <button
-              disabled={page >= (meta?.totalPages ?? 1)}
-              onClick={() =>
-                setPage((p) => Math.min(meta?.totalPages ?? 1, p + 1))
-              }
-              className="flex items-center gap-1 text-[12px] font-medium text-dashboard-muted hover:text-dashboard-heading disabled:opacity-30 disabled:pointer-events-none transition-colors touch-manipulation"
-            >
-              Next
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

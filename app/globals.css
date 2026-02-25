@@ -188,6 +188,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * Mobile readability: bump root font-size so all rem-based sizes
+ * (text, padding, gaps) scale up proportionally on small screens.
+ * Tailwind's text-xs (0.75rem) goes from 12px → ~13.5px,
+ *           text-sm (0.875rem) goes from 14px → ~15.75px, etc.
+ * Adjust the 18px value if directors want bigger/smaller.
+ */
+@media (max-width: 640px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 /* ── Auth form: professional input styling (breathing borders, focus glow) ── */
 .input-auth {
   @apply h-11 w-full min-w-0 rounded-xl border-2 bg-slate-50/90 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400;

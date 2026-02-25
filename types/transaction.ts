@@ -31,6 +31,7 @@ export interface Transaction {
   reference: string;
   sender: string | null;
   icon?: string | null;
+  provider?: string | null;
   payment_channel?: string | null;
   payment_method?: string | null;
 }

@@ -29,8 +29,8 @@ export default function SupportFAB() {
             Help & Support
           </span>
           {/* Button */}
-          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-brand-bg-primary text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95">
-            <Headphones className="h-5 w-5 sm:h-6 sm:w-6" />
+          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-brand-bg-primary text-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+            <Headphones className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
           </div>
         </div>
       </motion.button>

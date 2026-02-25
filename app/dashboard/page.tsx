@@ -26,7 +26,7 @@ import { useDashboard } from "@/hooks/useDashboard";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { Transaction as DashboardTransaction } from "@/types/dashboard";
 import { getNetworkLogo } from "@/lib/network-logos";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 const TRANSFER_ACTIONS = [
   { id: "to-smipay", name: "To Smipay", icon: Send, href: "/dashboard/transfer/smipay", comingSoon: true, bg: "var(--quick-action-1-bg)", color: "var(--quick-action-1)" },
@@ -264,6 +264,7 @@ function DashboardContent() {
               balance={parseBalance(dashboardData.wallet_card.current_balance)}
               isActive={primaryAccount?.isActive ?? true}
               onFundWallet={() => setIsFundWalletModalOpen(true)}
+              onViewHistory={() => router.push("/dashboard/transactions")}
             />
           </div>
 
@@ -346,7 +347,7 @@ function DashboardContent() {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface p-3 sm:p-4"
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 pt-5 pb-3 sm:p-4 sm:pt-5"
         >
           <div className="grid grid-cols-3">
             {TRANSFER_ACTIONS.map((action) => (
@@ -364,7 +365,7 @@ function DashboardContent() {
                     Soon
                   </span>
                 </div>
-                <span className="mt-1.5 text-[11px] sm:text-xs font-medium text-dashboard-heading leading-tight text-center">
+                <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
                   {action.name}
                 </span>
               </motion.div>
@@ -377,9 +378,9 @@ function DashboardContent() {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 py-3 sm:px-4 sm:py-4"
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4"
         >
-          <div className="grid grid-cols-4 gap-y-3 sm:gap-y-4">
+          <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6">
             {SERVICE_ACTIONS.map((action) => (
               <motion.div key={action.id} variants={item} className="flex flex-col items-center">
                 {action.comingSoon ? (
@@ -406,7 +407,7 @@ function DashboardContent() {
                     <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
                   </motion.button>
                 )}
-                <span className="mt-1.5 text-[10px] sm:text-[11px] font-medium text-dashboard-heading leading-tight text-center">
+                <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
                   {action.name}
                 </span>
               </motion.div>
@@ -416,21 +417,9 @@ function DashboardContent() {
 
         {/* Recent Transactions */}
         <section>
-          {dashboardData.transaction_history.length > 0 && (
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-[13px] font-semibold text-dashboard-heading">Recent Transactions</h2>
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/transactions")}
-                className="text-[12px] font-medium text-brand-bg-primary hover:text-brand-bg-primary/80 transition-colors touch-manipulation"
-              >
-                View all
-              </button>
-            </div>
-          )}
           <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
             {dashboardData.transaction_history.length > 0 ? (
-              <div>
+              <AnimatePresence mode="popLayout" initial={false}>
                 {dashboardData.transaction_history.slice(0, 5).map((transaction, idx) => {
                   const logo = getTransactionLogo(transaction);
                   const isCredit = transaction.credit_debit === "credit";
@@ -441,8 +430,13 @@ function DashboardContent() {
                         ? "text-[var(--tx-pending-text)]"
                         : "text-[var(--tx-failed-text)]";
                   return (
-                    <button
+                    <motion.button
                       key={transaction.id}
+                      layout
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                       type="button"
                       className={`flex w-full items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-left hover:bg-dashboard-bg/50 active:bg-dashboard-bg/70 transition-colors focus:outline-none focus-visible:bg-dashboard-bg/50 touch-manipulation ${
                         idx > 0 ? "border-t border-dashboard-border/40" : ""
@@ -489,10 +483,10 @@ function DashboardContent() {
                           {transaction.status}
                         </span>
                       </div>
-                    </button>
+                    </motion.button>
                   );
                 })}
-              </div>
+              </AnimatePresence>
             ) : (
               <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-dashboard-bg text-dashboard-muted">
@@ -509,9 +503,10 @@ function DashboardContent() {
       <FundWalletModal
         isOpen={isFundWalletModalOpen}
         onClose={() => {
+          const hadPayment = !!paymentReference;
           setIsFundWalletModalOpen(false);
           setPaymentReference(null);
-          refetch();
+          if (hadPayment) refetch();
         }}
         bankAccounts={dashboardData?.accounts || []}
         initialReference={paymentReference}
