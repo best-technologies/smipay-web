@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
 import {
@@ -237,25 +238,39 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Header – on mobile: title only; hamburger is top-right (Sidebar). Fund Wallet is inside wallet card. */}
       <motion.header
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
       >
-        <div className="flex items-stretch w-full">
-          <div className="flex-1 min-w-0 flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-            <div className="min-w-0 pr-12 lg:pr-0">
-              <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight truncate">
-                Dashboard
-              </h1>
-              <p className="text-xs sm:text-sm text-dashboard-muted mt-0.5">
-                Welcome back, {dashboardData.user.first_name}
-              </p>
-            </div>
-            {/* Fund Wallet is inside the wallet card only */}
-          </div>
+        <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("open-mobile-sidebar"))}
+            className="lg:hidden shrink-0 active:scale-95 transition-transform touch-manipulation"
+            aria-label="Open menu"
+          >
+            <Image
+              src="/smipay-icon.jpg"
+              alt="Smipay"
+              width={36}
+              height={36}
+              className="rounded-lg"
+              priority
+            />
+          </button>
+          <Image
+            src="/smipay-icon.jpg"
+            alt="Smipay"
+            width={36}
+            height={36}
+            className="rounded-lg shrink-0 hidden lg:block"
+            priority
+          />
+          <p className="text-base sm:text-lg font-semibold text-dashboard-heading tracking-tight truncate">
+            Hi, {dashboardData.user.first_name}
+          </p>
         </div>
       </motion.header>
 

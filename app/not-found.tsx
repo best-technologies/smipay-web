@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function NotFound() {
   return (
@@ -14,6 +15,16 @@ export default function NotFound() {
       />
 
       <div className="relative z-10 flex flex-col items-center max-w-md">
+        {/* Logo */}
+        <Image
+          src="/smipay-icon.jpg"
+          alt="Smipay"
+          width={56}
+          height={56}
+          className="rounded-2xl shadow-sm mb-6"
+          priority
+        />
+
         {/* Large 404 */}
         <p className="text-[120px] sm:text-[160px] font-extrabold leading-none tracking-tighter text-slate-200 select-none">
           404

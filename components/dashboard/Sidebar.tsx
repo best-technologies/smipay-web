@@ -14,7 +14,6 @@ import {
   LogOut,
   ChevronDown,
   ChevronRight,
-  Menu,
   X,
   Phone,
   Wifi,
@@ -132,11 +131,16 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  // By default, only keep VTU expanded; others collapsed
   const [openMenus, setOpenMenus] = useState<string[]>(["vtu"]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { dashboardData } = useDashboard();
-  // Lock body scroll when mobile sidebar is open so the dashboard behind doesn’t scroll
+
+  useEffect(() => {
+    const open = () => setIsMobileMenuOpen(true);
+    window.addEventListener("open-mobile-sidebar", open);
+    return () => window.removeEventListener("open-mobile-sidebar", open);
+  }, []);
+
   useEffect(() => {
     if (!isMobileMenuOpen) return;
     const prev = document.body.style.overflow;
@@ -160,11 +164,9 @@ export default function Sidebar() {
   };
 
   const isRouteEnabled = (href: string) => {
-    // Treat all Cable TV subtabs as enabled via the base /dashboard/cabletv route
     if (href.startsWith("/dashboard/cabletv")) {
       return ENABLED_ROUTES.includes("/dashboard/cabletv");
     }
-    // Treat all Education subtabs as enabled via the base /dashboard/education route
     if (href.startsWith("/dashboard/education")) {
       return ENABLED_ROUTES.includes("/dashboard/education");
     }
@@ -198,13 +200,13 @@ export default function Sidebar() {
               {user?.first_name} {user?.last_name}
             </p>
             <p className="text-xs text-dashboard-muted">
-              Balance: <span className="font-semibold text-emerald-600">₦{(dashboardData?.wallet_card?.current_balance) || "0.00"}</span>
+              Balance: <span className="font-semibold text-emerald-600">{"\u20A6"}{(dashboardData?.wallet_card?.current_balance) || "0.00"}</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Main Menu - Scrollable; min-h-0 lets this flex item shrink so overflow works */}
+      {/* Main Menu */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="p-4">
           <h3 className="text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-3">
@@ -296,7 +298,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Other Menu - Pinned to Bottom; shrink-0 keeps it visible */}
+      {/* Other Menu - Pinned to Bottom */}
       <div className="flex-shrink-0 p-4 border-t border-dashboard-border bg-dashboard-surface">
         <h3 className="text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-3">
           Other Menu
@@ -395,20 +397,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button – top-right on mobile (replaces Fund Wallet in header) */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-3 right-3 z-50 p-1.5 bg-dashboard-surface/90 backdrop-blur-sm rounded-lg shadow-sm border border-dashboard-border/60 touch-manipulation active:scale-95 transition-transform"
-        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-      >
-        {isMobileMenuOpen ? (
-          <X className="h-4.5 w-4.5 text-dashboard-heading" />
-        ) : (
-          <Menu className="h-4.5 w-4.5 text-dashboard-heading" />
-        )}
-      </button>
-
-      {/* Mobile Overlay – covers entire screen behind sidebar; tap to close; prevent scroll pass-through */}
+      {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-[45] touch-none"
@@ -422,7 +411,7 @@ export default function Sidebar() {
         {sidebarContent}
       </aside>
 
-      {/* Mobile Sidebar – solid opaque background; full viewport height, content scrolls inside; overflow-y-auto so only this panel scrolls */}
+      {/* Mobile Sidebar */}
       <aside
         className={`lg:hidden fixed top-0 left-0 w-[min(288px,85vw)] max-w-full h-dvh max-h-screen z-50 transform transition-transform duration-300 ease-out overscroll-contain ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
@@ -441,4 +430,3 @@ export default function Sidebar() {
     </>
   );
 }
-

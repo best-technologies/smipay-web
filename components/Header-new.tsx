@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronDown, Menu, X, LogOut, User, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,8 +20,18 @@ export default function HeaderNew() {
   return (
     <header className="w-full bg-brand-bg-primary text-white">
       <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="text-lg sm:text-xl font-semibold hover:opacity-90">
-          Smipay
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90">
+          <Image
+            src="/smipay-icon.jpg"
+            alt="Smipay"
+            width={32}
+            height={32}
+            className="rounded-lg"
+            priority
+          />
+          <span className="text-lg sm:text-xl font-bold tracking-tight">
+            Smipay
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
