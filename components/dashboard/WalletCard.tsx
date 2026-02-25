@@ -88,8 +88,8 @@ export function WalletCard({
             </div>
           </div>
 
-          {/* Account number + copy */}
-          {accountNumber && (
+          {/* Account number + copy — hidden for now */}
+          {/* {accountNumber && (
             <div className="flex items-center gap-2 flex-shrink-0">
               <div className="text-right">
                 <p className="text-[9px] text-slate-500 leading-tight">
@@ -111,7 +111,7 @@ export function WalletCard({
                 )}
               </button>
             </div>
-          )}
+          )} */}
 
           {/* Fund button */}
           {onFundWallet && (
