@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FundWalletModal } from "@/components/dashboard/FundWalletModal";
@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { WalletCard } from "@/components/dashboard/WalletCard";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useAuth } from "@/hooks/useAuth";
+import { OnboardingWalkthrough } from "@/components/dashboard/OnboardingWalkthrough";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { Transaction as DashboardTransaction } from "@/types/dashboard";
 import { getNetworkLogo } from "@/lib/network-logos";
@@ -65,10 +67,14 @@ const item = {
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // const { user } = useAuth();
+  const { user } = useAuth();
   const { dashboardData, isLoading: loading, error, refetch } = useDashboard();
   const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
+
+  const walletCardRef = useRef<HTMLDivElement>(null);
+  const quickLinksRef = useRef<HTMLDivElement>(null);
+  const showOnboarding = user?.has_completed_onboarding === false;
 
   useEffect(() => {
     const payment = searchParams.get("payment");
@@ -256,7 +262,7 @@ function DashboardContent() {
       <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 sm:space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Virtual Account Card - shown first on mobile */}
-          <div className="lg:col-span-2 order-1">
+          <div ref={walletCardRef} className="lg:col-span-2 order-1">
             <WalletCard
               bankName={primaryAccount?.bank_name}
               accountNumber={primaryAccount?.account_number}
@@ -375,6 +381,7 @@ function DashboardContent() {
 
         {/* Service Actions – Airtime & Data available; others Coming Soon */}
         <motion.section
+          ref={quickLinksRef}
           variants={container}
           initial="hidden"
           animate="visible"
@@ -511,6 +518,14 @@ function DashboardContent() {
         bankAccounts={dashboardData?.accounts || []}
         initialReference={paymentReference}
       />
+
+      {showOnboarding && dashboardData && (
+        <OnboardingWalkthrough
+          firstName={dashboardData.user.first_name}
+          walletCardRef={walletCardRef}
+          quickLinksRef={quickLinksRef}
+        />
+      )}
     </div>
   );
 }

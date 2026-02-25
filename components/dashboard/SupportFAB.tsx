@@ -22,6 +22,7 @@ export default function SupportFAB() {
         onClick={() => router.push("/dashboard/support")}
         className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 group"
         aria-label="Help & Support"
+        data-onboarding="support-fab"
       >
         <div className="relative flex items-center">
           {/* Label - desktop only */}

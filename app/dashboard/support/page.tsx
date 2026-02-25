@@ -1,32 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Plus,
+  MessageSquarePlus,
   Headphones,
   MessageCircle,
   Loader2,
   RefreshCw,
-  X,
+  Ticket,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
-import { supportApi } from "@/services/support-api";
 import { useUserSupportStore } from "@/store/user-support-store";
 import { connectUserSupportSocket } from "@/lib/user-support-socket";
-import type {
-  SupportTicketListItem,
-  CreateTicketPayload,
-} from "@/types/support";
-import {
-  SUPPORT_TYPES,
-  TICKET_STATUS_DISPLAY,
-} from "@/types/support";
+import type { ConversationListItem } from "@/types/support";
+import { CONVERSATION_STATUS_DISPLAY } from "@/types/support";
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -44,67 +35,75 @@ function relativeTime(iso: string): string {
 }
 
 const STATUS_COLOR_CLASSES: Record<string, string> = {
+  green: "bg-emerald-100 text-emerald-800 border-emerald-200",
   amber: "bg-amber-100 text-amber-800 border-amber-200",
   blue: "bg-blue-100 text-blue-800 border-blue-200",
-  orange: "bg-orange-100 text-orange-800 border-orange-200",
-  purple: "bg-purple-100 text-purple-800 border-purple-200",
-  green: "bg-emerald-100 text-emerald-800 border-emerald-200",
   slate: "bg-slate-100 text-slate-700 border-slate-200",
 };
 
-function TicketCard({ ticket }: { ticket: SupportTicketListItem }) {
+function ConversationCard({ conversation: c }: { conversation: ConversationListItem }) {
   const router = useRouter();
-  const statusInfo = TICKET_STATUS_DISPLAY[ticket.status] ?? {
-    label: ticket.status,
+  const statusInfo = CONVERSATION_STATUS_DISPLAY[c.status] ?? {
+    label: c.status,
     color: "slate",
   };
   const statusClasses =
     STATUS_COLOR_CLASSES[statusInfo.color] ?? STATUS_COLOR_CLASSES.slate;
-  const supportTypeLabel =
-    SUPPORT_TYPES.find((t) => t.value === ticket.support_type)?.label ??
-    ticket.support_type;
-  const lastPreview = ticket.last_message?.message ?? "No messages yet";
-  const isFromSupport = ticket.last_message?.is_from_user === false;
+
+  const lastPreview = c.last_message?.message ?? "No messages yet";
+  const isFromSupport = c.last_message?.is_from_user === false;
 
   return (
     <button
       type="button"
-      onClick={() => router.push(`/dashboard/support/${ticket.ticket_number}`)}
+      onClick={() => router.push(`/dashboard/support/${c.id}`)}
       className="w-full text-left rounded-xl border border-dashboard-border/60 bg-dashboard-surface p-3 sm:p-4 hover:bg-dashboard-surface/90 hover:border-dashboard-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-bg-primary/30"
     >
       <div className="flex gap-2 sm:gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+          {/* Agent name / waiting */}
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <h3 className="font-semibold text-dashboard-heading text-xs sm:text-sm truncate">
-              {ticket.subject}
+              {c.assigned_admin_name ?? "Waiting for support..."}
             </h3>
-            {ticket.has_unread && (
+            {c.has_unread && (
               <span className="shrink-0 h-2 w-2 rounded-full bg-blue-500" />
             )}
           </div>
+
+          {/* Status + ticket badge */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5">
             <span
               className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium border ${statusClasses}`}
             >
               {statusInfo.label}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-dashboard-bg text-dashboard-muted border border-dashboard-border/50">
-              {supportTypeLabel}
-            </span>
+            {c.ticket && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-dashboard-bg text-dashboard-muted border border-dashboard-border/50">
+                <Ticket className="h-2.5 w-2.5" />
+                {c.ticket.ticket_number}
+              </span>
+            )}
           </div>
+
+          {/* Last message preview */}
           <p
             className={`text-[11px] sm:text-xs text-dashboard-muted truncate ${
               isFromSupport ? "italic" : ""
             }`}
           >
-            {lastPreview}
+            {isFromSupport && c.last_message?.sender_name
+              ? `${c.last_message.sender_name}: ${lastPreview}`
+              : lastPreview}
           </p>
+
+          {/* Time + message count */}
           <div className="flex items-center gap-2 mt-2 text-[10px] sm:text-xs text-dashboard-muted">
-            <span>{relativeTime(ticket.updated_at)}</span>
+            <span>{relativeTime(c.last_message_at || c.updated_at)}</span>
             <span>•</span>
             <span className="inline-flex items-center gap-1">
               <MessageCircle className="h-3 w-3" />
-              {ticket.message_count} {ticket.message_count === 1 ? "msg" : "msgs"}
+              {c.message_count}
             </span>
           </div>
         </div>
@@ -127,207 +126,25 @@ function SkeletonCard() {
   );
 }
 
-interface CreateTicketModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSubmitSuccess: (ticketNumber: string) => void;
-}
-
-function CreateTicketModal({
-  open,
-  onClose,
-  onSubmitSuccess,
-}: CreateTicketModalProps) {
-  const { user } = useAuth();
-  const [subject, setSubject] = useState("");
-  const [description, setDescription] = useState("");
-  const [supportType, setSupportType] = useState<string>("GENERAL_INQUIRY");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const reset = useCallback(() => {
-    setSubject("");
-    setDescription("");
-    setSupportType("GENERAL_INQUIRY");
-    setError(null);
-  }, []);
-
-  useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.email) {
-      setError("You must be logged in to create a ticket.");
-      return;
-    }
-    const sub = subject.trim();
-    const desc = description.trim();
-    if (!sub || !desc) {
-      setError("Please fill in subject and description.");
-      return;
-    }
-
-    setSubmitting(true);
-    setError(null);
-    try {
-      const payload: CreateTicketPayload = {
-        subject: sub,
-        description: desc,
-        email: user.email,
-        phone_number: user.phone_number ?? undefined,
-        support_type: supportType,
-      };
-      const res = await supportApi.createTicket(payload);
-      if (res.success && res.data?.ticket) {
-        onClose();
-        onSubmitSuccess(res.data.ticket.ticket_number);
-      } else {
-        setError(res.message ?? "Failed to create ticket");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create ticket");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col"
-      >
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-dashboard-border/60">
-          <h2 className="text-base sm:text-lg font-bold text-dashboard-heading">
-            New Ticket
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 -m-1.5 rounded-lg hover:bg-dashboard-bg text-dashboard-muted hover:text-dashboard-heading transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col flex-1 min-h-0 overflow-auto"
-        >
-          <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs sm:text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-xs sm:text-sm font-medium text-dashboard-heading mb-1"
-              >
-                Subject <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Brief summary of your issue"
-                className="bg-dashboard-bg border-dashboard-border/60 text-dashboard-heading placeholder:text-dashboard-muted"
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-xs sm:text-sm font-medium text-dashboard-heading mb-1"
-              >
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Provide details so we can help you"
-                rows={4}
-                required
-                className="w-full px-3 py-2.5 text-sm bg-dashboard-bg border border-dashboard-border/60 rounded-md text-dashboard-heading placeholder:text-dashboard-muted focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20 resize-none"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="support_type"
-                className="block text-xs sm:text-sm font-medium text-dashboard-heading mb-1"
-              >
-                Support Type
-              </label>
-              <select
-                id="support_type"
-                value={supportType}
-                onChange={(e) => setSupportType(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm bg-dashboard-bg border border-dashboard-border/60 rounded-md text-dashboard-heading focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20"
-              >
-                {SUPPORT_TYPES.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-2 p-3 sm:p-4 border-t border-dashboard-border/60">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 bg-brand-bg-primary hover:bg-brand-bg-primary/90"
-            >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Create Ticket
-            </Button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
-  );
-}
-
 export default function SupportPage() {
   const router = useRouter();
   const {
-    tickets,
+    conversations,
     listLoading: loading,
     listError: error,
-    fetchTickets,
+    fetchConversations,
     invalidateList,
   } = useUserSupportStore();
-  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchTickets();
-  }, [fetchTickets]);
+    fetchConversations();
+  }, [fetchConversations]);
 
   const handleRetry = useCallback(() => {
-    fetchTickets(true);
-  }, [fetchTickets]);
+    fetchConversations(true);
+  }, [fetchConversations]);
 
-  // Socket.IO: listen for real-time ticket updates (new reply, status change)
+  // Socket.IO: listen for real-time conversation updates
   const socketConnected = useRef(false);
   useEffect(() => {
     if (socketConnected.current) return;
@@ -335,32 +152,36 @@ export default function SupportPage() {
 
     const socket = connectUserSupportSocket();
 
-    const handleTicketUpdated = (data: {
-      ticket_id: string;
+    const handleConversationUpdated = (data: {
+      conversation_id: string;
       event: string;
     }) => {
-      if (data.event === "new_reply" || data.event === "status_changed") {
+      if (
+        data.event === "new_reply" ||
+        data.event === "claimed" ||
+        data.event === "closed" ||
+        data.event === "ticket_created" ||
+        data.event === "handover_completed"
+      ) {
         invalidateList();
-        fetchTickets(true);
+        fetchConversations(true);
       }
     };
 
-    socket.on("ticket_updated", handleTicketUpdated);
+    socket.on("conversation_updated", handleConversationUpdated);
 
     return () => {
-      socket.off("ticket_updated", handleTicketUpdated);
+      socket.off("conversation_updated", handleConversationUpdated);
       socketConnected.current = false;
     };
-  }, [fetchTickets, invalidateList]);
+  }, [fetchConversations, invalidateList]);
 
-  const handleCreateSuccess = (ticketNumber: string) => {
-    invalidateList();
-    router.push(`/dashboard/support/${ticketNumber}`);
+  const handleStartChat = () => {
+    router.push("/dashboard/support/new");
   };
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Header */}
       <header className="bg-dashboard-surface border-b border-dashboard-border sticky top-0 z-10">
         <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 py-3 sm:px-4 sm:py-4">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -375,16 +196,15 @@ export default function SupportPage() {
             </h1>
           </div>
           <Button
-            onClick={() => setModalOpen(true)}
+            onClick={handleStartChat}
             className="shrink-0 bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-xs sm:text-sm gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2"
           >
-            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            New Ticket
+            <MessageSquarePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            Start Chat
           </Button>
         </div>
       </header>
 
-      {/* Content */}
       <main className="px-3 py-4 sm:px-4 sm:py-6">
         {loading ? (
           <div className="space-y-2 sm:space-y-3">
@@ -403,16 +223,12 @@ export default function SupportPage() {
             <p className="text-xs sm:text-sm text-dashboard-muted mb-4 max-w-[240px]">
               {error}
             </p>
-            <Button
-              onClick={handleRetry}
-              variant="outline"
-              className="gap-2"
-            >
+            <Button onClick={handleRetry} variant="outline" className="gap-2">
               <RefreshCw className="h-4 w-4" />
               Retry
             </Button>
           </div>
-        ) : tickets.length === 0 ? (
+        ) : conversations.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -422,17 +238,17 @@ export default function SupportPage() {
               <Headphones className="h-7 w-7 sm:h-8 sm:w-8" />
             </div>
             <p className="text-sm sm:text-base font-semibold text-dashboard-heading mb-1">
-              No tickets yet
+              Need help?
             </p>
             <p className="text-xs sm:text-sm text-dashboard-muted mb-4 max-w-[260px]">
-              Need help? Create a ticket and our team will get back to you soon.
+              Start a chat and our team will respond. No forms needed.
             </p>
             <Button
-              onClick={() => setModalOpen(true)}
+              onClick={handleStartChat}
               className="bg-brand-bg-primary hover:bg-brand-bg-primary/90 gap-2"
             >
-              <Plus className="h-4 w-4" />
-              Create your first ticket
+              <MessageSquarePlus className="h-4 w-4" />
+              Start Chat
             </Button>
           </motion.div>
         ) : (
@@ -442,28 +258,20 @@ export default function SupportPage() {
             className="space-y-2 sm:space-y-3"
           >
             <AnimatePresence mode="popLayout">
-              {tickets.map((ticket, i) => (
+              {conversations.map((conv, i) => (
                 <motion.div
-                  key={ticket.id}
+                  key={conv.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
                 >
-                  <TicketCard ticket={ticket} />
+                  <ConversationCard conversation={conv} />
                 </motion.div>
               ))}
             </AnimatePresence>
           </motion.div>
         )}
       </main>
-
-      <AnimatePresence>
-        <CreateTicketModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onSubmitSuccess={handleCreateSuccess}
-        />
-      </AnimatePresence>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Send,
@@ -10,6 +10,8 @@ import {
   RefreshCw,
   Star,
   AlertCircle,
+  Ticket,
+  UserCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,13 +19,17 @@ import { supportApi } from "@/services/support-api";
 import { useUserSupportStore } from "@/store/user-support-store";
 import {
   connectUserSupportSocket,
-  joinTicketRoom,
-  leaveTicketRoom,
+  joinConversationRoom,
+  leaveConversationRoom,
   emitUserTyping,
   emitUserStopTyping,
 } from "@/lib/user-support-socket";
-import type { SupportTicketDetail, SupportMessage } from "@/types/support";
-import { TICKET_STATUS_DISPLAY } from "@/types/support";
+import type {
+  ConversationDetail,
+  ConversationMessage,
+  ConversationStatus,
+} from "@/types/support";
+import { CONVERSATION_STATUS_DISPLAY } from "@/types/support";
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -54,81 +60,86 @@ function isSameDay(a: string, b: string): boolean {
   );
 }
 
-function getMsgTime(msg: SupportMessage): string {
+function getMsgTime(msg: ConversationMessage): string {
   return msg.createdAt ?? msg.created_at ?? "";
 }
 
 const STATUS_COLOR_CLASSES: Record<string, string> = {
+  green: "bg-emerald-100 text-emerald-800 border-emerald-200",
   amber: "bg-amber-100 text-amber-800 border-amber-200",
   blue: "bg-blue-100 text-blue-800 border-blue-200",
-  orange: "bg-orange-100 text-orange-800 border-orange-200",
-  purple: "bg-purple-100 text-purple-800 border-purple-200",
-  green: "bg-emerald-100 text-emerald-800 border-emerald-200",
   slate: "bg-slate-100 text-slate-700 border-slate-200",
 };
 
-interface LocalMessage extends SupportMessage {
+interface LocalMessage extends ConversationMessage {
   _tempId?: string;
   _sending?: boolean;
   _error?: string;
 }
 
-export default function TicketDetailPage() {
+export default function ConversationChatPage() {
   const params = useParams();
-  const ticketNumber = String(params.ticketNumber ?? "");
+  const router = useRouter();
+  const conversationId = String(params.id ?? "");
   const { user } = useAuth();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { fetchDetail, invalidateDetail } = useUserSupportStore();
+  const { fetchDetail, invalidateDetail, invalidateList } =
+    useUserSupportStore();
 
-  const [ticket, setTicket] = useState<SupportTicketDetail | null>(null);
+  const [conversation, setConversation] = useState<ConversationDetail | null>(
+    null,
+  );
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [sending, setSending] = useState(false);
+  const [supportTyping, setSupportTyping] = useState(false);
+  const [agentName, setAgentName] = useState<string | null>(null);
+
+  // Rating state
   const [hasRated, setHasRated] = useState(false);
   const [existingRating, setExistingRating] = useState<number | null>(null);
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [ratingValue, setRatingValue] = useState(0);
   const [ratingFeedback, setRatingFeedback] = useState("");
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
-  const [supportTyping, setSupportTyping] = useState(false);
 
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const ticketIdRef = useRef<string | null>(null);
 
   const scrollToBottom = useCallback(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const fetchTicket = useCallback(
+  // ─── Fetch conversation detail ────────────────────────────────────
+  const fetchConversation = useCallback(
     async (force = false) => {
-      if (!ticketNumber) return;
+      if (!conversationId) return;
       setLoading(true);
       setError(null);
-      const t = await fetchDetail(ticketNumber, force);
-      if (t) {
-        setTicket(t);
-        ticketIdRef.current = t.id;
+      const c = await fetchDetail(conversationId, force);
+      if (c) {
+        setConversation(c);
+        setAgentName(c.assigned_admin_name);
         setMessages(
-          (t.messages ?? []).map((m) => ({ ...m, _tempId: undefined }))
+          (c.messages ?? []).map((m) => ({ ...m, _tempId: undefined })),
         );
 
-        if (t.satisfaction_rating != null) {
+        if (c.satisfaction_rating != null) {
           setHasRated(true);
-          setExistingRating(t.satisfaction_rating);
+          setExistingRating(c.satisfaction_rating);
         } else {
           try {
-            const stored = sessionStorage.getItem(`rated:${ticketNumber}`);
+            const stored = sessionStorage.getItem(`rated:conv:${conversationId}`);
             if (stored) {
               setHasRated(true);
               setExistingRating(Number(stored));
             }
           } catch {
-            // sessionStorage unavailable
+            /* noop */
           }
         }
       } else {
@@ -137,23 +148,22 @@ export default function TicketDetailPage() {
       }
       setLoading(false);
     },
-    [ticketNumber, fetchDetail],
+    [conversationId, fetchDetail],
   );
 
   useEffect(() => {
-    fetchTicket();
-  }, [fetchTicket]);
+    fetchConversation();
+  }, [fetchConversation]);
 
-  // Socket.IO: connect, join room, listen for events
+  // ─── Socket.IO ────────────────────────────────────────────────────
   useEffect(() => {
-    if (!ticketIdRef.current) return;
-    const ticketId = ticketIdRef.current;
+    if (!conversationId || loading) return;
 
     const socket = connectUserSupportSocket();
-    joinTicketRoom(ticketId);
+    joinConversationRoom(conversationId);
 
     const handleNewMessage = (data: {
-      ticket_id: string;
+      conversation_id: string;
       message: {
         id: string;
         message: string;
@@ -164,12 +174,12 @@ export default function TicketDetailPage() {
         createdAt: string;
       };
     }) => {
-      if (data.ticket_id !== ticketId) return;
+      if (data.conversation_id !== conversationId) return;
 
       setMessages((prev) => {
-        // If this message confirms an optimistic one, replace it
         const optimisticIdx = prev.findIndex(
-          (m) => m._tempId && m._sending && m.message === data.message.message
+          (m) =>
+            m._tempId && m._sending && m.message === data.message.message,
         );
         if (optimisticIdx >= 0) {
           const next = [...prev];
@@ -180,7 +190,6 @@ export default function TicketDetailPage() {
           return next;
         }
 
-        // Don't add duplicates
         if (prev.some((m) => m.id === data.message.id)) return prev;
 
         return [
@@ -191,50 +200,107 @@ export default function TicketDetailPage() {
       setSupportTyping(false);
     };
 
-    const handleStatusChanged = (data: {
-      ticket_id: string;
-      new_status: string;
-      resolution_notes?: string;
+    const handleConversationClaimed = (data: {
+      conversation_id: string;
+      assigned_admin_name: string;
     }) => {
-      if (data.ticket_id !== ticketId) return;
-      setTicket((prev) =>
-        prev ? { ...prev, status: data.new_status } : prev
+      if (data.conversation_id !== conversationId) return;
+      setAgentName(data.assigned_admin_name);
+      setConversation((prev) =>
+        prev
+          ? {
+              ...prev,
+              assigned_admin_name: data.assigned_admin_name,
+              status: "active" as ConversationStatus,
+            }
+          : prev,
       );
     };
 
+    const handleConversationClosed = (data: {
+      conversation_id: string;
+    }) => {
+      if (data.conversation_id !== conversationId) return;
+      setConversation((prev) =>
+        prev ? { ...prev, status: "closed" as ConversationStatus } : prev,
+      );
+    };
+
+    const handleTicketCreated = (data: {
+      conversation_id: string;
+      ticket: {
+        id: string;
+        ticket_number: string;
+        subject: string;
+        support_type: string;
+        priority: string;
+        status: string;
+      };
+    }) => {
+      if (data.conversation_id !== conversationId) return;
+      setConversation((prev) =>
+        prev ? { ...prev, ticket: data.ticket } : prev,
+      );
+    };
+
+    const handleConversationUpdated = (data: {
+      conversation_id: string;
+      event: string;
+      assigned_admin_name?: string;
+    }) => {
+      if (data.conversation_id !== conversationId) return;
+      if (data.event === "claimed" && data.assigned_admin_name) {
+        setAgentName(data.assigned_admin_name);
+      }
+      if (data.event === "handover_completed" && data.assigned_admin_name) {
+        setAgentName(data.assigned_admin_name);
+      }
+      if (data.event === "closed") {
+        setConversation((prev) =>
+          prev ? { ...prev, status: "closed" as ConversationStatus } : prev,
+        );
+      }
+    };
+
     const handleTyping = (data: {
-      ticket_id: string;
+      conversation_id: string;
       is_admin?: boolean;
     }) => {
-      if (data.ticket_id !== ticketId || !data.is_admin) return;
+      if (data.conversation_id !== conversationId || !data.is_admin) return;
       setSupportTyping(true);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(
         () => setSupportTyping(false),
-        4000
+        4000,
       );
     };
 
-    const handleStopTyping = (data: { ticket_id: string }) => {
-      if (data.ticket_id !== ticketId) return;
+    const handleStopTyping = (data: { conversation_id: string }) => {
+      if (data.conversation_id !== conversationId) return;
       setSupportTyping(false);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
 
     socket.on("new_message", handleNewMessage);
-    socket.on("status_changed", handleStatusChanged);
+    socket.on("conversation_claimed", handleConversationClaimed);
+    socket.on("conversation_closed", handleConversationClosed);
+    socket.on("ticket_created_from_conversation", handleTicketCreated);
+    socket.on("conversation_updated", handleConversationUpdated);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
 
     return () => {
-      leaveTicketRoom(ticketId);
+      leaveConversationRoom(conversationId);
       socket.off("new_message", handleNewMessage);
-      socket.off("status_changed", handleStatusChanged);
+      socket.off("conversation_claimed", handleConversationClaimed);
+      socket.off("conversation_closed", handleConversationClosed);
+      socket.off("ticket_created_from_conversation", handleTicketCreated);
+      socket.off("conversation_updated", handleConversationUpdated);
       socket.off("typing", handleTyping);
       socket.off("stop_typing", handleStopTyping);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
-  }, [ticket?.id]);
+  }, [conversationId, loading]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -253,31 +319,28 @@ export default function TicketDetailPage() {
     el.style.height = `${Math.min(Math.max(el.scrollHeight, 40), maxHeight)}px`;
   }, [inputValue]);
 
-  const isClosed =
-    ticket?.status === "resolved" || ticket?.status === "closed";
+  const isClosed = conversation?.status === "closed";
   const showRatingForm =
-    (ticket?.status === "resolved" || ticket?.status === "closed") &&
-    !hasRated &&
-    !ratingSubmitted &&
-    !ratingSubmitting;
-  const canSend = !isClosed && !!user?.email;
+    isClosed && !hasRated && !ratingSubmitted && !ratingSubmitting;
+  const canSend = !isClosed;
 
+  // ─── Send message ─────────────────────────────────────────────────
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     const msg = inputValue.trim();
-    if (!msg || sending || !user?.email || !ticketNumber) return;
+    if (!msg || sending || !conversationId) return;
 
-    emitUserStopTyping(ticketIdRef.current ?? "");
+    emitUserStopTyping(conversationId);
 
     const tempId = `opt-${Date.now()}`;
     const displayName =
-      [user.first_name, user.last_name].filter(Boolean).join(" ") || "You";
+      [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "You";
     const optimistic: LocalMessage = {
       id: tempId,
       message: msg,
       is_from_user: true,
       sender_name: displayName,
-      sender_email: user.email,
+      sender_email: user?.email ?? null,
       attachments: null,
       created_at: new Date().toISOString(),
       _tempId: tempId,
@@ -289,32 +352,35 @@ export default function TicketDetailPage() {
     setSending(true);
 
     try {
-      const res = await supportApi.sendMessage({
-        ticket_number: ticketNumber,
+      const res = await supportApi.sendChat({
         message: msg,
-        email: user.email,
+        conversation_id: conversationId,
       });
 
-      if (res.success && res.data?.message) {
-        const serverMsg = res.data.message;
-        setMessages((prev) =>
-          prev.map((m) =>
-            m._tempId === tempId
-              ? {
-                  ...serverMsg,
-                  created_at: serverMsg.created_at ?? serverMsg.createdAt ?? "",
-                  createdAt: serverMsg.createdAt ?? serverMsg.created_at ?? "",
-                }
-              : m
-          )
-        );
+      if (res.success && res.data) {
+        if ("message" in res.data && res.data.message) {
+          const serverMsg = res.data.message;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m._tempId === tempId
+                ? {
+                    ...serverMsg,
+                    created_at:
+                      serverMsg.created_at ?? serverMsg.createdAt ?? "",
+                    createdAt:
+                      serverMsg.createdAt ?? serverMsg.created_at ?? "",
+                  }
+                : m,
+            ),
+          );
+        }
       } else {
         setMessages((prev) =>
           prev.map((m) =>
             m._tempId === tempId
               ? { ...m, _sending: false, _error: res.message ?? "Failed" }
-              : m
-          )
+              : m,
+          ),
         );
       }
     } catch (err) {
@@ -325,21 +391,24 @@ export default function TicketDetailPage() {
                 ...m,
                 _sending: false,
                 _error:
-                  err instanceof Error ? err.message : "Failed to send message",
+                  err instanceof Error
+                    ? err.message
+                    : "Failed to send message",
               }
-            : m
-        )
+            : m,
+        ),
       );
     } finally {
       setSending(false);
       scrollToBottom();
-      invalidateDetail(ticketNumber);
+      invalidateDetail(conversationId);
+      invalidateList();
     }
   };
 
   const handleRetryMessage = (tempId: string) => {
     const m = messages.find((x) => x._tempId === tempId);
-    if (!m || !user?.email) return;
+    if (!m) return;
     setInputValue(m.message);
     setMessages((prev) => prev.filter((x) => x._tempId !== tempId));
   };
@@ -350,24 +419,24 @@ export default function TicketDetailPage() {
       handleSendMessage(e);
       return;
     }
-    if (ticketIdRef.current) {
-      emitUserTyping(ticketIdRef.current);
+    if (conversationId) {
+      emitUserTyping(conversationId);
     }
   };
 
+  // ─── Rating ───────────────────────────────────────────────────────
   const handleRateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (ratingValue < 1 || ratingValue > 5) return;
     setRatingSubmitting(true);
     try {
-      await supportApi.rateTicket(ticketNumber, {
+      await supportApi.rateConversation(conversationId, {
         rating: ratingValue,
         feedback: ratingFeedback.trim() || undefined,
       });
       markAsRated(ratingValue);
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : String(err);
+      const msg = err instanceof Error ? err.message : String(err);
       if (msg.toLowerCase().includes("already rated")) {
         markAsRated(ratingValue || existingRating || 5);
       }
@@ -380,21 +449,22 @@ export default function TicketDetailPage() {
     setHasRated(true);
     setRatingSubmitted(true);
     setExistingRating(rating);
-    setTicket((prev) =>
-      prev ? { ...prev, satisfaction_rating: rating } : prev
+    setConversation((prev) =>
+      prev ? { ...prev, satisfaction_rating: rating } : prev,
     );
-    invalidateDetail(ticketNumber);
+    invalidateDetail(conversationId);
     try {
-      sessionStorage.setItem(`rated:${ticketNumber}`, String(rating));
+      sessionStorage.setItem(`rated:conv:${conversationId}`, String(rating));
     } catch {
-      // sessionStorage unavailable
+      /* noop */
     }
   };
 
-  if (!ticketNumber) {
+  // ─── Render: loading ──────────────────────────────────────────────
+  if (!conversationId) {
     return (
       <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
-        <p className="text-dashboard-muted">Invalid ticket</p>
+        <p className="text-dashboard-muted">Invalid conversation</p>
       </div>
     );
   }
@@ -443,7 +513,8 @@ export default function TicketDetailPage() {
     );
   }
 
-  if (error && !ticket) {
+  // ─── Render: error ────────────────────────────────────────────────
+  if (error && !conversation) {
     return (
       <div className="min-h-screen bg-dashboard-bg flex flex-col">
         <header className="bg-dashboard-surface border-b border-dashboard-border sticky top-0 z-10">
@@ -455,7 +526,7 @@ export default function TicketDetailPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <h1 className="text-base font-semibold text-dashboard-heading truncate">
-              {ticketNumber}
+              Conversation
             </h1>
           </div>
         </header>
@@ -471,7 +542,7 @@ export default function TicketDetailPage() {
           </p>
           <button
             type="button"
-            onClick={() => fetchTicket(true)}
+            onClick={() => fetchConversation(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashboard-border bg-dashboard-surface text-dashboard-heading hover:bg-dashboard-surface/90 transition-colors text-sm"
           >
             <RefreshCw className="h-4 w-4" />
@@ -482,14 +553,14 @@ export default function TicketDetailPage() {
     );
   }
 
-  const t = ticket!;
-  const statusInfo =
-    (TICKET_STATUS_DISPLAY as Record<string, { label: string; color: string }>)[
-      t.status
-    ] ?? { label: t.status, color: "slate" };
+  // ─── Render: chat ─────────────────────────────────────────────────
+  const c = conversation!;
+  const statusInfo = CONVERSATION_STATUS_DISPLAY[c.status] ?? {
+    label: c.status,
+    color: "slate",
+  };
   const statusClasses =
     STATUS_COLOR_CLASSES[statusInfo.color] ?? STATUS_COLOR_CLASSES.slate;
-
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "You";
 
@@ -507,21 +578,47 @@ export default function TicketDetailPage() {
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-base sm:text-lg font-semibold text-dashboard-heading truncate">
-                {t.ticket_number}
+              <h1 className="text-sm sm:text-base font-semibold text-dashboard-heading truncate flex items-center gap-1.5">
+                {agentName ? (
+                  <>
+                    <UserCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    {agentName}
+                  </>
+                ) : (
+                  "Waiting for support..."
+                )}
               </h1>
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border shrink-0 ${statusClasses}`}
+                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium border shrink-0 ${statusClasses}`}
               >
                 {statusInfo.label}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-dashboard-muted truncate mt-0.5">
-              {t.subject}
-            </p>
+            {c.ticket && (
+              <p className="text-[10px] sm:text-xs text-dashboard-muted mt-0.5 flex items-center gap-1">
+                <Ticket className="h-3 w-3" />
+                Ticket: {c.ticket.ticket_number}
+              </p>
+            )}
           </div>
         </div>
       </header>
+
+      {/* Agent assignment banner */}
+      <AnimatePresence>
+        {agentName && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-emerald-50 border-b border-emerald-200 px-3 py-2 text-center"
+          >
+            <p className="text-xs text-emerald-700 font-medium">
+              {agentName} is helping you
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chat thread */}
       <div
@@ -535,29 +632,19 @@ export default function TicketDetailPage() {
             </p>
           ) : (
             <>
-              {t.description && (
-                <div className="rounded-xl bg-dashboard-surface border border-dashboard-border/60 px-3 py-2.5 mb-2">
-                  <p className="text-[10px] sm:text-xs font-medium text-dashboard-muted uppercase tracking-wide mb-1">
-                    Ticket description
-                  </p>
-                  <p className="text-xs sm:text-sm text-dashboard-heading whitespace-pre-wrap break-words">
-                    {t.description}
-                  </p>
-                </div>
-              )}
               {messages.map((msg, idx) => {
                 const time = getMsgTime(msg);
-                const prevTime = idx > 0 ? getMsgTime(messages[idx - 1]!) : "";
+                const prevTime =
+                  idx > 0 ? getMsgTime(messages[idx - 1]!) : "";
                 const showDateSep =
                   idx === 0 || !isSameDay(prevTime, time);
                 const isUser = msg.is_from_user;
                 const sender =
-                  msg.sender_name ??
-                  (isUser ? displayName : "Support");
+                  msg.sender_name ?? (isUser ? displayName : "Support");
 
                 return (
-                  <div key={msg.id} className="space-y-2">
-                    {showDateSep && (
+                  <div key={msg._tempId ?? msg.id} className="space-y-2">
+                    {showDateSep && time && (
                       <p className="text-center text-xs text-dashboard-muted py-2">
                         {formatDate(time)}
                       </p>
@@ -584,7 +671,7 @@ export default function TicketDetailPage() {
                               isUser ? "opacity-75" : "text-dashboard-muted"
                             }`}
                           >
-                            {relativeTime(time)}
+                            {time ? relativeTime(time) : ""}
                           </span>
                           {msg._sending && (
                             <Loader2 className="h-3 w-3 animate-spin opacity-75" />
@@ -593,7 +680,8 @@ export default function TicketDetailPage() {
                             <button
                               type="button"
                               onClick={() =>
-                                msg._tempId && handleRetryMessage(msg._tempId)
+                                msg._tempId &&
+                                handleRetryMessage(msg._tempId)
                               }
                               className="text-[10px] text-red-400 hover:text-red-300 underline"
                             >
@@ -622,7 +710,9 @@ export default function TicketDetailPage() {
                         <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:150ms]" />
                         <span className="h-1.5 w-1.5 rounded-full bg-dashboard-muted animate-bounce [animation-delay:300ms]" />
                       </span>
-                      <span className="text-xs text-dashboard-muted">Support is typing...</span>
+                      <span className="text-xs text-dashboard-muted">
+                        {agentName ?? "Support"} is typing...
+                      </span>
                     </div>
                   </motion.div>
                 )}
@@ -634,13 +724,11 @@ export default function TicketDetailPage() {
         </div>
       </div>
 
-      {/* Resolved/Closed banner */}
+      {/* Closed banner */}
       {isClosed && (
         <div className="shrink-0 px-3 py-2 sm:px-4 bg-dashboard-surface border-t border-dashboard-border">
           <p className="text-xs sm:text-sm text-dashboard-muted text-center">
-            {t.status === "resolved"
-              ? "This ticket has been resolved"
-              : "This ticket is closed"}
+            This conversation is closed
           </p>
         </div>
       )}
@@ -700,39 +788,41 @@ export default function TicketDetailPage() {
         )}
       </AnimatePresence>
 
-      {(ratingSubmitted || (hasRated && !showRatingForm)) && (() => {
-        const displayRating =
-          existingRating ?? ticket?.satisfaction_rating ?? ratingValue;
-        return (
-          <div className="shrink-0 px-3 py-4 sm:px-4 bg-dashboard-surface border-t border-dashboard-border">
-            <div className="max-w-md mx-auto text-center">
-              <p className="text-sm font-medium text-emerald-600 mb-1.5">
-                {ratingSubmitted
-                  ? "Thank you for your feedback"
-                  : "You rated this ticket"}
-              </p>
-              <div className="flex justify-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`h-5 w-5 ${
-                      star <= displayRating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-dashboard-muted/30"
-                    }`}
-                  />
-                ))}
+      {/* Already rated display */}
+      {(ratingSubmitted || (hasRated && !showRatingForm)) &&
+        (() => {
+          const dr =
+            existingRating ??
+            conversation?.satisfaction_rating ??
+            ratingValue;
+          return (
+            <div className="shrink-0 px-3 py-4 sm:px-4 bg-dashboard-surface border-t border-dashboard-border">
+              <div className="max-w-md mx-auto text-center">
+                <p className="text-sm font-medium text-emerald-600 mb-1.5">
+                  {ratingSubmitted
+                    ? "Thank you for your feedback"
+                    : "You rated this conversation"}
+                </p>
+                <div className="flex justify-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`h-5 w-5 ${
+                        star <= dr
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-dashboard-muted/30"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
       {/* Message input */}
       {canSend && (
-        <div
-          className="shrink-0 px-3 py-3 sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 bg-dashboard-surface border-t border-dashboard-border"
-        >
+        <div className="shrink-0 px-3 py-3 sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 bg-dashboard-surface border-t border-dashboard-border">
           <form
             onSubmit={handleSendMessage}
             className="flex gap-2 items-end max-w-2xl mx-auto"

@@ -37,35 +37,50 @@ interface CachedCoords {
 }
 
 const LOCATION_CACHE_KEY = "smipay-geo-cache";
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const PERMISSION_KEY = "smipay-geo-perm";
+// Cache location for 30 minutes — avoids repeated prompts while still
+// giving the backend reasonably fresh coordinates.
+const CACHE_TTL_MS = 30 * 60 * 1000;
+// Only re-request from the browser at most once per 30 minutes.
+const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 let cachedLocation: CachedCoords | null = null;
-// Timer handle kept for potential future cleanup
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- assigned for possible clearInterval later
 let locationRefreshTimer: ReturnType<typeof setInterval> | null = null;
 let locationRequested = false;
 
 function persistLocation(coords: CachedCoords): void {
   try {
-    sessionStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(coords));
-  } catch {
-    // sessionStorage may be unavailable
-  }
+    localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(coords));
+  } catch { /* storage unavailable */ }
 }
 
 function loadPersistedLocation(): CachedCoords | null {
   try {
-    const raw = sessionStorage.getItem(LOCATION_CACHE_KEY);
+    const raw = localStorage.getItem(LOCATION_CACHE_KEY);
     if (!raw) return null;
     const parsed: CachedCoords = JSON.parse(raw);
-    if (Date.now() - parsed.timestamp > REFRESH_INTERVAL_MS) return null;
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) return null;
     return parsed;
   } catch {
     return null;
   }
 }
 
+function setPermissionState(state: "granted" | "denied"): void {
+  try { localStorage.setItem(PERMISSION_KEY, state); } catch { /* */ }
+}
+
+function getPermissionState(): string | null {
+  try { return localStorage.getItem(PERMISSION_KEY); } catch { return null; }
+}
+
 function fetchPosition(): void {
   if (typeof navigator === "undefined" || !navigator.geolocation) return;
+
+  // If user previously denied, don't prompt again — backend uses IP fallback.
+  if (getPermissionState() === "denied") return;
+
+  // If cache is still fresh, skip the browser call entirely.
+  if (cachedLocation && Date.now() - cachedLocation.timestamp < CACHE_TTL_MS) return;
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
@@ -75,33 +90,80 @@ function fetchPosition(): void {
         timestamp: Date.now(),
       };
       persistLocation(cachedLocation);
+      setPermissionState("granted");
     },
-    () => {
-      // User denied or error — silently ignore; backend uses IP fallback.
+    (err) => {
+      // PERMISSION_DENIED (code 1) = user said no — remember and stop asking.
+      // Other errors (timeout, position unavailable) are transient; don't block future attempts.
+      if (err.code === err.PERMISSION_DENIED) {
+        setPermissionState("denied");
+      }
     },
-    { enableHighAccuracy: false, timeout: 10_000, maximumAge: REFRESH_INTERVAL_MS }
+    { enableHighAccuracy: false, timeout: 10_000, maximumAge: CACHE_TTL_MS }
   );
 }
 
 /**
- * Initialise geolocation: request permission, cache result, set up
- * periodic refresh (every 5 min) and refresh on tab-foreground.
+ * Initialise geolocation: load cached coords, request permission once
+ * if needed, then refresh silently in the background.
  * Safe to call multiple times — only runs once.
  */
 export function initGeolocation(): void {
   if (typeof window === "undefined" || locationRequested) return;
   locationRequested = true;
 
-  // Load any recent cached value so the very first request has coords
   cachedLocation = loadPersistedLocation();
 
-  // Initial fetch
-  fetchPosition();
+  // Use the Permissions API (where supported) to check without prompting.
+  // This avoids the iOS/Safari repeated dialog entirely when permission
+  // was already granted or denied.
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions
+      .query({ name: "geolocation" as PermissionName })
+      .then((status) => {
+        if (status.state === "granted") setPermissionState("granted");
+        if (status.state === "denied") {
+          setPermissionState("denied");
+          return; // respect the denial — backend uses IP fallback
+        }
 
-  // Periodic refresh
+        // Permission already granted — safe to fetch silently
+        if (status.state === "granted" && !cachedLocation) {
+          fetchPosition();
+        }
+
+        // "prompt" — only ask once if we have no coords at all
+        if (status.state === "prompt" && !cachedLocation && getPermissionState() !== "denied") {
+          fetchPosition();
+        }
+
+        // Listen for future changes (user toggles in Settings)
+        status.addEventListener("change", () => {
+          if (status.state === "granted") {
+            setPermissionState("granted");
+            fetchPosition();
+          } else if (status.state === "denied") {
+            setPermissionState("denied");
+          }
+        });
+      })
+      .catch(() => {
+        // Permissions API not fully supported — fallback
+        if (!cachedLocation && getPermissionState() !== "denied") {
+          fetchPosition();
+        }
+      });
+  } else {
+    // No Permissions API (older iOS Safari) — only fetch if no cache
+    if (!cachedLocation && getPermissionState() !== "denied") {
+      fetchPosition();
+    }
+  }
+
+  // Background refresh at a relaxed cadence — no-op if cache is still fresh
   locationRefreshTimer = setInterval(fetchPosition, REFRESH_INTERVAL_MS);
 
-  // Refresh when the user returns to the tab
+  // On tab-foreground: only refresh if cache is stale (fetchPosition checks)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") fetchPosition();
   });

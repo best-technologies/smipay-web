@@ -30,9 +30,11 @@ export interface RegisterPayload {
   updates_opt_in?: boolean;
 }
 
-/** Register response: account created, OTP sent to email */
+/** Register response: account created and auto-signed-in (§3.3 — same shape as sign-in) */
 export interface RegisterResponseData {
-  user: { id: string; email: string; first_name: string; last_name: string };
+  access_token: string;
+  refresh_token: string | null;
+  user: NewAuthUser;
 }
 
 /** Sign-in payload (§3.3) */
@@ -93,7 +95,7 @@ export const authApi = {
 
   /**
    * Step 3 — Register (§3.3). Email must already be verified (steps 1 & 2).
-   * On success, user can sign in immediately (no post-registration OTP).
+   * On success, user is auto-signed-in — response includes access_token + user.
    */
   register: async (data: RegisterPayload): Promise<ApiEnvelope<RegisterResponseData>> => {
     try {
@@ -180,7 +182,22 @@ export const authApi = {
   },
 
   /**
-   * Logout (§3.7) — invalidates refresh tokens server-side.
+   * Complete onboarding (§3.9) — marks user as having finished the walkthrough.
+   * Idempotent: safe to call more than once.
+   */
+  completeOnboarding: async (): Promise<ApiEnvelope<{ has_completed_onboarding: boolean }>> => {
+    try {
+      const response = await backendApi.post<ApiEnvelope<{ has_completed_onboarding: boolean }>>(
+        "/new-auth/complete-onboarding"
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Logout (§3.10) — invalidates refresh tokens server-side.
    * Frontend must also discard stored tokens locally regardless of outcome.
    */
   logout: async (): Promise<void> => {

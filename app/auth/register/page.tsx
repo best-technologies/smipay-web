@@ -17,6 +17,8 @@ import {
   type NewAuthRegisterData,
 } from "@/lib/validations/auth/register-backend.schema";
 import { authApi } from "@/services/auth-api";
+import { useAuth } from "@/hooks/useAuth";
+import { mapNewAuthUserToUser } from "@/lib/auth-storage";
 import { Loader2, ArrowLeft, Mail, CheckCircle, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -118,6 +120,7 @@ function PasswordStrengthMeter({
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [step, setStep] = useState<Step>("verify-email");
   const [formData, setFormData] = useState<
     NewAuthRegisterData & { otp: string }
@@ -279,7 +282,7 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await authApi.register({
+      const response = await authApi.register({
         email: parsed.data.email,
         password: parsed.data.password,
         first_name: parsed.data.first_name,
@@ -289,13 +292,24 @@ export default function RegisterPage() {
         referral_code: parsed.data.referral_code || undefined,
         updates_opt_in: parsed.data.updates_opt_in ?? false,
       });
-      setSuccessMessage("Account created. Redirecting to sign in...");
-      setTimeout(() => router.push("/auth/signin?registered=true"), 1500);
+
+      if (response.success && response.data?.access_token) {
+        const { access_token, user: apiUser } = response.data;
+        const user = mapNewAuthUserToUser(apiUser);
+        login(user, access_token);
+        setSuccessMessage("Account created! Redirecting to dashboard...");
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 1200);
+      } else {
+        setSuccessMessage("Account created. Redirecting to sign in...");
+        setTimeout(() => router.push("/auth/signin?registered=true"), 1500);
+      }
     } catch (err: unknown) {
       setServerError(
         err instanceof Error ? err.message : "Registration failed. Please try again."
       );
-    } finally {
       setIsLoading(false);
     }
   };

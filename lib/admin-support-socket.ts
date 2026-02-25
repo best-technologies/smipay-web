@@ -6,7 +6,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 let socket: Socket | null = null;
-let currentTicketId: string | null = null;
+let currentConversationId: string | null = null;
 
 export function getAdminSupportSocket(): Socket | null {
   return socket;
@@ -35,10 +35,8 @@ export function connectAdminSupportSocket(): Socket {
   });
 
   socket.on("connect", () => {
-    console.log("[AdminSupportSocket] connected, sid:", socket?.id);
-    if (currentTicketId) {
-      console.log("[AdminSupportSocket] re-joining ticket room:", currentTicketId);
-      socket?.emit("join_ticket", { ticket_id: currentTicketId });
+    if (currentConversationId) {
+      socket?.emit("join_conversation", { conversation_id: currentConversationId });
     }
   });
 
@@ -46,15 +44,11 @@ export function connectAdminSupportSocket(): Socket {
     console.error("[AdminSupportSocket] connection error:", err.message);
   });
 
-  socket.on("disconnect", (reason) => {
-    console.log("[AdminSupportSocket] disconnected:", reason);
-  });
-
   return socket;
 }
 
 export function disconnectAdminSupportSocket() {
-  currentTicketId = null;
+  currentConversationId = null;
   if (socket) {
     socket.removeAllListeners();
     socket.disconnect();
@@ -62,33 +56,46 @@ export function disconnectAdminSupportSocket() {
   }
 }
 
+// ─── Conversation room management ───────────────────────────────────
+
+export function joinConversationRoom(conversationId: string) {
+  currentConversationId = conversationId;
+  socket?.emit("join_conversation", { conversation_id: conversationId });
+}
+
+export function leaveConversationRoom(conversationId: string) {
+  if (currentConversationId === conversationId) currentConversationId = null;
+  socket?.emit("leave_conversation", { conversation_id: conversationId });
+}
+
+// Legacy ticket room helpers (backward compatibility)
 export function joinTicketRoom(ticketId: string) {
-  currentTicketId = ticketId;
   socket?.emit("join_ticket", { ticket_id: ticketId });
 }
 
 export function leaveTicketRoom(ticketId: string) {
-  if (currentTicketId === ticketId) currentTicketId = null;
   socket?.emit("leave_ticket", { ticket_id: ticketId });
 }
+
+// ─── Typing indicators ──────────────────────────────────────────────
 
 let typingTimer: ReturnType<typeof setTimeout> | null = null;
 let isCurrentlyTyping = false;
 
-export function emitAdminTyping(ticketId: string) {
+export function emitAdminTyping(conversationId: string) {
   if (!isCurrentlyTyping) {
     isCurrentlyTyping = true;
-    socket?.emit("typing", { ticket_id: ticketId });
+    socket?.emit("typing", { conversation_id: conversationId });
   }
   if (typingTimer) clearTimeout(typingTimer);
   typingTimer = setTimeout(() => {
     isCurrentlyTyping = false;
-    socket?.emit("stop_typing", { ticket_id: ticketId });
+    socket?.emit("stop_typing", { conversation_id: conversationId });
   }, 2000);
 }
 
-export function emitAdminStopTyping(ticketId: string) {
+export function emitAdminStopTyping(conversationId: string) {
   if (typingTimer) clearTimeout(typingTimer);
   isCurrentlyTyping = false;
-  socket?.emit("stop_typing", { ticket_id: ticketId });
+  socket?.emit("stop_typing", { conversation_id: conversationId });
 }

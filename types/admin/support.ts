@@ -1,4 +1,161 @@
-// --- Analytics ---
+// ─── CONVERSATIONS (new live-chat system) ────────────────────────────
+
+export type AdminConversationStatus = "active" | "waiting_support" | "waiting_user" | "closed";
+export type HandoverStatus = "pending" | "accepted" | "rejected";
+
+export interface AdminConversationUserBrief {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone_number: string;
+  smipay_tag: string | null;
+  profile_image: { secure_url: string } | null;
+}
+
+export interface AdminConversationAdminBrief {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+
+export interface AdminConversationTicketBrief {
+  id: string;
+  ticket_number: string;
+  subject: string;
+  status: string;
+  priority: string;
+  support_type: string;
+}
+
+export interface AdminConversationMessage {
+  id: string;
+  message: string;
+  is_internal: boolean;
+  is_from_user: boolean;
+  user_id: string | null;
+  sender_name: string | null;
+  sender_email: string | null;
+  attachments: string[] | null;
+  createdAt: string;
+}
+
+export interface AdminConversationLastMessage {
+  message: string;
+  is_from_user: boolean;
+  sender_name: string | null;
+  createdAt: string;
+}
+
+export interface AdminConversationListItem {
+  id: string;
+  user_id: string | null;
+  email: string | null;
+  phone_number: string | null;
+  status: AdminConversationStatus;
+  assigned_to: string | null;
+  assigned_at: string | null;
+  satisfaction_rating: number | null;
+  last_message_at: string;
+  createdAt: string;
+  updatedAt: string;
+  user: AdminConversationUserBrief | null;
+  ticket: AdminConversationTicketBrief | null;
+  message_count: number;
+  last_message: AdminConversationLastMessage | null;
+  has_unread: boolean;
+  assigned_admin: AdminConversationAdminBrief | null;
+}
+
+export interface AdminConversationAnalytics {
+  total_conversations: number;
+  active: number;
+  unassigned: number;
+  by_status: Record<string, number>;
+}
+
+export interface AdminConversationHandover {
+  id: string;
+  from_admin_id: string;
+  to_admin_id: string;
+  from_admin_name: string;
+  to_admin_name: string;
+  reason: string | null;
+  status: HandoverStatus;
+  responded_at: string | null;
+  createdAt: string;
+}
+
+export interface AdminConversationDetailUser extends AdminConversationUserBrief {
+  account_status: string;
+  role: string;
+  wallet: { current_balance: number } | null;
+  tier: { tier: string; name: string } | null;
+  kyc_verification: { is_verified: boolean; status: string } | null;
+}
+
+export interface AdminConversationDetail {
+  id: string;
+  user_id: string | null;
+  email: string | null;
+  phone_number: string | null;
+  status: AdminConversationStatus;
+  assigned_to: string | null;
+  assigned_at: string | null;
+  device_metadata: SupportDeviceMetadata | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  satisfaction_rating: number | null;
+  feedback: string | null;
+  last_message_at: string;
+  createdAt: string;
+  updatedAt: string;
+  user: AdminConversationDetailUser | null;
+  messages: AdminConversationMessage[];
+  ticket: AdminConversationTicketBrief | null;
+  assigned_admin: AdminConversationAdminBrief | null;
+  handovers: AdminConversationHandover[];
+}
+
+export interface AdminConversationsListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    analytics: AdminConversationAnalytics;
+    conversations: AdminConversationListItem[];
+    meta: SupportListMeta;
+  };
+}
+
+export interface AdminConversationDetailResponse {
+  success: boolean;
+  message: string;
+  data: AdminConversationDetail;
+}
+
+export interface AdminConversationFilters {
+  page: number;
+  limit: number;
+  search: string;
+  status: string;
+  assigned_to: string;
+  user_id: string;
+  has_ticket: string;
+  date_from: string;
+  date_to: string;
+  sort_by: string;
+  sort_order: string;
+}
+
+export const CONVERSATION_STATUS_OPTIONS = [
+  { value: "active", label: "Active", color: "green" },
+  { value: "waiting_support", label: "Waiting Support", color: "amber" },
+  { value: "waiting_user", label: "Waiting User", color: "blue" },
+  { value: "closed", label: "Closed", color: "slate" },
+] as const;
+
+// ─── TICKETS (existing — unchanged) ─────────────────────────────────
 
 export interface SupportOverview {
   total_tickets: number;
@@ -33,8 +190,6 @@ export interface SupportAnalytics {
   by_type: Record<string, number>;
 }
 
-// --- User brief ---
-
 export interface SupportUserBrief {
   id: string;
   first_name: string | null;
@@ -45,16 +200,12 @@ export interface SupportUserBrief {
   profile_image: { secure_url: string } | null;
 }
 
-// --- Admin brief ---
-
 export interface SupportAdminBrief {
   id: string;
   first_name: string | null;
   last_name: string | null;
   email: string | null;
 }
-
-// --- Ticket item ---
 
 export interface SupportTicketItem {
   id: string;
@@ -73,6 +224,7 @@ export interface SupportTicketItem {
   resolved_at: string | null;
   satisfaction_rating: number | null;
   tags: string[] | null;
+  conversation_id?: string | null;
   createdAt: string;
   updatedAt: string;
   user: SupportUserBrief | null;
@@ -80,16 +232,12 @@ export interface SupportTicketItem {
   assigned_admin: SupportAdminBrief | null;
 }
 
-// --- Pagination ---
-
 export interface SupportListMeta {
   total: number;
   page: number;
   limit: number;
   total_pages: number;
 }
-
-// --- List response ---
 
 export interface SupportListResponse {
   success: boolean;
@@ -100,8 +248,6 @@ export interface SupportListResponse {
     meta: SupportListMeta;
   };
 }
-
-// --- Message ---
 
 export interface SupportMessage {
   id: string;
@@ -115,16 +261,12 @@ export interface SupportMessage {
   createdAt: string;
 }
 
-// --- Device metadata ---
-
 export interface SupportDeviceMetadata {
   device_id: string;
   platform: string;
   device_model: string;
   app_version: string;
 }
-
-// --- Related transaction ---
 
 export interface SupportRelatedTransaction {
   id: string;
@@ -135,8 +277,6 @@ export interface SupportRelatedTransaction {
   createdAt: string;
 }
 
-// --- Detail user (extended) ---
-
 export interface SupportDetailUser extends SupportUserBrief {
   account_status: string;
   role: string;
@@ -144,8 +284,6 @@ export interface SupportDetailUser extends SupportUserBrief {
   tier: { tier: string; name: string } | null;
   kyc_verification: { is_verified: boolean; status: string } | null;
 }
-
-// --- Ticket detail (full) ---
 
 export interface SupportTicketDetail extends SupportTicketItem {
   description: string;
@@ -165,23 +303,17 @@ export interface SupportTicketDetail extends SupportTicketItem {
   user: SupportDetailUser | null;
 }
 
-// --- Detail response ---
-
 export interface SupportDetailResponse {
   success: boolean;
   message: string;
   data: SupportTicketDetail;
 }
 
-// --- Mutation response ---
-
 export interface SupportMutationResponse {
   success: boolean;
   message: string;
   data: SupportTicketItem;
 }
-
-// --- Filters ---
 
 export interface SupportFilters {
   page: number;
@@ -197,8 +329,6 @@ export interface SupportFilters {
   sort_by: string;
   sort_order: string;
 }
-
-// --- Enums ---
 
 export const SUPPORT_STATUSES = [
   { value: "pending", label: "Pending", color: "amber" },

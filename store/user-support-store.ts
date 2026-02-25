@@ -1,20 +1,20 @@
 import { create } from "zustand";
 import { supportApi } from "@/services/support-api";
 import type {
-  SupportTicketListItem,
-  SupportTicketDetail,
+  ConversationListItem,
+  ConversationDetail,
 } from "@/types/support";
 
 const CACHE_TTL = 60_000;
 const MAX_DETAIL_CACHE = 10;
 
 interface DetailCacheEntry {
-  data: SupportTicketDetail;
+  data: ConversationDetail;
   ts: number;
 }
 
 interface UserSupportState {
-  tickets: SupportTicketListItem[];
+  conversations: ConversationListItem[];
   listLoading: boolean;
   listError: string | null;
   listFetchedAt: number;
@@ -23,18 +23,19 @@ interface UserSupportState {
   detailLoading: boolean;
   detailError: string | null;
 
-  fetchTickets: (force?: boolean) => Promise<void>;
+  fetchConversations: (force?: boolean) => Promise<void>;
   invalidateList: () => void;
 
   fetchDetail: (
-    ticketNumber: string,
+    conversationId: string,
     force?: boolean,
-  ) => Promise<SupportTicketDetail | null>;
-  invalidateDetail: (ticketNumber: string) => void;
+  ) => Promise<ConversationDetail | null>;
+  invalidateDetail: (conversationId: string) => void;
+  updateDetailInCache: (conversationId: string, partial: Partial<ConversationDetail>) => void;
 }
 
 export const useUserSupportStore = create<UserSupportState>((set, get) => ({
-  tickets: [],
+  conversations: [],
   listLoading: false,
   listError: null,
   listFetchedAt: 0,
@@ -43,7 +44,7 @@ export const useUserSupportStore = create<UserSupportState>((set, get) => ({
   detailLoading: false,
   detailError: null,
 
-  fetchTickets: async (force = false) => {
+  fetchConversations: async (force = false) => {
     const { listFetchedAt } = get();
 
     if (!force && listFetchedAt && Date.now() - listFetchedAt < CACHE_TTL) {
@@ -52,25 +53,20 @@ export const useUserSupportStore = create<UserSupportState>((set, get) => ({
 
     set({ listLoading: true, listError: null });
     try {
-      const res = await supportApi.getMyTickets();
-      const ticketsList =
-        res.data?.tickets ??
-        (res as unknown as { tickets?: SupportTicketListItem[] }).tickets ??
-        [];
-
-      if (res.success) {
+      const res = await supportApi.getConversations();
+      if (res.success && res.data?.conversations) {
         set({
-          tickets: ticketsList,
+          conversations: res.data.conversations,
           listFetchedAt: Date.now(),
           listError: null,
         });
       } else {
-        set({ listError: res.message ?? "Failed to load tickets" });
+        set({ listError: res.message ?? "Failed to load conversations" });
       }
     } catch (err) {
       set({
         listError:
-          err instanceof Error ? err.message : "Failed to load tickets",
+          err instanceof Error ? err.message : "Failed to load conversations",
       });
     } finally {
       set({ listLoading: false });
@@ -81,11 +77,11 @@ export const useUserSupportStore = create<UserSupportState>((set, get) => ({
     set({ listFetchedAt: 0 });
   },
 
-  fetchDetail: async (ticketNumber, force = false) => {
+  fetchDetail: async (conversationId, force = false) => {
     const { detailCache } = get();
 
     if (!force) {
-      const cached = detailCache.get(ticketNumber);
+      const cached = detailCache.get(conversationId);
       if (cached && Date.now() - cached.ts < CACHE_TTL) {
         return cached.data;
       }
@@ -93,20 +89,20 @@ export const useUserSupportStore = create<UserSupportState>((set, get) => ({
 
     set({ detailLoading: true, detailError: null });
     try {
-      const res = await supportApi.getTicket(ticketNumber);
-      if (res.success && res.data?.ticket) {
-        const ticket = res.data.ticket;
+      const res = await supportApi.getConversation(conversationId);
+      if (res.success && res.data?.conversation) {
+        const conversation = res.data.conversation;
         const cache = new Map(get().detailCache);
-        cache.set(ticketNumber, { data: ticket, ts: Date.now() });
+        cache.set(conversationId, { data: conversation, ts: Date.now() });
         if (cache.size > MAX_DETAIL_CACHE) {
           const oldest = cache.keys().next().value;
           if (oldest) cache.delete(oldest);
         }
         set({ detailCache: cache, detailLoading: false });
-        return ticket;
+        return conversation;
       }
       set({
-        detailError: res.message ?? "Failed to load ticket",
+        detailError: res.message ?? "Failed to load conversation",
         detailLoading: false,
       });
       return null;
@@ -120,9 +116,21 @@ export const useUserSupportStore = create<UserSupportState>((set, get) => ({
     }
   },
 
-  invalidateDetail: (ticketNumber) => {
+  invalidateDetail: (conversationId) => {
     const cache = new Map(get().detailCache);
-    cache.delete(ticketNumber);
+    cache.delete(conversationId);
     set({ detailCache: cache });
+  },
+
+  updateDetailInCache: (conversationId, partial) => {
+    const cache = new Map(get().detailCache);
+    const entry = cache.get(conversationId);
+    if (entry) {
+      cache.set(conversationId, {
+        data: { ...entry.data, ...partial },
+        ts: entry.ts,
+      });
+      set({ detailCache: cache });
+    }
   },
 }));

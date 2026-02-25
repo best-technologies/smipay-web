@@ -14,13 +14,14 @@ export interface User {
   is_phone_verified: boolean;
   account_status: string;
   role: string;
+  has_completed_onboarding?: boolean;
   wallet?: {
     current_balance: number;
     isActive: boolean;
   };
 }
 
-/** New-auth API user shape (§3.3 FRONTEND_DEVICE_METADATA.md) */
+/** New-auth API user shape (§3.3 / §3.5 FRONTEND_DEVICE_METADATA.md) */
 export interface NewAuthUser {
   id: string;
   email: string;
@@ -35,6 +36,7 @@ export interface NewAuthUser {
   profile_image?: string | null;
   kyc_verified?: boolean;
   isTransactionPinSetup?: boolean;
+  has_completed_onboarding?: boolean;
   created_at?: string;
 }
 
@@ -52,6 +54,7 @@ export function mapNewAuthUserToUser(api: NewAuthUser): User {
     is_phone_verified: ext.is_phone_verified === true,
     account_status: (typeof ext.account_status === "string" ? ext.account_status : "active"),
     role: api.role ?? "user",
+    has_completed_onboarding: api.has_completed_onboarding ?? true,
     wallet: ext.wallet as User["wallet"] | undefined,
   };
 }
