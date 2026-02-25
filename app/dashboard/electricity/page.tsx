@@ -1,7 +1,14 @@
 "use client";
 
-import { ComingSoon } from "@/components/dashboard/ComingSoon";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ElectricityPage() {
-  return <ComingSoon featureName="Electricity" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/dashboard/electricity/vtpass");
+  }, [router]);
+
+  return null;
 }

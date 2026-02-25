@@ -19,6 +19,18 @@ const FRIENDLY_NAMES: Record<string, string> = {
   gotv: "GOtv",
   startimes: "StarTimes",
   showmax: "Showmax",
+  "ikeja-electric": "Ikeja",
+  "eko-electric": "Eko",
+  "kano-electric": "Kano",
+  "portharcourt-electric": "PH",
+  "jos-electric": "Jos",
+  "ibadan-electric": "Ibadan",
+  "kaduna-electric": "Kaduna",
+  "abuja-electric": "Abuja",
+  "enugu-electric": "Enugu",
+  "benin-electric": "Benin",
+  "aba-electric": "Aba",
+  "yola-electric": "Yola",
 };
 
 function formatNumber(num: string): string {

@@ -6,7 +6,7 @@
 
 const MAX_ENTRIES = 5;
 
-export type ServiceType = "airtime" | "data" | "cable";
+export type ServiceType = "airtime" | "data" | "cable" | "electricity";
 
 export interface RecentEntry {
   serviceID: string;

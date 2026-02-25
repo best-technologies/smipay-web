@@ -26,6 +26,20 @@ export const NETWORK_LOGOS: Record<string, string> = {
   gotv: "/imgs/cable-tv-logo/gotv-logo-png_seeklogo-496045.png",
   startimes: "/imgs/cable-tv-logo/startimes-logo.jpg",
   showmax: "/imgs/cable-tv-logo/showmax-logo.png",
+
+  // Electricity service IDs (discos)
+  "ikeja-electric": "/electricity-logo/ikeja-electric.jpeg",
+  "eko-electric": "/electricity-logo/eko-electric.jpg",
+  "kano-electric": "/electricity-logo/kano-electric.png",
+  "portharcourt-electric": "/electricity-logo/ph-electric.jpg",
+  "jos-electric": "/electricity-logo/jos-electric.jpeg",
+  "ibadan-electric": "/electricity-logo/ibadan-electric.jpg",
+  "kaduna-electric": "/electricity-logo/kaduna-electric.jpeg",
+  "abuja-electric": "/electricity-logo/abuja-electric.png",
+  "enugu-electric": "/electricity-logo/Enugu-electric.png",
+  "benin-electric": "/electricity-logo/benin-electric.jpg",
+  "aba-electric": "/electricity-logo/aba-electric.png",
+  "yola-electric": "/electricity-logo/yola-electric.jpeg",
 };
 
 /**
@@ -65,7 +79,13 @@ export function getNetworkLogo(serviceID: string): string | null {
   
   // Cable TV service IDs are usually direct (dstv, gotv, etc.)
   // Already handled by exact match above
-  
+
+  // Electricity service IDs contain "-electric" suffix
+  if (normalizedId.includes("-electric")) {
+    logo = NETWORK_LOGOS[normalizedId];
+    if (logo) return logo;
+  }
+
   return null;
 }
 

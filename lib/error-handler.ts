@@ -14,10 +14,29 @@ export interface ApiError {
 export function handleApiError(error: unknown): ApiError {
   const err = error as Record<string, unknown>;
   if (err && typeof err.statusCode === "number" && typeof err.message === "string") {
+    const status = err.statusCode as number;
+    const rawMsg = err.message as string;
+
+    if (status === 404 || rawMsg.startsWith("Cannot GET") || rawMsg.startsWith("Cannot POST")) {
+      return {
+        message: "This service is temporarily unavailable. Please try again later.",
+        code: "SERVICE_UNAVAILABLE",
+        statusCode: status,
+      };
+    }
+
+    if (status >= 500) {
+      return {
+        message: "Our servers are currently experiencing issues. Please try again in a few moments.",
+        code: "SERVER_ERROR",
+        statusCode: status,
+      };
+    }
+
     return {
-      message: err.message as string,
+      message: rawMsg,
       code: "API_ERROR",
-      statusCode: err.statusCode as number,
+      statusCode: status,
     };
   }
 
