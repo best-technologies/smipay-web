@@ -44,17 +44,16 @@ export function useActivityTracker() {
     clearAuth();
     logout();
 
-    const url = new URL("/auth/signin", window.location.origin);
+    // Redirect to landing page instead of signin.
+    // We intentionally drop the \"session expired\" query so users just see home.
     if (message) {
-      url.searchParams.set("expired", "true");
-      url.searchParams.set("message", message);
+      console.info(message);
     }
-
-    router.push(url.toString());
+    router.push("/");
   }, [logout, router]);
 
   const acknowledgeExpiry = useCallback(() => {
-    router.push("/auth/signin");
+    router.push("/");
   }, [router]);
 
   const checkSession = useCallback(() => {

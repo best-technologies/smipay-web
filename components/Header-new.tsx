@@ -143,13 +143,49 @@ export default function HeaderNew() {
         </div>
 
         {/* Mobile Menu Button */}
-        <button
-          className="lg:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          {/* Mobile Auth CTAs – always visible on landing for quick access */}
+          {!isLoading && (
+            <>
+              {isAuthenticated && user ? (
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-8 px-3 rounded-full bg-white text-brand-bg-primary hover:bg-white/90 text-xs font-semibold"
+                >
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 rounded-full text-xs text-white hover:bg-white/10"
+                  >
+                    <Link href="/auth/signin">Sign In</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="h-8 px-3 rounded-full bg-white text-brand-bg-primary hover:bg-white/90 text-xs font-semibold"
+                  >
+                    <Link href="/auth/register">Register</Link>
+                  </Button>
+                </>
+              )}
+            </>
+          )}
+
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}

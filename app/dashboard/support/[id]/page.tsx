@@ -309,6 +309,13 @@ export default function ConversationChatPage() {
     }
   }, [loading, messages.length, scrollToBottom]);
 
+  // Ensure input is in view on first load
+  useEffect(() => {
+    if (!loading && textareaRef.current) {
+      textareaRef.current.scrollIntoView({ block: "end" });
+    }
+  }, [loading]);
+
   // Auto-grow textarea
   useEffect(() => {
     const el = textareaRef.current;

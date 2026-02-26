@@ -93,11 +93,10 @@ backendApi.interceptors.response.use(
         // Clear zustand store
         localStorage.removeItem("smipay-auth");
 
-        // Redirect to signin with message
-        const url = new URL("/auth/signin", window.location.origin);
-        url.searchParams.set("expired", "true");
-        url.searchParams.set("message", "Your session has expired. Please sign in again.");
-        window.location.href = url.toString();
+        // Redirect to landing page instead of forcing signin.
+        // Backend JWT is 7 days; when it expires or 401 occurs, we clear local state
+        // and let users land on home where they can choose to sign in again.
+        window.location.href = "/";
         return Promise.reject(error);
       }
     }

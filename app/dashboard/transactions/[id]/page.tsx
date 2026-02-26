@@ -177,7 +177,7 @@ export default function TransactionDetailPage() {
   const hasToken = isElectricity && "electricity_token" in meta && !!(meta as ElectricityMeta).electricity_token;
 
   return (
-    <div className="min-h-screen bg-dashboard-bg flex flex-col">
+    <div className="min-h-screen bg-dashboard-bg">
       {/* ── Header ─────────────────────────── */}
       <header className="sticky top-0 z-30 bg-dashboard-surface border-b border-dashboard-border/50">
         <div className="flex items-center justify-between px-4 h-12 max-w-lg mx-auto">
@@ -195,7 +195,7 @@ export default function TransactionDetailPage() {
       </header>
 
       {/* ── Scrollable content ─────────────── */}
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="pb-28">
         <div className="max-w-lg mx-auto">
 
           {/* ── Hero ───────────────────────── */}

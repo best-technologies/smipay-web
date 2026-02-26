@@ -41,11 +41,11 @@ const SERVICE_ACTIONS = [
   { id: "airtime", name: "Airtime", icon: Phone, href: "/dashboard/airtime", comingSoon: false, bg: "var(--quick-action-3-bg)", color: "var(--quick-action-3)" },
   { id: "data", name: "Data", icon: Wifi, href: "/dashboard/data", comingSoon: false, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
   { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv", comingSoon: false, bg: "var(--quick-action-5-bg)", color: "var(--quick-action-5)" },
-  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity/vtpass", comingSoon: false, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
   { id: "education", name: "Education", icon: GraduationCap, href: "/dashboard/education/vtpass", comingSoon: false, bg: "var(--quick-action-1-bg)", color: "var(--quick-action-1)" },
-  { id: "betting", name: "Betting", icon: Dices, href: "/dashboard/betting", comingSoon: true, bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
+  { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity/vtpass", comingSoon: false, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
+  { id: "intl-airtime", name: "Intl. Airtime", icon: Globe, href: "/dashboard/intl-airtime/vtpass", comingSoon: false, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
   { id: "cards", name: "Cards", icon: CreditCard, href: "/dashboard/cards", comingSoon: true, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
-  { id: "intl-airtime", name: "Intl. Airtime", icon: Globe, href: "/dashboard/intl-airtime", comingSoon: true, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
+  { id: "betting", name: "Betting", icon: Dices, href: "/dashboard/betting", comingSoon: true, bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
 ];
 
 const container = {
@@ -363,38 +363,7 @@ function DashboardContent() {
           <WalletAnalysisCards />
         </motion.section> */}
 
-        {/* Transfer Actions – 3 across, circular icons, no header */}
-        <motion.section
-          variants={container}
-          initial="hidden"
-          animate="visible"
-          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 pt-5 pb-3 sm:p-4 sm:pt-5"
-        >
-          <div className="grid grid-cols-3">
-            {TRANSFER_ACTIONS.map((action) => (
-              <motion.div key={action.id} variants={item} className="flex flex-col items-center">
-                <div className="relative">
-                  <button
-                    type="button"
-                    disabled
-                    className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full opacity-75 cursor-not-allowed transition-transform"
-                    style={{ backgroundColor: action.bg, color: action.color }}
-                  >
-                    <action.icon className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.8} />
-                  </button>
-                  <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
-                    Soon
-                  </span>
-                </div>
-                <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
-                  {action.name}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* Service Actions – Airtime & Data available; others Coming Soon */}
+        {/* Service Actions – quick links come right after wallet card */}
         <motion.section
           ref={quickLinksRef}
           variants={container}
@@ -429,6 +398,37 @@ function DashboardContent() {
                     <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
                   </motion.button>
                 )}
+                <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
+                  {action.name}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Transfer Actions – 3 across, circular icons, no header */}
+        <motion.section
+          variants={container}
+          initial="hidden"
+          animate="visible"
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 pt-5 pb-3 sm:p-4 sm:pt-5"
+        >
+          <div className="grid grid-cols-3">
+            {TRANSFER_ACTIONS.map((action) => (
+              <motion.div key={action.id} variants={item} className="flex flex-col items-center">
+                <div className="relative">
+                  <button
+                    type="button"
+                    disabled
+                    className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full opacity-75 cursor-not-allowed transition-transform"
+                    style={{ backgroundColor: action.bg, color: action.color }}
+                  >
+                    <action.icon className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.8} />
+                  </button>
+                  <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
+                    Soon
+                  </span>
+                </div>
                 <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
                   {action.name}
                 </span>

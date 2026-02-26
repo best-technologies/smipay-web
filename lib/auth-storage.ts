@@ -65,10 +65,10 @@ const LAST_ACTIVITY_KEY = "smipay-last-activity";
 const TOKEN_EXPIRY_KEY = "smipay-token-expiry";
 const PAYMENT_IN_PROGRESS_KEY = "smipay-payment-in-progress";
 
-// Session timeout: 5 minutes of inactivity
-export const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
-// Warning before timeout: 1 minute before expiry
-export const SESSION_WARNING_TIME = 1 * 60 * 1000; // 1 minute in milliseconds
+// Session timeout: 7 days (aligns with backend JWT lifetime)
+export const SESSION_TIMEOUT = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+// Warning before timeout: 1 hour before expiry
+export const SESSION_WARNING_TIME = 5 * 60 * 1000; //this should be 5 minutes in milliseconds
 
 /**
  * Save authentication token

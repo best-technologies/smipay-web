@@ -14,7 +14,7 @@ export default function Hero() {
           <h1 className="text-brand-text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-[130%] sm:leading-[140%] tracking-[0%] font-semibold">
             The Smarter Way to Take Control of Your Money
           </h1>
-          <p className="text-xs sm:text-sm md:text-base text-brand-text-secondary max-w-xl">
+          <p className="text-sm sm:text-base md:text-lg text-brand-text-secondary max-w-xl">
             Experience seamless digital transactions, instant airtime & data
             top-ups, bill payments, and virtual cards—all in one powerful
             platform.
