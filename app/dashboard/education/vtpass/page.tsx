@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import { WalletCard } from "@/components/dashboard/WalletCard";
 import {
@@ -28,6 +29,7 @@ import type {
   VtpassEducationVariation,
   VtpassEducationPurchaseResponse,
 } from "@/types/vtpass/vtu/vtpass-education";
+import { getNetworkLogo } from "@/lib/network-logos";
 import { motion, AnimatePresence } from "motion/react";
 
 interface EducationProduct {
@@ -403,26 +405,41 @@ export default function VtpassEducationPage() {
                     Select product
                   </label>
                   <div className="space-y-3">
-                    {EDUCATION_PRODUCTS.map((product) => (
-                      <button
-                        key={product.id}
-                        onClick={() => handleSelectProduct(product)}
-                        className="w-full flex items-center gap-3.5 p-4 rounded-xl border-2 border-dashboard-border/80 bg-dashboard-surface hover:border-brand-bg-primary/40 hover:bg-brand-bg-primary/[0.03] transition-all text-left touch-manipulation"
-                      >
-                        <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100">
-                          <GraduationCap className="h-5 w-5 text-purple-600" strokeWidth={1.75} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm sm:text-[15px] text-dashboard-heading">
-                            {product.name}
-                          </p>
-                          <p className="text-[11px] sm:text-xs text-dashboard-muted mt-0.5 truncate">
-                            {product.description}
-                          </p>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-dashboard-muted/40 shrink-0" />
-                      </button>
-                    ))}
+                    {EDUCATION_PRODUCTS.map((product) => {
+                      const logo = getNetworkLogo(product.id);
+                      return (
+                        <button
+                          key={product.id}
+                          onClick={() => handleSelectProduct(product)}
+                          className="w-full flex items-center gap-3.5 p-4 rounded-xl border-2 border-dashboard-border/80 bg-dashboard-surface hover:border-brand-bg-primary/40 hover:bg-brand-bg-primary/[0.03] transition-all text-left touch-manipulation"
+                        >
+                          {logo ? (
+                            <div className="relative h-10 w-10 sm:h-11 sm:w-11 rounded-xl overflow-hidden ring-1 ring-dashboard-border/40 shrink-0 bg-dashboard-bg">
+                              <Image
+                                src={logo}
+                                alt={product.shortName}
+                                fill
+                                className="object-contain p-1.5"
+                                unoptimized
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100">
+                              <GraduationCap className="h-5 w-5 text-purple-600" strokeWidth={1.75} />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm sm:text-[15px] text-dashboard-heading">
+                              {product.name}
+                            </p>
+                            <p className="text-[11px] sm:text-xs text-dashboard-muted mt-0.5 truncate">
+                              {product.description}
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-dashboard-muted/40 shrink-0" />
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
