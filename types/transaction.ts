@@ -65,11 +65,31 @@ export interface AirtimeMeta {
   network: string;
 }
 
+export interface EducationCard {
+  Serial: string;
+  Pin: string;
+}
+
+export interface EducationMeta {
+  service_id: string;
+  variation_code: string;
+  product_name: string;
+  phone: string;
+  quantity: number;
+  profile_id: string | null;
+  pin: string | null;
+  serial: string | null;
+  tokens: string[] | null;
+  cards: EducationCard[] | null;
+  purchased_code: string | null;
+}
+
 export type TransactionMeta =
   | ElectricityMeta
   | CableMeta
   | DataMeta
   | AirtimeMeta
+  | EducationMeta
   | Record<string, never>;
 
 export interface TransactionDetail {

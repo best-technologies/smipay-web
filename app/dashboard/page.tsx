@@ -42,7 +42,7 @@ const SERVICE_ACTIONS = [
   { id: "data", name: "Data", icon: Wifi, href: "/dashboard/data", comingSoon: false, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },
   { id: "cable", name: "Cable TV", icon: Tv, href: "/dashboard/cabletv", comingSoon: false, bg: "var(--quick-action-5-bg)", color: "var(--quick-action-5)" },
   { id: "electricity", name: "Electricity", icon: Zap, href: "/dashboard/electricity/vtpass", comingSoon: false, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
-  { id: "education", name: "Education", icon: GraduationCap, href: "/dashboard/education", comingSoon: true, bg: "var(--quick-action-1-bg)", color: "var(--quick-action-1)" },
+  { id: "education", name: "Education", icon: GraduationCap, href: "/dashboard/education/vtpass", comingSoon: false, bg: "var(--quick-action-1-bg)", color: "var(--quick-action-1)" },
   { id: "betting", name: "Betting", icon: Dices, href: "/dashboard/betting", comingSoon: true, bg: "var(--quick-action-6-bg)", color: "var(--quick-action-6)" },
   { id: "cards", name: "Cards", icon: CreditCard, href: "/dashboard/cards", comingSoon: true, bg: "var(--quick-action-4-bg)", color: "var(--quick-action-4)" },
   { id: "intl-airtime", name: "Intl. Airtime", icon: Globe, href: "/dashboard/intl-airtime", comingSoon: true, bg: "var(--quick-action-2-bg)", color: "var(--quick-action-2)" },

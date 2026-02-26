@@ -92,7 +92,7 @@ const menuItems: MenuItem[] = [
     id: "education",
     label: "Education",
     icon: GraduationCap,
-    href: "/dashboard/education",
+    href: "/dashboard/education/vtpass",
   },
   // {
   //   id: "refer",
@@ -141,6 +141,7 @@ const ENABLED_ROUTES = [
   "/dashboard/data",
   "/dashboard/cabletv",
   "/dashboard/electricity",
+  "/dashboard/education",
   "/dashboard/settings-profile",
 ];
 

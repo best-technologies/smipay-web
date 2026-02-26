@@ -40,6 +40,11 @@ export const NETWORK_LOGOS: Record<string, string> = {
   "benin-electric": "/electricity-logo/benin-electric.jpg",
   "aba-electric": "/electricity-logo/aba-electric.png",
   "yola-electric": "/electricity-logo/yola-electric.jpeg",
+
+  // Education service IDs
+  "waec-registration": "/education-logo/waec-logo.webp",
+  waec: "/education-logo/waec-logo.webp",
+  jamb: "/education-logo/jamb-logo.png",
 };
 
 /**

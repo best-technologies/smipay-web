@@ -22,6 +22,8 @@ import type {
   CableMeta,
   DataMeta,
   AirtimeMeta,
+  EducationMeta,
+  EducationCard,
 } from "@/types/transaction";
 import { getNetworkLogo } from "@/lib/network-logos";
 
@@ -62,6 +64,9 @@ export default function TransactionDetailPage() {
     }
     if (tx.type === "airtime" && tx.meta && "network" in tx.meta && (tx.meta as AirtimeMeta).network) {
       return (tx.meta as AirtimeMeta).network.replace(/-/g, " ").trim().toUpperCase();
+    }
+    if (tx.type === "education" && tx.meta && "product_name" in tx.meta && (tx.meta as EducationMeta).product_name) {
+      return (tx.meta as EducationMeta).product_name;
     }
     if (tx.provider) {
       return tx.provider.replace(/-/g, " ").replace(/electric$/i, "Electricity");
@@ -167,6 +172,7 @@ export default function TransactionDetailPage() {
   const isCable = transaction.type === "cable";
   const isData = transaction.type === "data";
   const isAirtime = transaction.type === "airtime";
+  const isEducation = transaction.type === "education";
 
   const hasToken = isElectricity && "electricity_token" in meta && !!(meta as ElectricityMeta).electricity_token;
 
@@ -237,6 +243,65 @@ export default function TransactionDetailPage() {
               </span>
             </div>
           </div>
+
+          {/* ── Education credentials card ── */}
+          {isEducation && "pin" in meta && (meta as EducationMeta).pin && (
+            <div className="mx-4 mt-3 space-y-2">
+              {/* WAEC Result Checker: cards with Serial + PIN */}
+              {(meta as EducationMeta).cards && (meta as EducationMeta).cards!.length > 0
+                ? (meta as EducationMeta).cards!.map((card: EducationCard, idx: number) => (
+                    <div key={idx} className="bg-dashboard-surface rounded-xl border border-dashboard-border/50 px-4 py-3.5 space-y-2">
+                      {(meta as EducationMeta).cards!.length > 1 && (
+                        <p className="text-[10px] text-dashboard-muted font-semibold uppercase tracking-wider">Card {idx + 1}</p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-dashboard-muted">Serial</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-dashboard-heading font-mono tracking-wide">{card.Serial}</span>
+                          <button onClick={() => copyToClipboard(card.Serial, `serial-${idx}`)} className="p-1 rounded-md hover:bg-dashboard-bg transition-colors touch-manipulation">
+                            {copiedField === `serial-${idx}` ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-dashboard-muted/50" />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-dashboard-muted">PIN</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-dashboard-heading font-mono tracking-wide">{card.Pin}</span>
+                          <button onClick={() => copyToClipboard(card.Pin, `pin-${idx}`)} className="p-1 rounded-md hover:bg-dashboard-bg transition-colors touch-manipulation">
+                            {copiedField === `pin-${idx}` ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-dashboard-muted/50" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                : (
+                    <div className="bg-dashboard-surface rounded-xl border border-dashboard-border/50 px-4 py-3.5 space-y-2">
+                      {(meta as EducationMeta).serial && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-dashboard-muted">Serial</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-dashboard-heading font-mono tracking-wide">{(meta as EducationMeta).serial}</span>
+                            <button onClick={() => copyToClipboard((meta as EducationMeta).serial!, "serial")} className="p-1 rounded-md hover:bg-dashboard-bg transition-colors touch-manipulation">
+                              {copiedField === "serial" ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-dashboard-muted/50" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-dashboard-muted">
+                          {(meta as EducationMeta).product_name?.includes("JAMB") ? "JAMB PIN" : "PIN"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-dashboard-heading font-mono tracking-wide">{(meta as EducationMeta).pin}</span>
+                          <button onClick={() => copyToClipboard((meta as EducationMeta).pin!, "edu-pin")} className="p-1 rounded-md hover:bg-dashboard-bg transition-colors touch-manipulation">
+                            {copiedField === "edu-pin" ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-dashboard-muted/50" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+            </div>
+          )}
 
           {/* ── Token card (electricity prepaid) ── */}
           {hasToken && (
@@ -323,6 +388,20 @@ export default function TransactionDetailPage() {
                 {/* Airtime */}
                 {isAirtime && "phone" in meta && (
                   <Row label="Recipient Mobile" value={(meta as AirtimeMeta).phone} mono />
+                )}
+
+                {/* Education */}
+                {isEducation && "product_name" in meta && (meta as EducationMeta).product_name && (
+                  <Row label="Product" value={(meta as EducationMeta).product_name} />
+                )}
+                {isEducation && "phone" in meta && (meta as EducationMeta).phone && (
+                  <Row label="Phone" value={(meta as EducationMeta).phone} mono />
+                )}
+                {isEducation && "profile_id" in meta && (meta as EducationMeta).profile_id && (
+                  <Row label="JAMB Profile ID" value={(meta as EducationMeta).profile_id!} mono />
+                )}
+                {isEducation && "quantity" in meta && (meta as EducationMeta).quantity > 1 && (
+                  <Row label="Quantity" value={String((meta as EducationMeta).quantity)} />
                 )}
 
                 {/* ── Common rows ──────── */}
