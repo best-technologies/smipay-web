@@ -15,7 +15,6 @@ import {
   MapPin,
   Shield,
   Wallet,
-  Loader2,
   Crown,
   Zap,
   Lock,
@@ -44,11 +43,87 @@ function getTierStyle(tier: string) {
   return TIER_STYLES[tier] ?? TIER_STYLES.UNVERIFIED;
 }
 
+function ProfileSkeleton() {
+  return (
+    <div className="min-h-screen bg-dashboard-bg">
+      <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
+        <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-dashboard-border/50 animate-pulse shrink-0" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="h-5 w-24 bg-dashboard-border/60 rounded animate-pulse" />
+            <div className="h-3.5 w-32 bg-dashboard-border/40 rounded animate-pulse" />
+          </div>
+        </div>
+      </header>
+
+      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 max-w-2xl mx-auto space-y-4">
+        {/* Profile card skeleton */}
+        <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface p-4 sm:p-5">
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-dashboard-border/50 animate-pulse shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-36 bg-dashboard-border/60 rounded animate-pulse" />
+              <div className="h-3 w-48 bg-dashboard-border/40 rounded animate-pulse" />
+              <div className="flex gap-2 mt-2">
+                <div className="h-5 w-16 bg-dashboard-border/40 rounded-full animate-pulse" />
+                <div className="h-5 w-14 bg-dashboard-border/40 rounded-full animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs skeleton */}
+        <div className="flex gap-1 overflow-x-auto no-scrollbar -mx-4 px-4 pb-0.5">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-9 w-24 rounded-full bg-dashboard-border/50 animate-pulse shrink-0" />
+          ))}
+        </div>
+
+        {/* Content skeleton */}
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
+            <div className="px-4 py-3 sm:px-5 border-b border-dashboard-border/40">
+              <div className="h-4 w-40 bg-dashboard-border/50 rounded animate-pulse" />
+            </div>
+            <div className="p-4 sm:p-5 space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-3 py-2">
+                  <div className="h-4 w-4 rounded bg-dashboard-border/40 animate-pulse shrink-0" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 w-20 bg-dashboard-border/40 rounded animate-pulse" />
+                    <div className="h-4 w-32 bg-dashboard-border/50 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
+            <div className="px-4 py-3 sm:px-5 border-b border-dashboard-border/40">
+              <div className="h-4 w-24 bg-dashboard-border/50 rounded animate-pulse" />
+            </div>
+            <div className="p-4 sm:p-5 space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-center gap-3 py-2">
+                  <div className="h-4 w-4 rounded bg-dashboard-border/40 animate-pulse shrink-0" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 w-16 bg-dashboard-border/40 rounded animate-pulse" />
+                    <div className="h-4 w-28 bg-dashboard-border/50 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { id: "personal", label: "Personal Info" },
-  { id: "verification", label: "Verification" },
+  // { id: "verification", label: "Verification" },
   { id: "wallet", label: "Wallet" },
-  { id: "tiers", label: "Tiers & Limits" },
+  // { id: "tiers", label: "Tiers & Limits" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -59,11 +134,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabId>("personal");
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-bg-primary" />
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (error) {
@@ -195,7 +266,7 @@ export default function ProfilePage() {
                       ? new Date(user.date_of_birth).toLocaleDateString("en-US", {
                           year: "numeric", month: "long", day: "numeric",
                         })
-                      : "Not set"
+                      : ""
                   }
                 />
               </div>
@@ -225,13 +296,13 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Verification tab — commented out for now
         {activeTab === "verification" && (
           <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
             <div className="px-4 py-3 sm:px-5 border-b border-dashboard-border/40">
               <h3 className="text-sm sm:text-base font-semibold text-dashboard-heading">KYC Verification</h3>
             </div>
             <div className="p-4 sm:p-5 space-y-3">
-              {/* Status */}
               <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-dashboard-bg/60">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-100 rounded-lg shrink-0">
@@ -250,15 +321,12 @@ export default function ProfilePage() {
                   <XCircle className="h-5 w-5 text-red-500 shrink-0" />
                 )}
               </div>
-
-              {/* ID Type */}
               <InfoRow icon={CreditCard} label="ID Type" value={kyc_verification.id_type.replace(/_/g, " ")} capitalize />
-
-              {/* ID Number */}
               <InfoRow icon={CreditCard} label="ID Number" value={kyc_verification.id_number} mono />
             </div>
           </div>
         )}
+        */}
 
         {activeTab === "wallet" && (
           <div className="space-y-4">
@@ -324,9 +392,9 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Tiers & Limits tab — commented out for now
         {activeTab === "tiers" && (
           <div className="space-y-4">
-            {/* Current Tier */}
             {current_tier && (
               <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
                 <div className={`bg-gradient-to-r ${getTierStyle(current_tier.tier).gradient} px-4 py-3 sm:px-5 sm:py-4 text-white`}>
@@ -358,8 +426,6 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
-
-            {/* Available Tiers */}
             {sortedTiers.length > 0 && (
               <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
                 <div className="px-4 py-3 sm:px-5 border-b border-dashboard-border/40">
@@ -383,6 +449,7 @@ export default function ProfilePage() {
             )}
           </div>
         )}
+        */}
       </div>
     </div>
   );
@@ -411,7 +478,7 @@ function InfoRow({
       <div className="flex-1 min-w-0">
         <p className="text-[10px] sm:text-xs text-dashboard-muted">{label}</p>
         <p className={`text-sm sm:text-base font-medium text-dashboard-heading truncate ${cap ? "capitalize" : ""} ${mono ? "font-mono" : ""}`}>
-          {value || "Not set"}
+          {value || ""}
         </p>
       </div>
     </div>

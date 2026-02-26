@@ -13,7 +13,6 @@ import {
   Wifi,
   Tv,
   Receipt,
-  Loader2,
   Landmark,
   Hash,
   Send,
@@ -64,6 +63,122 @@ const item = {
     transition: { duration: 0.35 },
   },
 };
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-dashboard-bg">
+      {/* Header skeleton matching new header layout */}
+      <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
+        <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+          {/* Mobile menu avatar */}
+          <div className="lg:hidden shrink-0">
+            <div className="h-9 w-9 rounded-lg bg-dashboard-border/60 animate-pulse" />
+          </div>
+          {/* Desktop avatar */}
+          <div className="hidden lg:block shrink-0">
+            <div className="h-9 w-9 rounded-lg bg-dashboard-border/60 animate-pulse" />
+          </div>
+          {/* Greeting text */}
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <div className="h-4 w-24 sm:w-28 bg-dashboard-border/70 rounded animate-pulse" />
+            <div className="h-3 w-32 sm:w-40 bg-dashboard-border/50 rounded animate-pulse" />
+          </div>
+        </div>
+      </header>
+
+      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 sm:space-y-8">
+        {/* Top row: wallet card + user info card */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Wallet card skeleton */}
+          <div className="lg:col-span-2">
+            <div
+              className="rounded-2xl h-40 sm:h-44 animate-pulse"
+              style={{
+                background:
+                  "linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%)",
+              }}
+            />
+          </div>
+
+          {/* User info card skeleton (desktop only) */}
+          <div className="hidden lg:block">
+            <div className="bg-dashboard-surface rounded-2xl border border-dashboard-border/80 shadow-sm p-5 h-full animate-pulse">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="h-12 w-12 rounded-full bg-dashboard-border/50" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 w-32 bg-dashboard-border/50 rounded" />
+                  <div className="h-2.5 w-24 bg-dashboard-border/40 rounded" />
+                </div>
+              </div>
+              <div className="border-t border-dashboard-border/80 pt-4 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="h-2.5 w-12 bg-dashboard-border/40 rounded" />
+                  <div className="h-4 w-16 bg-dashboard-border/40 rounded-full" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-2.5 w-10 bg-dashboard-border/40 rounded" />
+                  <div className="h-4 w-18 bg-dashboard-border/40 rounded-full" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-2.5 w-9 bg-dashboard-border/40 rounded" />
+                  <div className="h-4 w-14 bg-dashboard-border/40 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Service actions skeleton */}
+        <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4 animate-pulse">
+          <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-dashboard-border/50" />
+                <div className="h-2.5 w-12 mt-2 rounded bg-dashboard-border/40" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Transfer actions skeleton */}
+        <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 pt-5 pb-3 sm:p-4 sm:pt-5 animate-pulse">
+          <div className="grid grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-dashboard-border/50" />
+                <div className="h-2.5 w-14 mt-2 rounded bg-dashboard-border/40" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent transactions skeleton */}
+        <section>
+          <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className={`px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-3 ${
+                  i > 0 ? "border-t border-dashboard-border/40" : ""
+                }`}
+              >
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-dashboard-border/50 animate-pulse shrink-0" />
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="h-3 w-28 sm:w-36 bg-dashboard-border/50 rounded animate-pulse" />
+                  <div className="h-2.5 w-20 bg-dashboard-border/40 rounded animate-pulse" />
+                </div>
+                <div className="text-right space-y-1.5">
+                  <div className="h-3 w-12 bg-dashboard-border/50 rounded animate-pulse ml-auto" />
+                  <div className="h-2.5 w-10 bg-dashboard-border/40 rounded animate-pulse ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
 
 function DashboardContent() {
   const router = useRouter();
@@ -121,104 +236,7 @@ function DashboardContent() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-dashboard-bg">
-        {/* Header skeleton */}
-        <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
-          <div className="flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-            <div className="min-w-0 pr-12 lg:pr-0">
-              <div className="h-5 w-24 sm:w-28 bg-dashboard-border/70 rounded animate-pulse" />
-              <div className="h-3.5 w-36 mt-2 bg-dashboard-border/50 rounded animate-pulse" />
-            </div>
-          </div>
-        </header>
-
-        <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 sm:space-y-8">
-          {/* Wallet card skeleton */}
-          <div
-            className="rounded-2xl overflow-hidden shadow-xl animate-pulse"
-            style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)" }}
-          >
-            <div className="p-4 sm:p-5">
-              <div className="flex justify-between mb-4">
-                <div className="h-3 w-20 bg-white/10 rounded" />
-                <div className="h-5 w-14 bg-white/10 rounded-full" />
-              </div>
-              <div className="h-3 w-24 bg-white/10 rounded mb-2" />
-              <div className="h-8 w-28 bg-white/15 rounded mb-4" />
-              <div className="h-3 w-28 bg-white/10 rounded mb-1" />
-              <div className="h-4 w-36 bg-white/15 rounded mb-3" />
-              <div className="h-3 w-44 bg-white/10 rounded mb-4" />
-              <div className="h-11 w-full bg-white/20 rounded-xl" />
-            </div>
-          </div>
-
-          {/* Analysis cards skeleton */}
-          <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 p-3 sm:p-4 animate-pulse"
-              >
-                <div className="h-8 w-8 sm:h-9 sm:w-9 bg-dashboard-border/60 rounded-lg mb-2" />
-                <div className="h-2.5 w-16 sm:w-20 bg-dashboard-border/50 rounded mb-2" />
-                <div className="h-5 w-14 sm:w-20 bg-dashboard-border/60 rounded" />
-              </div>
-            ))}
-          </div>
-
-          {/* Transfer actions skeleton */}
-          <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface p-3 sm:p-4 animate-pulse">
-            <div className="grid grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-dashboard-border/50" />
-                  <div className="h-2.5 w-12 mt-2 rounded bg-dashboard-border/40" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Service actions skeleton */}
-          <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 py-3 sm:px-4 sm:py-4 animate-pulse">
-            <div className="grid grid-cols-4 gap-y-3">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-dashboard-border/50" />
-                  <div className="h-2.5 w-10 mt-2 rounded bg-dashboard-border/40" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent transactions skeleton */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div className="h-3.5 w-32 bg-dashboard-border/60 rounded animate-pulse" />
-                <div className="h-2.5 w-20 mt-1.5 bg-dashboard-border/40 rounded animate-pulse" />
-              </div>
-              <div className="h-3 w-12 bg-dashboard-border/50 rounded animate-pulse" />
-            </div>
-            <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className={`px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-3 ${i > 1 ? "border-t border-dashboard-border/40" : ""}`}>
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-dashboard-border/50 animate-pulse shrink-0" />
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="h-3 w-28 sm:w-36 bg-dashboard-border/50 rounded animate-pulse" />
-                    <div className="h-2.5 w-20 bg-dashboard-border/40 rounded animate-pulse" />
-                  </div>
-                  <div className="text-right space-y-1.5">
-                    <div className="h-3 w-12 bg-dashboard-border/50 rounded animate-pulse ml-auto" />
-                    <div className="h-2.5 w-10 bg-dashboard-border/40 rounded animate-pulse ml-auto" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error || !dashboardData) {
@@ -549,9 +567,7 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-dashboard-bg flex items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-dashboard-accent" />
-        </div>
+        <DashboardSkeleton />
       }
     >
       <DashboardContent />
