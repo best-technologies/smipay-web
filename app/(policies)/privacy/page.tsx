@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy
             </h1>
             <p className="mt-3 text-sm text-[#9CA3AF]">
-              Last updated: November 21, 2025
+              Last updated: Febuary 26, 2026
             </p>
           </div>
         </div>
@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy
             </h1>
             <p className="mt-3 text-sm text-[#9CA3AF]">
-              Last updated: November 21, 2025
+              Last updated: Febuary 26, 2026
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy
             </h1>
             <p className="mt-2 text-xs text-[#9CA3AF]">
-              Last updated: November 21, 2025
+              Last updated: Febuary 26, 2026
             </p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy
             </h1>
             <p className="mt-2 text-xs text-[#9CA3AF]">
-              Last updated: November 21, 2025
+              Last updated: Febuary 26, 2026
             </p>
           </div>
         </div>
@@ -106,21 +106,23 @@ export default function PrivacyPolicyPage() {
               Information We Collect
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-4">
-              We collect the following types of information to provide and
-              improve our Services:
+              We collect information in order to create and secure your account,
+              process transactions, improve Smipay, meet legal obligations, and
+              keep your experience safe. The categories below describe what we
+              collect when you use the app or website.
             </p>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
               1. Personal Information
             </h3>
             <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
-              <li>Full name</li>
-              <li>Phone number</li>
-              <li>Email address</li>
-              <li>Date of birth</li>
-              <li>Residential address</li>
-              <li>Identity documents (BVN, NIN, ID card)</li>
-              <li>Account login details</li>
+              <li>Full name and contact details (email address, phone number)</li>
+              <li>Date of birth and residential / billing address where required</li>
+              <li>
+                Identity information for KYC/AML purposes (such as BVN, NIN, ID card
+                details) where required by law or our partners
+              </li>
+              <li>Account login details (hashed passwords, security settings)</li>
             </ul>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
@@ -141,18 +143,25 @@ export default function PrivacyPolicyPage() {
               <li>IP address</li>
               <li>Device model</li>
               <li>Operating system</li>
-              <li>App usage data</li>
-              <li>Browser type</li>
-              <li>Network provider</li>
+              <li>App version and performance data</li>
+              <li>Browser type (for web access)</li>
+              <li>Mobile network provider</li>
+              <li>
+                Device identifiers and diagnostic information (such as device IDs or
+                crash logs) used to secure your account, prevent fraud, and improve
+                stability
+              </li>
             </ul>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
               4. Cookies and Tracking Technologies
             </h3>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed">
-              We use cookies, pixels, and analytics tools to understand user
-              behavior and improve our platform. See our Cookies Policy for more
-              details.
+              We use cookies, pixels, and analytics tools to understand usage
+              patterns, maintain security, and improve our platform. These
+              technologies may collect anonymized or pseudonymized identifiers.
+              You can control cookies through your browser settings. See our
+              Cookies Policy for more details.
             </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
@@ -244,6 +253,34 @@ export default function PrivacyPolicyPage() {
             </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
+              Account Deletion and Data Erasure
+            </h2>
+            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
+              You can request that your Smipay account be closed and your
+              personal data deleted:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
+              <li>
+                From within the app (where available) by navigating to{" "}
+                <strong>Settings &gt; Account &gt; Delete account</strong>, or
+              </li>
+              <li>
+                By sending an email from your registered email address to{" "}
+                <strong>support@smipay.com</strong> with the subject line
+                &quot;Account deletion request&quot;.
+              </li>
+            </ul>
+            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
+              We may ask you to verify your identity before processing deletion
+              requests. Once confirmed, we will deactivate your account and
+              permanently delete or anonymize personal data that we are not
+              legally required to retain (for example, records needed for
+              anti‑money‑laundering, tax, or regulatory purposes). Where we must
+              retain limited information, we will restrict its use to compliance
+              and audit purposes only.
+            </p>
+
+            <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               Data Retention
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
@@ -276,7 +313,10 @@ export default function PrivacyPolicyPage() {
               <li>Request data portability</li>
             </ul>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
-              Requests can be made via our support channels.
+              To exercise any of these rights, please contact us via{" "}
+              <strong>support@smipay.com</strong>. We will respond to verified
+              requests within a reasonable period and in line with NDPR and any
+              other applicable regulations.
             </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">

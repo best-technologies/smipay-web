@@ -18,30 +18,27 @@ export default function HeaderNew() {
   };
 
   return (
-    <header className="w-full bg-brand-bg-primary text-white">
+    <header className="w-full bg-white border-b border-dashboard-border/60">
       <div className="mx-auto flex h-header max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90">
+        <Link href="/" className="flex items-center hover:opacity-90">
           <Image
-            src="/smipay-icon.jpg"
+            src="/smipay-logo.png"
             alt="Smipay"
-            width={32}
+            width={140}
             height={32}
-            className="rounded-lg"
+            className="h-7 w-auto sm:h-8"
             priority
           />
-          <span className="text-lg sm:text-xl font-bold tracking-tight">
-            Smipay
-          </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-8 text-sm lg:flex">
+        <div className="hidden items-center gap-8 text-sm lg:flex text-brand-text-primary">
           <nav className="flex items-center gap-8">
-            <Link href="/" className="hover:opacity-90">
+            <Link href="/" className="hover:text-brand-bg-primary transition-colors">
               Home
             </Link>
             <div className="group relative">
-              <button className="flex items-center gap-2 hover:opacity-90">
+              <button className="flex items-center gap-2 hover:text-brand-bg-primary transition-colors">
                 <span>Services</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
@@ -60,10 +57,10 @@ export default function HeaderNew() {
                 </Link>
               </div>
             </div>
-            <Link href="#" className="hover:opacity-90">
+            <Link href="#" className="hover:text-brand-bg-primary transition-colors">
               About Us
             </Link>
-            <Link href="#" className="hover:opacity-90">
+            <Link href="#" className="hover:text-brand-bg-primary transition-colors">
               Support
             </Link>
           </nav>
@@ -73,8 +70,8 @@ export default function HeaderNew() {
             <>
               {isAuthenticated && user ? (
                 <div className="relative group">
-                  <button className="flex items-center gap-2 hover:opacity-90 py-2">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <button className="flex items-center gap-2 hover:text-brand-bg-primary py-2">
+                    <div className="w-8 h-8 rounded-full bg-brand-bg-primary/10 flex items-center justify-center text-brand-bg-primary">
                       <User className="h-4 w-4" />
                     </div>
                     <span className="font-medium">{user.first_name}</span>
@@ -126,13 +123,13 @@ export default function HeaderNew() {
                   <Button
                     asChild
                     variant="ghost"
-                    className="text-white hover:bg-white/10"
+                    className="text-brand-text-primary hover:bg-brand-bg-primary/5"
                   >
                     <Link href="/auth/signin">Sign In</Link>
                   </Button>
                   <Button
                     asChild
-                    className="bg-white text-brand-bg-primary hover:bg-white/90"
+                    className="bg-brand-bg-primary text-white hover:bg-brand-bg-primary/90"
                   >
                     <Link href="/auth/register">Register</Link>
                   </Button>
@@ -151,7 +148,7 @@ export default function HeaderNew() {
                 <Button
                   asChild
                   size="sm"
-                  className="h-8 px-3 rounded-full bg-white text-brand-bg-primary hover:bg-white/90 text-xs font-semibold"
+                  className="h-8 px-3 rounded-full bg-brand-bg-primary text-white hover:bg-brand-bg-primary/90 text-xs font-semibold"
                 >
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
@@ -161,14 +158,14 @@ export default function HeaderNew() {
                     asChild
                     variant="ghost"
                     size="sm"
-                    className="h-8 px-3 rounded-full text-xs text-white hover:bg-white/10"
+                    className="h-8 px-3 rounded-full text-xs text-brand-text-primary hover:bg-brand-bg-primary/5"
                   >
                     <Link href="/auth/signin">Sign In</Link>
                   </Button>
                   <Button
                     asChild
                     size="sm"
-                    className="h-8 px-3 rounded-full bg-white text-brand-bg-primary hover:bg-white/90 text-xs font-semibold"
+                    className="h-8 px-3 rounded-full bg-brand-bg-primary text-white hover:bg-brand-bg-primary/90 text-xs font-semibold"
                   >
                     <Link href="/auth/register">Register</Link>
                   </Button>
