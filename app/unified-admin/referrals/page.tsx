@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
-import { RefreshCw, UserPlus, Settings, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  RefreshCw,
+  UserPlus,
+  Settings,
+  Loader2,
+  Lightbulb,
+  Power,
+  AlertTriangle,
+} from "lucide-react";
 import { useAdminReferrals } from "@/hooks/admin/useAdminReferrals";
 import { adminReferralsApi } from "@/services/admin/referrals-api";
 import { ReferralsAnalytics } from "./_components/ReferralsAnalytics";
@@ -12,6 +20,7 @@ import { ReferralsPagination } from "./_components/ReferralsPagination";
 import { ReferralsSkeleton } from "./_components/ReferralsSkeleton";
 import { TopReferrers } from "./_components/TopReferrers";
 import { ReferralConfigModal } from "./_components/ReferralConfigModal";
+import { ReferralHowItWorksModal } from "./_components/ReferralHowItWorksModal";
 import { REFERRAL_STATUSES } from "@/types/admin/referrals";
 
 export default function ReferralsPage() {
@@ -32,10 +41,28 @@ export default function ReferralsPage() {
   } = useAdminReferrals();
 
   const [configOpen, setConfigOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectSubmitting, setRejectSubmitting] = useState(false);
+  const [toggleConfirm, setToggleConfirm] = useState(false);
+  const [toggleLoading, setToggleLoading] = useState(false);
+
+  const programActive = analytics?.config?.is_active ?? false;
+
+  const handleToggleProgram = async () => {
+    setToggleConfirm(false);
+    setToggleLoading(true);
+    try {
+      await adminReferralsApi.updateConfig({ is_active: !programActive });
+      refetch();
+    } catch {
+      /* handled */
+    } finally {
+      setToggleLoading(false);
+    }
+  };
 
   const handleApprove = async (id: string) => {
     setActionLoading(id);
@@ -80,6 +107,14 @@ export default function ReferralsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setHowItWorksOpen(true)}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+            >
+              <Lightbulb className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">How it Works</span>
+            </button>
             {analytics?.config && (
               <button
                 type="button"
@@ -112,6 +147,45 @@ export default function ReferralsPage() {
           >
             {error}
             <button type="button" onClick={refetch} className="ml-2 underline font-medium">Retry</button>
+          </motion.div>
+        )}
+
+        {/* Master Switch */}
+        {analytics?.config && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-4 py-3"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center ${programActive ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"}`}
+                >
+                  <Power className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-dashboard-heading">
+                    Referral Program
+                  </p>
+                  <p className="text-[11px] text-dashboard-muted">
+                    {programActive
+                      ? "Active — referral codes are accepted and rewards are being paid"
+                      : "Inactive — referral codes are ignored and no rewards are paid out"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setToggleConfirm(true)}
+                disabled={toggleLoading}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${programActive ? "bg-emerald-500" : "bg-slate-300"}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${programActive ? "translate-x-6" : "translate-x-1"}`}
+                />
+              </button>
+            </div>
           </motion.div>
         )}
 
@@ -235,6 +309,58 @@ export default function ReferralsPage() {
           </motion.div>
         </div>
       )}
+
+      {/* Toggle program confirmation */}
+      <AnimatePresence>
+        {toggleConfirm && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-sm p-5"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-dashboard-heading">
+                    {programActive ? "Disable" : "Enable"} Referral Program
+                  </h3>
+                  <p className="text-xs text-dashboard-muted">
+                    {programActive
+                      ? "New referral codes will be ignored during signup, and pending referrals won't be rewarded even if the trigger is met. Records are kept — turning it back on resumes everything."
+                      : "New referral codes will be accepted during signup, and pending referrals will start being rewarded when triggers are met."}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setToggleConfirm(false)}
+                  className="px-4 py-2 text-xs font-medium border border-dashboard-border/60 rounded-lg hover:bg-dashboard-bg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleToggleProgram}
+                  className={`px-4 py-2 text-xs font-medium rounded-lg text-white transition-colors ${programActive ? "bg-red-600 hover:bg-red-700" : "bg-emerald-600 hover:bg-emerald-700"}`}
+                >
+                  {programActive ? "Turn Off" : "Turn On"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* How it Works modal */}
+      <ReferralHowItWorksModal
+        open={howItWorksOpen}
+        onClose={() => setHowItWorksOpen(false)}
+      />
     </div>
   );
 }

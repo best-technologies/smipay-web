@@ -181,7 +181,7 @@ export default function AdminLayout({
         <SupportNotificationBanner />
         <div className="flex min-h-screen bg-dashboard-bg">
           <AdminSidebar />
-          <main className="flex-1 overflow-auto">{children}</main>
+          <main className="flex-1 overflow-auto admin-content-area">{children}</main>
         </div>
 
         <SessionWarning

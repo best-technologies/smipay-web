@@ -22,6 +22,8 @@ import {
   ChevronDown,
   ChevronRight,
   ScrollText,
+  Gift,
+  Coins,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -83,11 +85,26 @@ const adminMenuItems: AdminMenuItem[] = [
     enabled: false,
   },
   {
-    id: "referrals",
-    label: "Referrals",
-    icon: UserPlus,
-    href: "/unified-admin/referrals",
+    id: "rewards",
+    label: "Rewards",
+    icon: Gift,
     enabled: true,
+    submenu: [
+      {
+        id: "referrals",
+        label: "Referrals",
+        href: "/unified-admin/referrals",
+        icon: UserPlus,
+        enabled: true,
+      },
+      {
+        id: "cashback",
+        label: "Cashback",
+        href: "/unified-admin/cashback",
+        icon: Coins,
+        enabled: true,
+      },
+    ],
   },
   {
     id: "cards",
@@ -126,7 +143,15 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const [openMenus, setOpenMenus] = useState<string[]>(() => {
+    const initial: string[] = [];
+    for (const item of adminMenuItems) {
+      if (item.submenu?.some((sub) => pathname.startsWith(sub.href))) {
+        initial.push(item.id);
+      }
+    }
+    return initial;
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {

@@ -277,3 +277,16 @@ html {
     display: none;
   }
 }
+
+/*
+ * Admin content area readability boost.
+ * Scales all text, spacing, and elements proportionally
+ * without touching individual component files.
+ * Adjust --admin-zoom to taste (1.0 = no change, 1.1 = 10% bigger).
+ */
+:root {
+  --admin-zoom: 1.07;
+}
+.admin-content-area {
+  zoom: var(--admin-zoom);
+}
