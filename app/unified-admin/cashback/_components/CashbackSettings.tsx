@@ -10,6 +10,7 @@ import {
   Trash2,
   AlertTriangle,
   Check,
+  Undo2,
 } from "lucide-react";
 import { adminCashbackApi } from "@/services/admin/cashback-api";
 import type {
@@ -51,6 +52,7 @@ export function CashbackSettings({
   >({});
   const [ruleSaving, setRuleSaving] = useState<string | null>(null);
   const [ruleSuccess, setRuleSuccess] = useState<string | null>(null);
+  const [ruleToggling, setRuleToggling] = useState<string | null>(null);
 
   const [seeding, setSeeding] = useState(false);
   const [toggleConfirm, setToggleConfirm] = useState(false);
@@ -131,11 +133,24 @@ export function CashbackSettings({
     }
   };
 
+  const handleToggleRule = async (rule: CashbackRule) => {
+    setRuleToggling(rule.id);
+    try {
+      await adminCashbackApi.updateRule(rule.id, {
+        is_active: !rule.is_active,
+      });
+      onSaved();
+    } catch {
+      // handled
+    } finally {
+      setRuleToggling(null);
+    }
+  };
+
   const getRuleEdit = useCallback(
     (rule: CashbackRule) => {
       const edit = ruleEdits[rule.id];
       return {
-        is_active: edit?.is_active ?? rule.is_active,
         percentage: edit?.percentage ?? rule.percentage,
         max_cashback_amount:
           edit?.max_cashback_amount !== undefined
@@ -161,6 +176,14 @@ export function CashbackSettings({
     }));
   };
 
+  const clearRuleEdit = (ruleId: string) => {
+    setRuleEdits((prev) => {
+      const next = { ...prev };
+      delete next[ruleId];
+      return next;
+    });
+  };
+
   const handleSaveRule = async (rule: CashbackRule) => {
     const edit = ruleEdits[rule.id];
     if (!edit) return;
@@ -168,8 +191,6 @@ export function CashbackSettings({
     setRuleSaving(rule.id);
     try {
       const payload: Record<string, unknown> = {};
-      if (edit.is_active !== undefined && edit.is_active !== rule.is_active)
-        payload.is_active = edit.is_active;
       if (edit.percentage !== undefined && edit.percentage !== rule.percentage)
         payload.percentage = edit.percentage;
       if (edit.max_cashback_amount !== undefined)
@@ -414,17 +435,12 @@ export function CashbackSettings({
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() =>
-                            setRuleField(
-                              rule.id,
-                              "is_active",
-                              !edited.is_active,
-                            )
-                          }
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${edited.is_active ? "bg-emerald-500" : "bg-slate-300"}`}
+                          onClick={() => handleToggleRule(rule)}
+                          disabled={ruleToggling === rule.id}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${rule.is_active ? "bg-emerald-500" : "bg-slate-300"} ${ruleToggling === rule.id ? "opacity-50" : ""}`}
                         >
                           <span
-                            className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform ${edited.is_active ? "translate-x-4.5" : "translate-x-0.5"}`}
+                            className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform ${rule.is_active ? "translate-x-4.5" : "translate-x-0.5"}`}
                           />
                         </button>
                         <button
@@ -478,6 +494,14 @@ export function CashbackSettings({
                           )}
                           Save
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => clearRuleEdit(rule.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-md border border-dashboard-border/60 text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-bg transition-colors"
+                        >
+                          <Undo2 className="h-3 w-3" />
+                          Cancel
+                        </button>
                         {saved && (
                           <span className="text-[10px] text-emerald-600 font-medium">
                             Saved!
@@ -494,13 +518,12 @@ export function CashbackSettings({
                     </span>
                     <button
                       type="button"
-                      onClick={() =>
-                        setRuleField(rule.id, "is_active", !edited.is_active)
-                      }
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${edited.is_active ? "bg-emerald-500" : "bg-slate-300"}`}
+                      onClick={() => handleToggleRule(rule)}
+                      disabled={ruleToggling === rule.id}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${rule.is_active ? "bg-emerald-500" : "bg-slate-300"} ${ruleToggling === rule.id ? "opacity-50" : ""}`}
                     >
                       <span
-                        className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform ${edited.is_active ? "translate-x-4.5" : "translate-x-0.5"}`}
+                        className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform ${rule.is_active ? "translate-x-4.5" : "translate-x-0.5"}`}
                       />
                     </button>
                     <MiniInput
@@ -525,25 +548,37 @@ export function CashbackSettings({
                     />
                     <div className="flex items-center gap-1">
                       {hasEdits && (
-                        <button
-                          type="button"
-                          onClick={() => handleSaveRule(rule)}
-                          disabled={saving}
-                          className="p-1.5 rounded-md bg-brand-bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all"
-                        >
-                          {saving ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : saved ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <Save className="h-3 w-3" />
-                          )}
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleSaveRule(rule)}
+                            disabled={saving}
+                            className="p-1.5 rounded-md bg-brand-bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all"
+                            title="Save changes"
+                          >
+                            {saving ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : saved ? (
+                              <Check className="h-3 w-3" />
+                            ) : (
+                              <Save className="h-3 w-3" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => clearRuleEdit(rule.id)}
+                            className="p-1.5 rounded-md text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-bg border border-dashboard-border/60 transition-colors"
+                            title="Cancel edit"
+                          >
+                            <Undo2 className="h-3 w-3" />
+                          </button>
+                        </>
                       )}
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(rule)}
                         className="p-1.5 rounded-md text-dashboard-muted hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="Delete rule"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>

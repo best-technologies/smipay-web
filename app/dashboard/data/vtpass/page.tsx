@@ -35,6 +35,11 @@ export default function VtpassDataPage() {
   const walletBalance = dashboardData
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
+  const cashbackBalance = dashboardData?.cashback_wallet?.current_balance;
+  const dataCbRate = dashboardData?.cashback_rates?.find(
+    (r) => r.service === "data" && r.is_active
+  );
+  const cashbackPercent = dataCbRate?.percentage;
 
   const services = allServices.filter((service) => {
     const standardProviders = ["mtn-data", "glo-data", "airtel-data", "etisalat-data"];
@@ -263,6 +268,8 @@ export default function VtpassDataPage() {
                   onSuccess={handleTransactionSuccess}
                   onError={handleTransactionError}
                   walletBalance={walletBalance}
+                  cashbackBalance={cashbackBalance}
+                  cashbackPercent={cashbackPercent}
                 />
               )}
             </div>

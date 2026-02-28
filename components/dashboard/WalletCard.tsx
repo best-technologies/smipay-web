@@ -10,6 +10,7 @@ interface WalletCardProps {
   accountNumber?: string;
   accountHolderName?: string;
   balance: number;
+  cashbackBalance?: string;
   isActive?: boolean;
   isLoading?: boolean;
   compact?: boolean;
@@ -22,6 +23,7 @@ export function WalletCard({
   accountNumber,
   accountHolderName,
   balance,
+  cashbackBalance,
   isActive = true,
   isLoading = false,
   compact = false,
@@ -198,6 +200,12 @@ export function WalletCard({
             )}
           </button>
         </div>
+
+        {cashbackBalance && (
+          <p className="mt-1 text-[11px] sm:text-xs text-emerald-400/90 font-medium tabular-nums">
+            Cashback: {balanceHidden ? "••••" : cashbackBalance}
+          </p>
+        )}
 
         {/* Transaction History + Add Money row */}
         <div className="flex items-center justify-between mt-3">

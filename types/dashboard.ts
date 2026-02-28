@@ -79,10 +79,24 @@ export interface AccountTier {
   is_active: boolean;
 }
 
+export interface CashbackWallet {
+  current_balance: string;
+  all_time_earned: string;
+  all_time_withdrawn: string;
+}
+
+export interface CashbackRate {
+  service: string;
+  percentage: number;
+  is_active: boolean;
+}
+
 export interface DashboardData {
   user: DashboardUser;
   accounts: BankAccount[];
   wallet_card: WalletCard;
+  cashback_wallet?: CashbackWallet;
+  cashback_rates?: CashbackRate[];
   transaction_history: Transaction[];
   kyc_verification: KycVerification;
   current_tier: AccountTier;

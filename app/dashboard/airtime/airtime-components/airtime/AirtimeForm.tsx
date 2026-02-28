@@ -17,9 +17,11 @@ interface AirtimeFormProps {
   onSuccess: (data: VtpassPurchaseResponse) => void;
   onError: (error: string) => void;
   walletBalance: number;
+  cashbackBalance?: string;
+  cashbackPercent?: number;
 }
 
-export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormProps) {
+export function AirtimeForm({ onSuccess, onError, walletBalance, cashbackBalance, cashbackPercent }: AirtimeFormProps) {
   const { serviceIds: allServices, isLoading: loadingServices, error: servicesError } = useVtpassServiceIds();
 
   const services = useMemo(
@@ -135,7 +137,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
     setShowConfirmation(true);
   };
 
-  const handleConfirmPurchase = async () => {
+  const handleConfirmPurchase = async (useCashback: boolean) => {
     setIsSubmitting(true);
     setShowConfirmation(false);
 
@@ -150,6 +152,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         amount: parseFloat(amount),
         phone: phoneNumber,
         request_id: requestId,
+        use_cashback: useCashback || undefined,
       });
 
       if (response.success) {
@@ -214,6 +217,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         min={minAmount}
         max={maxAmount}
         presetAmounts={[100, 200, 500, 1000, 2000, 5000]}
+        cashbackPercent={cashbackPercent}
       />
 
       {/* Pay button */}
@@ -249,6 +253,8 @@ export function AirtimeForm({ onSuccess, onError, walletBalance }: AirtimeFormPr
         phoneNumber={phoneNumber}
         amount={parseFloat(amount) || 0}
         walletBalance={walletBalance}
+        cashbackBalance={cashbackBalance}
+        cashbackPercent={cashbackPercent}
         isLoading={isSubmitting}
       />
     </form>

@@ -11,6 +11,7 @@ interface AmountInputProps {
   max?: number;
   presetAmounts?: number[];
   required?: boolean;
+  cashbackPercent?: number;
 }
 
 export function AmountInput({
@@ -21,6 +22,7 @@ export function AmountInput({
   min = 50,
   max = 100000,
   presetAmounts = [100, 200, 500, 1000, 2000, 5000],
+  cashbackPercent,
 }: AmountInputProps) {
   const handlePresetClick = (amount: number) => {
     if (amount >= min && amount <= max) {
@@ -30,6 +32,7 @@ export function AmountInput({
 
   const numericValue = parseFloat(value) || 0;
   const isValid = numericValue >= min && numericValue <= max && value !== "";
+  const showCashback = cashbackPercent != null && cashbackPercent > 0;
 
   return (
     <div className="space-y-3">
@@ -71,11 +74,12 @@ export function AmountInput({
       </div>
 
       {presetAmounts.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="grid grid-cols-3 gap-2">
           {presetAmounts
             .filter((a) => a >= min && a <= max)
             .map((a) => {
               const isActive = value === a.toString();
+              const cashback = showCashback ? (a * cashbackPercent!) / 100 : 0;
               return (
                 <button
                   key={a}
@@ -83,14 +87,27 @@ export function AmountInput({
                   onClick={() => handlePresetClick(a)}
                   disabled={disabled}
                   className={cn(
-                    "h-8 px-3 text-[12px] font-semibold rounded-full transition-all duration-150 tabular-nums",
+                    "flex flex-col items-center justify-center rounded-xl py-2 px-2 transition-all duration-150",
                     "disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] touch-manipulation",
                     isActive
-                      ? "bg-brand-bg-primary text-white shadow-sm"
-                      : "bg-dashboard-bg text-dashboard-muted ring-1 ring-dashboard-border/50 hover:ring-dashboard-border hover:text-dashboard-heading"
+                      ? "bg-brand-bg-primary/[0.06] ring-[1.5px] ring-brand-bg-primary"
+                      : "bg-dashboard-bg ring-1 ring-dashboard-border/50 hover:ring-dashboard-border"
                   )}
                 >
-                  ₦{a >= 1000 ? `${a / 1000}k` : a}
+                  {showCashback && (
+                    <span className={cn(
+                      "text-[10px] sm:text-[11px] font-semibold leading-tight mb-0.5",
+                      isActive ? "text-emerald-600" : "text-emerald-500"
+                    )}>
+                      ₦{cashback % 1 === 0 ? cashback : cashback.toFixed(1)} Cashback
+                    </span>
+                  )}
+                  <span className={cn(
+                    "text-sm sm:text-[15px] font-bold tabular-nums",
+                    isActive ? "text-dashboard-heading" : "text-dashboard-heading/80"
+                  )}>
+                    ₦{a.toLocaleString()}
+                  </span>
                 </button>
               );
             })}

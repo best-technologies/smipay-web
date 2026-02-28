@@ -26,7 +26,7 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { OnboardingWalkthrough } from "@/components/dashboard/OnboardingWalkthrough";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
-import type { Transaction as DashboardTransaction } from "@/types/dashboard";
+import type { Transaction as DashboardTransaction, CashbackRate } from "@/types/dashboard";
 import { getNetworkLogo } from "@/lib/network-logos";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -63,6 +63,16 @@ const item = {
     transition: { duration: 0.35 },
   },
 };
+
+function buildCashbackMap(rates?: CashbackRate[]): Map<string, CashbackRate> {
+  if (!rates) return new Map();
+  const map = new Map<string, CashbackRate>();
+  for (const rate of rates) {
+    const actionId = rate.service === "international_airtime" ? "intl-airtime" : rate.service;
+    map.set(actionId, rate);
+  }
+  return map;
+}
 
 function DashboardSkeleton() {
   return (
@@ -253,6 +263,9 @@ function DashboardContent() {
   }
 
   const primaryAccount = dashboardData.accounts[0];
+  const cashbackRateMap = buildCashbackMap(dashboardData.cashback_rates);
+  const isCashbackActive = dashboardData.cashback_rates?.some((r) => r.is_active) ?? false;
+  const cashbackWallet = dashboardData.cashback_wallet;
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
@@ -301,6 +314,7 @@ function DashboardContent() {
               accountNumber={primaryAccount?.account_number}
               accountHolderName={primaryAccount?.account_holder_name}
               balance={parseBalance(dashboardData.wallet_card.current_balance)}
+              cashbackBalance={isCashbackActive ? cashbackWallet?.current_balance : undefined}
               isActive={primaryAccount?.isActive ?? true}
               onFundWallet={() => setIsFundWalletModalOpen(true)}
               onViewHistory={() => router.push("/dashboard/transactions")}
@@ -372,15 +386,6 @@ function DashboardContent() {
           </motion.div>
         </div>
 
-        {/* Wallet analysis section – commented out for now */}
-        {/* <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
-        >
-          <WalletAnalysisCards />
-        </motion.section> */}
-
         {/* Service Actions – quick links come right after wallet card */}
         <motion.section
           ref={quickLinksRef}
@@ -390,37 +395,48 @@ function DashboardContent() {
           className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4"
         >
           <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6">
-            {SERVICE_ACTIONS.map((action) => (
-              <motion.div key={action.id} variants={item} className="flex flex-col items-center">
-                {action.comingSoon ? (
-                  <div className="relative">
-                    <div
-                      className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full opacity-75 cursor-not-allowed"
-                      style={{ backgroundColor: action.bg, color: action.color }}
-                    >
-                      <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+            {SERVICE_ACTIONS.map((action) => {
+              const cbRate = cashbackRateMap.get(action.id);
+              const showCb = cbRate && cbRate.is_active && cbRate.percentage > 0;
+              return (
+                <motion.div key={action.id} variants={item} className="flex flex-col items-center">
+                  {action.comingSoon ? (
+                    <div className="relative">
+                      <div
+                        className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full opacity-75 cursor-not-allowed"
+                        style={{ backgroundColor: action.bg, color: action.color }}
+                      >
+                        <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+                      </div>
+                      <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
+                        Soon
+                      </span>
                     </div>
-                    <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
-                      Soon
-                    </span>
-                  </div>
-                ) : (
-                  <motion.button
-                    type="button"
-                    onClick={() => router.push(action.href)}
-                    whileHover={{ scale: 1.06 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
-                    style={{ backgroundColor: action.bg, color: action.color }}
-                  >
-                    <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
-                  </motion.button>
-                )}
-                <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
-                  {action.name}
-                </span>
-              </motion.div>
-            ))}
+                  ) : (
+                    <div className="relative">
+                      {showCb && (
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] sm:text-[10px] font-bold leading-none whitespace-nowrap shadow-sm">
+                          {cbRate.percentage}%
+                        </span>
+                      )}
+                      <motion.button
+                        type="button"
+                        onClick={() => router.push(action.href)}
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
+                        style={{ backgroundColor: action.bg, color: action.color }}
+                      >
+                        <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+                      </motion.button>
+                    </div>
+                  )}
+                  <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
+                    {action.name}
+                  </span>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.section>
 

@@ -27,6 +27,12 @@ export default function VtpassAirtimePage() {
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
 
+  const cashbackBalance = dashboardData?.cashback_wallet?.current_balance;
+  const airtimeCbRate = dashboardData?.cashback_rates?.find(
+    (r) => r.service === "airtime" && r.is_active
+  );
+  const cashbackPercent = airtimeCbRate?.percentage;
+
   const handleTransactionSuccess = async (data: VtpassPurchaseResponse) => {
     const isError =
       data.code !== "000" &&
@@ -138,6 +144,8 @@ export default function VtpassAirtimePage() {
               onSuccess={handleTransactionSuccess}
               onError={handleTransactionError}
               walletBalance={walletBalance}
+              cashbackBalance={cashbackBalance}
+              cashbackPercent={cashbackPercent}
             />
           </div>
         </motion.section>

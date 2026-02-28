@@ -19,6 +19,8 @@ interface DataPurchaseFormProps {
   onSuccess: (data: VtpassDataPurchaseResponse) => void;
   onError: (error: string) => void;
   walletBalance: number;
+  cashbackBalance?: string;
+  cashbackPercent?: number;
 }
 
 export function DataPurchaseForm({
@@ -29,6 +31,8 @@ export function DataPurchaseForm({
   onSuccess,
   onError,
   walletBalance,
+  cashbackBalance,
+  cashbackPercent,
 }: DataPurchaseFormProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [errors, setErrors] = useState<{ phoneNumber?: string }>({});
@@ -37,6 +41,8 @@ export function DataPurchaseForm({
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const amount = parseFloat(selectedVariation.variation_amount);
+  const cashbackBalanceNum = parseFloat((cashbackBalance || "0").replace(/[₦,]/g, "")) || 0;
+  const maxPayable = walletBalance + cashbackBalanceNum;
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -47,8 +53,8 @@ export function DataPurchaseForm({
     } else if (!phoneNumber.startsWith("0")) {
       newErrors.phoneNumber = "Phone number must start with 0";
     }
-    if (amount > walletBalance) {
-      setServerError("Insufficient wallet balance");
+    if (amount > maxPayable) {
+      setServerError("Insufficient wallet and cashback balance");
       return false;
     }
     setErrors(newErrors);
@@ -62,7 +68,7 @@ export function DataPurchaseForm({
     setShowConfirmation(true);
   };
 
-  const handleConfirmPurchase = async () => {
+  const handleConfirmPurchase = async (useCashback: boolean) => {
     setIsSubmitting(true);
     setShowConfirmation(false);
     try {
@@ -78,6 +84,7 @@ export function DataPurchaseForm({
         amount,
         phone: phoneNumber,
         request_id: requestId,
+        use_cashback: useCashback || undefined,
       });
 
       if (response.success) {
@@ -157,6 +164,8 @@ export function DataPurchaseForm({
         phoneNumber={phoneNumber}
         amount={amount}
         walletBalance={walletBalance}
+        cashbackBalance={cashbackBalance}
+        cashbackPercent={cashbackPercent}
         isLoading={isSubmitting}
       />
     </form>
