@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { X, Wallet, CheckCircle2, Zap, FileText } from "lucide-react";
-import { getNetworkLogo } from "@/lib/network-logos";
-import type { MeterType } from "@/types/vtpass/vtu/vtpass-electricity";
+import { X, Globe2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function parseCurrencyString(val: string | undefined): number {
@@ -16,11 +14,12 @@ interface PurchaseConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (useCashback: boolean) => void;
-  serviceName: string;
-  serviceID: string;
-  meterNumber: string;
-  meterType: MeterType;
-  customerName: string;
+  countryName: string;
+  countryFlag?: string;
+  productTypeName: string;
+  variationName: string;
+  beneficiaryNumber: string;
+  countryPrefix: string;
   amount: number;
   walletBalance?: number;
   cashbackBalance?: string;
@@ -32,11 +31,12 @@ export function PurchaseConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
-  serviceName,
-  serviceID,
-  meterNumber,
-  meterType,
-  customerName,
+  countryName,
+  countryFlag,
+  productTypeName,
+  variationName,
+  beneficiaryNumber,
+  countryPrefix,
   amount,
   walletBalance,
   cashbackBalance,
@@ -61,13 +61,6 @@ export function PurchaseConfirmationModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const shortName = serviceName
-    .replace(/Electric.*$/i, "")
-    .replace(/Payment.*$/i, "")
-    .replace(/-/g, " ")
-    .trim();
-  const logo = getNetworkLogo(serviceID);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -110,7 +103,6 @@ export function PurchaseConfirmationModal({
           </div>
         )}
 
-        {/* Amount header */}
         <div className="pt-12 pb-5 px-5 text-center border-b border-slate-100">
           <p className="text-3xl sm:text-[32px] font-bold text-slate-900 tabular-nums tracking-tight">
             ₦
@@ -128,40 +120,33 @@ export function PurchaseConfirmationModal({
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-0">
           <div className="flex items-center justify-between py-3 border-b border-slate-100">
-            <span className="text-sm text-slate-500">Provider</span>
-            <div className="flex items-center gap-2.5">
-              {logo ? (
-                <div className="relative h-9 w-9 rounded-xl overflow-hidden ring-1 ring-dashboard-border/40 shrink-0">
-                  <Image src={logo} alt={shortName} fill className="object-cover" unoptimized />
+            <span className="text-sm text-slate-500">Destination</span>
+            <div className="flex items-center gap-2">
+              {countryFlag ? (
+                <div className="relative h-5 w-5 rounded-full overflow-hidden ring-1 ring-slate-200 shrink-0">
+                  <Image src={countryFlag} alt={countryName} fill className="object-cover" unoptimized />
                 </div>
               ) : (
-                <div className="p-1.5 bg-quick-action-4-bg rounded-lg">
-                  <Zap className="h-5 w-5 text-quick-action-4" />
-                </div>
+                <Globe2 className="h-4 w-4 text-slate-400" />
               )}
-              <span className="text-sm font-semibold text-slate-900">{shortName}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between py-3 border-b border-slate-100">
-            <span className="text-sm text-slate-500">Customer</span>
-            <span className="text-sm font-semibold text-slate-900">{customerName}</span>
-          </div>
-
-          <div className="flex items-center justify-between py-3 border-b border-slate-100">
-            <span className="text-sm text-slate-500">Meter Number</span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-900 font-mono">{meterNumber}</span>
-              <span
-                className={`text-xs font-semibold px-2 py-0.5 rounded capitalize ${
-                  meterType === "prepaid"
-                    ? "bg-amber-50 text-amber-700"
-                    : "bg-blue-50 text-blue-700"
-                }`}
-              >
-                {meterType}
+              <span className="text-sm font-semibold text-slate-900">
+                {countryName} · {productTypeName}
               </span>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between py-3 border-b border-slate-100">
+            <span className="text-sm text-slate-500">Plan</span>
+            <span className="text-sm font-semibold text-slate-900 text-right max-w-[60%] truncate">
+              {variationName}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-3 border-b border-slate-100">
+            <span className="text-sm text-slate-500">Destination Phone</span>
+            <span className="text-sm font-semibold text-slate-900 font-mono">
+              +{countryPrefix} {beneficiaryNumber}
+            </span>
           </div>
 
           <div className="flex items-center justify-between py-3 border-b border-slate-100">
@@ -265,7 +250,7 @@ export function PurchaseConfirmationModal({
             }
             className="w-full h-13 sm:h-14 rounded-xl bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-white text-base font-semibold transition-colors shadow-lg shadow-brand-bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] touch-manipulation"
           >
-            {isLoading ? "Processing…" : "Confirm"}
+            {isLoading ? "Processing…" : "Pay"}
           </button>
         </div>
       </div>

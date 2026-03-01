@@ -25,8 +25,21 @@ import { WalletCard } from "@/components/dashboard/WalletCard";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { OnboardingWalkthrough } from "@/components/dashboard/OnboardingWalkthrough";
+import {
+  getPaymentReference,
+  clearPaymentReference,
+  clearPaymentInProgress,
+} from "@/lib/auth-storage";
+import {
+  getWelcomeBonusCongratsShownTxId,
+  setWelcomeBonusCongratsShownTxId,
+} from "@/lib/welcome-bonus-storage";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
 import type { Transaction as DashboardTransaction } from "@/types/dashboard";
+import {
+  WelcomeBonusCongrats,
+  FIRST_TX_BONUS_TYPE,
+} from "@/components/dashboard/WelcomeBonusCongrats";
 import { RewardBanners } from "@/components/dashboard/RewardBanners";
 import { getNetworkLogo } from "@/lib/network-logos";
 import { motion, AnimatePresence } from "motion/react";
@@ -199,20 +212,43 @@ function DashboardContent() {
   const { dashboardData, isLoading: loading, error, refetch } = useDashboard();
   const [isFundWalletModalOpen, setIsFundWalletModalOpen] = useState(false);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
+  const [showWelcomeBonusCongrats, setShowWelcomeBonusCongrats] = useState(false);
+  const [welcomeBonusTx, setWelcomeBonusTx] = useState<{ id: string; amount: number } | null>(null);
 
   const walletCardRef = useRef<HTMLDivElement>(null);
   const quickLinksRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLDivElement>(null);
+  const rewardBannersRef = useRef<HTMLDivElement>(null);
   const showOnboarding = user?.has_completed_onboarding === false;
+
+  // Show welcome-bonus congrats once per first_tx_bonus tx (scan recent txs so referral/other bonuses don't hide it)
+  useEffect(() => {
+    if (!dashboardData?.transaction_history?.length) return;
+    const recent = dashboardData.transaction_history.slice(0, 20);
+    const firstTxBonus = recent.find((tx) => tx.type === FIRST_TX_BONUS_TYPE);
+    if (!firstTxBonus) return;
+    if (getWelcomeBonusCongratsShownTxId() === firstTxBonus.id) return;
+    setWelcomeBonusTx({ id: firstTxBonus.id, amount: Number(firstTxBonus.amount) });
+    setShowWelcomeBonusCongrats(true);
+  }, [dashboardData?.transaction_history]);
 
   useEffect(() => {
     const payment = searchParams.get("payment");
-    const reference = searchParams.get("reference") || searchParams.get("trxref");
+    const urlReference = searchParams.get("reference") || searchParams.get("trxref");
 
-    if (payment === "callback" && reference) {
-      queueMicrotask(() => {
-        setPaymentReference(reference);
-        setIsFundWalletModalOpen(true);
-      });
+    if (payment === "callback") {
+      const reference = urlReference || getPaymentReference();
+
+      if (reference) {
+        queueMicrotask(() => {
+          setPaymentReference(reference);
+          setIsFundWalletModalOpen(true);
+        });
+      } else {
+        clearPaymentInProgress();
+        clearPaymentReference();
+      }
+
       setTimeout(() => {
         const url = new URL(window.location.href);
         url.searchParams.delete("payment");
@@ -277,29 +313,31 @@ function DashboardContent() {
         className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
       >
         <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-mobile-sidebar"))}
-            className="lg:hidden shrink-0 active:scale-95 transition-transform touch-manipulation"
-            aria-label="Open menu"
-          >
+          <div ref={menuButtonRef} className="shrink-0">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("open-mobile-sidebar"))}
+              className="lg:hidden active:scale-95 transition-transform touch-manipulation rounded-lg"
+              aria-label="Open menu"
+            >
+              <Image
+                src="/smipay-icon.jpg"
+                alt="Smipay"
+                width={36}
+                height={36}
+                className="rounded-lg"
+                priority
+              />
+            </button>
             <Image
               src="/smipay-icon.jpg"
               alt="Smipay"
               width={36}
               height={36}
-              className="rounded-lg"
+              className="rounded-lg hidden lg:block"
               priority
             />
-          </button>
-          <Image
-            src="/smipay-icon.jpg"
-            alt="Smipay"
-            width={36}
-            height={36}
-            className="rounded-lg shrink-0 hidden lg:block"
-            priority
-          />
+          </div>
           <p className="text-base sm:text-lg font-semibold text-dashboard-heading tracking-tight truncate">
             Hi, {dashboardData.user.first_name}
           </p>
@@ -389,10 +427,12 @@ function DashboardContent() {
 
         {/* Reward Banners — horizontally scrollable promos */}
         {dashboardData.reward_banners && dashboardData.reward_banners.length > 0 && (
-          <RewardBanners
-            banners={dashboardData.reward_banners}
-            userTag={dashboardData.user.smipay_tag}
-          />
+          <div ref={rewardBannersRef}>
+            <RewardBanners
+              banners={dashboardData.reward_banners}
+              userTag={dashboardData.user.smipay_tag}
+            />
+          </div>
         )}
 
         {/* Service Actions – quick links come right after wallet card */}
@@ -567,20 +607,33 @@ function DashboardContent() {
       <FundWalletModal
         isOpen={isFundWalletModalOpen}
         onClose={() => {
-          const hadPayment = !!paymentReference;
           setIsFundWalletModalOpen(false);
           setPaymentReference(null);
-          if (hadPayment) refetch();
+          refetch();
         }}
         bankAccounts={dashboardData?.accounts || []}
         initialReference={paymentReference}
       />
+
+      {welcomeBonusTx && (
+        <WelcomeBonusCongrats
+          isOpen={showWelcomeBonusCongrats}
+          onClose={() => {
+            setWelcomeBonusCongratsShownTxId(welcomeBonusTx.id);
+            setShowWelcomeBonusCongrats(false);
+          }}
+          amount={welcomeBonusTx.amount}
+          transactionId={welcomeBonusTx.id}
+        />
+      )}
 
       {showOnboarding && dashboardData && (
         <OnboardingWalkthrough
           firstName={dashboardData.user.first_name}
           walletCardRef={walletCardRef}
           quickLinksRef={quickLinksRef}
+          menuButtonRef={menuButtonRef}
+          rewardBannersRef={rewardBannersRef}
         />
       )}
     </div>

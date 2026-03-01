@@ -86,6 +86,7 @@ export interface VtpassCablePurchaseRequest {
   phone?: string;
   subscription_type?: "change" | "renew";
   quantity?: number;
+  use_cashback?: boolean;
 }
 
 export interface VtpassCableTransactionContent {

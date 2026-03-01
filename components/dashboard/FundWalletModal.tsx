@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { X, Building2, CreditCard, Tag, ArrowLeft, Copy, Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardFundingAmount } from "./CardFundingAmount";
 import { PaymentVerification } from "./PaymentVerification";
 import { walletApi } from "@/services/wallet-api";
-import { setPaymentInProgress, clearPaymentInProgress } from "@/lib/auth-storage";
+import {
+  setPaymentInProgress,
+  clearPaymentInProgress,
+  savePaymentReference,
+  clearPaymentReference,
+} from "@/lib/auth-storage";
 import type { BankAccount } from "@/types/dashboard";
 
 interface FundWalletModalProps {
@@ -33,6 +38,7 @@ export function FundWalletModal({
   const [paymentReference, setPaymentReference] = useState<string | null>(initialReference);
   const [error, setError] = useState<string | null>(null);
   const [verificationDone, setVerificationDone] = useState(false);
+  const verificationAbortRef = useRef(false);
 
   const primaryAccount = bankAccounts[0];
 
@@ -64,7 +70,18 @@ export function FundWalletModal({
   };
 
   const handleClose = () => {
-    if (isProcessing || (currentStep === "card-verification" && !verificationDone)) return;
+    if (isProcessing) return;
+
+    const wasVerifying = currentStep === "card-verification" && !verificationDone;
+
+    if (wasVerifying && paymentReference) {
+      verificationAbortRef.current = true;
+      walletApi.cancelPaystackFunding(paymentReference).catch(() => {});
+    }
+
+    clearPaymentInProgress();
+    clearPaymentReference();
+
     setCurrentStep("select-method");
     setSelectedMethod(null);
     setCopiedField(null);
@@ -72,6 +89,7 @@ export function FundWalletModal({
     setError(null);
     setIsProcessing(false);
     setVerificationDone(false);
+    verificationAbortRef.current = false;
     onClose();
   };
 
@@ -85,6 +103,7 @@ export function FundWalletModal({
 
       if (response.success && response.data) {
         setPaymentReference(response.data.reference);
+        savePaymentReference(response.data.reference);
         setPaymentInProgress();
         window.location.href = response.data.authorization_url;
       } else {
@@ -104,18 +123,21 @@ export function FundWalletModal({
     setError(null);
   };
 
-  const handleVerificationSuccess = () => {
+  const handleVerificationSuccess = useCallback((_data: { amount: string; balance_after?: string }) => {
     clearPaymentInProgress();
+    clearPaymentReference();
     setVerificationDone(true);
-  };
+  }, []);
 
-  const handleVerificationError = (message: string) => {
-    setError(message);
+  const handleVerificationError = useCallback((_message: string) => {
+    clearPaymentInProgress();
+    clearPaymentReference();
     setVerificationDone(true);
-  };
+  }, []);
 
   const handleVerificationRetry = () => {
     clearPaymentInProgress();
+    clearPaymentReference();
     setCurrentStep("card-funding");
     setPaymentReference(null);
     setError(null);
@@ -161,14 +183,14 @@ export function FundWalletModal({
                   {currentStep === "select-method" && "Choose your preferred funding method"}
                   {currentStep === "bank-transfer" && "Transfer to your account"}
                   {currentStep === "card-funding" && "Fund with card"}
-                  {currentStep === "card-verification" && "Verifying payment"}
+                  {currentStep === "card-verification" && (verificationDone ? "Payment complete" : "Verifying payment")}
                   {currentStep === "smipay-tag" && "Fund via Smipay Tag"}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              disabled={isProcessing || (currentStep === "card-verification" && !verificationDone)}
+              disabled={isProcessing}
               className="p-1.5 -mr-1.5 hover:bg-dashboard-bg rounded-lg transition-colors disabled:opacity-50"
             >
               <X className="h-5 w-5 text-dashboard-muted" />
@@ -371,6 +393,7 @@ export function FundWalletModal({
                 onSuccess={handleVerificationSuccess}
                 onError={handleVerificationError}
                 onRetry={handleVerificationRetry}
+                onDismiss={handleClose}
               />
             )}
 

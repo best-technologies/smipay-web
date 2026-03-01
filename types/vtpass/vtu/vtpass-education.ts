@@ -47,6 +47,7 @@ export interface VtpassEducationPurchaseRequest {
   billersCode?: string;
   amount?: number;
   request_id?: string;
+  use_cashback?: boolean;
 }
 
 export interface VtpassEducationCard {

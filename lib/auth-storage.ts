@@ -64,6 +64,7 @@ const USER_KEY = "smipay-user";
 const LAST_ACTIVITY_KEY = "smipay-last-activity";
 const TOKEN_EXPIRY_KEY = "smipay-token-expiry";
 const PAYMENT_IN_PROGRESS_KEY = "smipay-payment-in-progress";
+const PAYMENT_REFERENCE_KEY = "smipay-payment-reference";
 
 // Session timeout: 7 days (aligns with backend JWT lifetime)
 export const SESSION_TIMEOUT = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
@@ -262,6 +263,30 @@ export function isPaymentInProgress(): boolean {
     return elapsed < 15 * 60 * 1000; // 15 minutes
   }
   return false;
+}
+
+/**
+ * Persist payment reference across page redirects (Paystack redirect flow).
+ * Stored in localStorage so it survives the full-page redirect to Paystack
+ * and the redirect back to the app.
+ */
+export function savePaymentReference(reference: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(PAYMENT_REFERENCE_KEY, reference);
+  }
+}
+
+export function getPaymentReference(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem(PAYMENT_REFERENCE_KEY);
+  }
+  return null;
+}
+
+export function clearPaymentReference(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(PAYMENT_REFERENCE_KEY);
+  }
 }
 
 /**

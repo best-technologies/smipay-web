@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, ChevronRight, Sparkles, Wallet, Zap, Headphones } from "lucide-react";
+import { X, ChevronRight, Sparkles, Wallet, Zap, Headphones, PanelLeft, Gift } from "lucide-react";
 import { authApi } from "@/services/auth-api";
 import { useAuthStore } from "@/store/auth-store-backend";
 
@@ -10,6 +10,8 @@ interface OnboardingWalkthroughProps {
   firstName: string;
   walletCardRef: React.RefObject<HTMLDivElement | null>;
   quickLinksRef: React.RefObject<HTMLDivElement | null>;
+  menuButtonRef?: React.RefObject<HTMLDivElement | null>;
+  rewardBannersRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 interface TooltipPosition {
@@ -27,10 +29,22 @@ const STEPS = [
     description: "Let us give you a quick tour of your dashboard. It only takes a moment.",
   },
   {
+    id: "menu",
+    icon: PanelLeft,
+    title: "Menu",
+    description: "Tap the Smipay logo anytime to open the sidebar. You can access your profile, settings, and more from there.",
+  },
+  {
     id: "wallet",
     icon: Wallet,
     title: "Your Wallet",
     description: "This is your account balance. Tap **+ Add Money** to fund your wallet instantly.",
+  },
+  {
+    id: "rewards",
+    icon: Gift,
+    title: "Rewards & offers",
+    description: "Here you’ll see promos like **Welcome Bonus** and cashback. Tap a banner to see how to earn.",
   },
   {
     id: "quicklinks",
@@ -139,6 +153,8 @@ export function OnboardingWalkthrough({
   firstName,
   walletCardRef,
   quickLinksRef,
+  menuButtonRef,
+  rewardBannersRef,
 }: OnboardingWalkthroughProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -150,12 +166,14 @@ export function OnboardingWalkthrough({
   const getElementForStep = useCallback(
     (step: number): HTMLElement | null => {
       const id = STEPS[step]?.id as StepId;
+      if (id === "menu" && menuButtonRef?.current) return menuButtonRef.current;
       if (id === "wallet") return walletCardRef.current;
+      if (id === "rewards" && rewardBannersRef?.current) return rewardBannersRef.current;
       if (id === "quicklinks") return quickLinksRef.current;
       if (id === "support") return document.querySelector<HTMLElement>("[data-onboarding='support-fab']");
       return null;
     },
-    [walletCardRef, quickLinksRef]
+    [walletCardRef, quickLinksRef, menuButtonRef, rewardBannersRef]
   );
 
   useEffect(() => {

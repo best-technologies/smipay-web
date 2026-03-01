@@ -25,6 +25,7 @@ import {
 } from "@/hooks/vtpass/vtu/useInternationalAirtime";
 import { vtpassInternationalAirtimeApi } from "@/services/vtpass/vtu/vtpass-international-airtime-api";
 import { TransactionStatusModal } from "../intl-airtime-components/intl-airtime/TransactionStatusModal";
+import { PurchaseConfirmationModal } from "../intl-airtime-components/intl-airtime/PurchaseConfirmationModal";
 import type {
   IntlAirtimeVariation,
   IntlAirtimePurchaseResponse,
@@ -57,6 +58,7 @@ export default function VtpassInternationalAirtimePage() {
   const [transactionData, setTransactionData] = useState<IntlAirtimePurchaseResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [lastRequestId, setLastRequestId] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const countriesState = useIntlAirtimeCountries();
   const productTypesState = useIntlAirtimeProductTypes(selectedCountryCode);
@@ -66,6 +68,13 @@ export default function VtpassInternationalAirtimePage() {
   const walletBalance = dashboardData
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
+  const cashbackBalance = dashboardData?.cashback_wallet?.current_balance;
+  const intlCbRate = dashboardData?.cashback_rates?.find(
+    (r) =>
+      (r.service === "international_airtime" || r.service === "intl_airtime") &&
+      r.is_active
+  );
+  const cashbackPercent = intlCbRate?.percentage;
   const primaryAccount = dashboardData?.accounts?.[0];
 
   const selectedCountry = countriesState.data?.countries.find(
@@ -124,7 +133,12 @@ export default function VtpassInternationalAirtimePage() {
       errs.amount = "Enter a valid amount in NGN";
     }
 
-    if (parsedAmount > walletBalance) {
+    const cbNum = cashbackBalance
+      ? parseFloat(cashbackBalance.replace(/[₦,]/g, "")) || 0
+      : 0;
+    const maxCbDeduction = cbNum > 0 ? Math.min(cbNum, parsedAmount) : 0;
+    const minFromWallet = parsedAmount - maxCbDeduction;
+    if (parsedAmount > 0 && minFromWallet > walletBalance) {
       setServerError("Insufficient wallet balance. Please top up.");
       setFormErrors(errs);
       return false;
@@ -134,14 +148,20 @@ export default function VtpassInternationalAirtimePage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmitPurchase = async (e: React.FormEvent) => {
+  const handleSubmitPurchase = (e: React.FormEvent) => {
     e.preventDefault();
     setServerError("");
     if (!selectedCountryCode || !selectedProductTypeId || !selectedOperatorId || !selectedVariation)
       return;
     if (!validatePurchase()) return;
+    setShowConfirmation(true);
+  };
 
+  const handleConfirmPurchase = async (useCashback: boolean) => {
+    if (!selectedCountryCode || !selectedProductTypeId || !selectedOperatorId || !selectedVariation)
+      return;
     setIsSubmitting(true);
+    setShowConfirmation(false);
 
     try {
       const now = new Date();
@@ -159,6 +179,7 @@ export default function VtpassInternationalAirtimePage() {
         country_code: selectedCountryCode,
         product_type_id: selectedProductTypeId,
         request_id: requestId,
+        ...(useCashback ? { use_cashback: true } : {}),
       });
 
       if (response.success) {
@@ -818,6 +839,28 @@ export default function VtpassInternationalAirtimePage() {
           )}
         </AnimatePresence>
       </div>
+
+      {showConfirmation &&
+        selectedCountry &&
+        selectedProductType &&
+        selectedVariation && (
+          <PurchaseConfirmationModal
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleConfirmPurchase}
+            countryName={selectedCountry.name}
+            countryFlag={selectedCountry.flag}
+            productTypeName={selectedProductType.name}
+            variationName={selectedVariation.name}
+            beneficiaryNumber={beneficiaryNumber}
+            countryPrefix={selectedCountry.prefix}
+            amount={parsedAmount}
+            walletBalance={walletBalance}
+            cashbackBalance={cashbackBalance}
+            cashbackPercent={cashbackPercent}
+            isLoading={isSubmitting}
+          />
+        )}
 
       {transactionStatus && (
         <TransactionStatusModal

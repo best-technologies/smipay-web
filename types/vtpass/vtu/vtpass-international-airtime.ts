@@ -70,6 +70,7 @@ export interface IntlAirtimePurchaseRequest {
   country_code: string;
   product_type_id: string;
   request_id?: string;
+  use_cashback?: boolean;
 }
 
 export interface IntlAirtimeTransactionContent {

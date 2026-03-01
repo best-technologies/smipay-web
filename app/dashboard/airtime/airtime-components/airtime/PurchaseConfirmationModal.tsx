@@ -102,8 +102,13 @@ export function PurchaseConfirmationModal({
         {/* Amount header */}
         <div className="pt-12 pb-5 px-5 text-center border-b border-slate-100">
           <p className="text-3xl sm:text-[32px] font-bold text-slate-900 tabular-nums tracking-tight">
-            ₦{amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+            ₦{(useCashback && cbDeduction > 0 ? finalFromWallet : amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
           </p>
+          {useCashback && cbDeduction > 0 && (
+            <p className="text-sm text-slate-400 line-through mt-1 tabular-nums">
+              ₦{amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+            </p>
+          )}
         </div>
 
         {/* Details */}

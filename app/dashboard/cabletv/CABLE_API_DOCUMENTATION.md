@@ -238,6 +238,7 @@ POST /api/v1/vtpass/cable/purchase
 | `phone` | string | No | Customer phone. Falls back to registered phone number if omitted |
 | `quantity` | number | No | Months to subscribe (DSTV/GOTV only, default 1) |
 | `request_id` | string | No | Idempotency key. Auto-generated if omitted. **Always store this — you need it for query** |
+| `use_cashback` | boolean | No | If `true`, the backend deducts what it can from the user's cashback wallet first, then the remainder from the main wallet. Defaults to `false` if not sent |
 
 ---
 
@@ -393,9 +394,7 @@ No `subscription_type`. No verify step. `billersCode` is the **phone number**.
 | 400 | `variation_code is required for Startimes/Showmax purchases` | Missing variation_code |
 | 400 | `Amount must be greater than zero...` | Startimes eWallet variation without explicit amount |
 | 400 | `Invalid serviceID. Must be one of: dstv, gotv, startimes, showmax` | Bad serviceID |
-| 403 | `Daily cable purchase count limit reached` | Exceeded daily tx count |
-| 403 | `Daily cable purchase amount limit exceeded` | Exceeded daily amount cap |
-| 429 | `Too Many Requests` | Rate-limited |
+| 429 | `Rate limit exceeded. Please slow down.` | Too many API calls |
 
 ---
 
@@ -637,18 +636,7 @@ POST /api/v1/vtpass/cable/query
 
 ---
 
-## 9. Daily Limits
-
-| Limit | Default | Env Variable |
-|-------|---------|-------------|
-| Max transactions per day | 20 | `CABLE_DAILY_COUNT_LIMIT` |
-| Max amount per day | ₦500,000 | `CABLE_DAILY_AMOUNT_LIMIT` |
-
-Exceeding either limit returns `403 Forbidden`.
-
----
-
-## 10. Product Whitelisting
+## 9. Product Whitelisting
 
 If you receive `"PRODUCT IS NOT WHITELISTED ON YOUR ACCOUNT"`:
 
@@ -678,13 +666,11 @@ If you receive `"PRODUCT IS NOT WHITELISTED ON YOUR ACCOUNT"`:
 | `Showmax does not support smartcard verification...` | Called verify with serviceID=showmax | Skip verify for Showmax |
 | `Insufficient wallet balance` | User doesn't have enough funds | Prompt to top up wallet |
 
-### Rate / Limit Errors (403 / 429)
+### Rate Limit Errors (429)
 
 | Error Message | Cause |
 |---------------|-------|
-| `Daily cable purchase count limit reached` | Exceeded daily transaction count |
-| `Daily cable purchase amount limit exceeded` | Exceeded daily amount cap |
-| `Too Many Requests` | Too many API calls in short time |
+| `Rate limit exceeded. Please slow down.` | Too many API calls in short time |
 
 ### VTpass Response Codes
 
@@ -850,3 +836,39 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 | Purchase | `POST /purchase` | `subscription_type` required | No `subscription_type` | No `subscription_type`, billersCode = phone |
 | Check pending tx | `POST /query` | Yes | Yes | Yes |
 | Voucher in response | — | No | No | **Yes** — display to user |
+
+---
+
+## Wallet Balance & Rewards
+
+- Transactions are deducted from the user's wallet (and optionally cashback wallet when `use_cashback: true`)
+- If `use_cashback: true` is sent and the user has a cashback balance, the backend splits the payment: cashback wallet is charged first (up to its balance), the remainder from the main wallet. Example: ₦4,615 cable with ₦500 cashback → ₦500 from cashback + ₦4,115 from wallet
+- If the transaction fails or is reversed, both wallet and cashback (if any was used) are refunded automatically
+- On a successful purchase, the user also **earns** cashback (if admin has enabled it for cable) — separate from spending cashback
+- Always check wallet balance (and optionally show cashback balance) before allowing purchase
+
+### Rewards on Successful Purchase
+
+On a successful cable purchase, the backend automatically triggers these reward checks (all fire-and-forget — they never block or affect the purchase response):
+
+| Reward | What happens | Notes |
+|--------|-------------|-------|
+| **Cashback** | User earns a % of the purchase amount into their **cashback wallet** | Only if admin has enabled cashback for `cable`. Percentage and caps are managed via admin cashback config. |
+| **Referral** | If the user was referred by someone, the referrer may earn a reward | Only triggers if referral program is active and conditions are met |
+| **First Transaction Bonus** | If this is the user's very first successful transaction, they may earn a welcome bonus | Only triggers once per user, ever. Only if admin has enabled the first-tx program. |
+
+**Frontend does NOT need to do anything special for these rewards.** They happen entirely on the backend. However, you may want to:
+- Show a toast/notification if the user earned cashback (listen for push notifications)
+- Display the user's cashback wallet balance somewhere in the app (use the cashback balance endpoint)
+
+---
+
+## Changelog
+
+- **2026-02-28**: Spend cashback support
+  - Purchase request now accepts optional `use_cashback: true`; payment is split between cashback wallet and main wallet when set. Refunds on failure return amounts to both wallets.
+- **2026-02-28**: Rewards integration
+  - Successful cable purchases now earn cashback automatically (if admin has enabled it for `cable`)
+  - Referral reward checks now trigger on successful cable purchase
+  - First transaction bonus checks now trigger on successful cable purchase
+- **2026-02-25**: Initial documentation

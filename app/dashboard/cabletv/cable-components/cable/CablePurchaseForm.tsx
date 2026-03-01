@@ -16,6 +16,11 @@ import type {
 } from "@/types/vtpass/vtu/vtpass-cable";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
 
+function parseCurrencyString(val: string | undefined): number {
+  if (!val) return 0;
+  return parseFloat(val.replace(/[₦,]/g, "")) || 0;
+}
+
 interface CablePurchaseFormProps {
   selectedServiceId: string;
   selectedVariation: VtpassCableVariation | null;
@@ -25,6 +30,8 @@ interface CablePurchaseFormProps {
   onSuccess: (data: VtpassCablePurchaseResponse) => void;
   onError: (error: string) => void;
   walletBalance: number;
+  cashbackBalance?: string;
+  cashbackPercent?: number;
 }
 
 export function CablePurchaseForm({
@@ -36,6 +43,8 @@ export function CablePurchaseForm({
   onSuccess,
   onError,
   walletBalance,
+  cashbackBalance,
+  cashbackPercent,
 }: CablePurchaseFormProps) {
   const serviceIdLower = selectedServiceId.toLowerCase();
   const isDSTVOrGOTV = serviceIdLower === "dstv" || serviceIdLower === "gotv";
@@ -113,7 +122,10 @@ export function CablePurchaseForm({
       }
     }
 
-    if (amount > walletBalance) {
+    const cbNum = parseCurrencyString(cashbackBalance);
+    const maxCbDeduction = cbNum > 0 ? Math.min(cbNum, amount) : 0;
+    const minFromWallet = amount - maxCbDeduction;
+    if (amount > 0 && minFromWallet > walletBalance) {
       setServerError("Insufficient wallet balance. Please top up.");
       return false;
     }
@@ -129,7 +141,7 @@ export function CablePurchaseForm({
     setShowConfirmation(true);
   };
 
-  const handleConfirmPurchase = async () => {
+  const handleConfirmPurchase = async (useCashback: boolean) => {
     setIsSubmitting(true);
     setShowConfirmation(false);
 
@@ -145,6 +157,7 @@ export function CablePurchaseForm({
         serviceID: selectedServiceId,
         billersCode,
         ...(phoneNumber ? { phone: phoneNumber } : {}),
+        ...(useCashback ? { use_cashback: true } : {}),
       };
 
       if (isDSTVOrGOTV) {
@@ -416,6 +429,8 @@ export function CablePurchaseForm({
         isLoading={isSubmitting}
         isShowmax={isShowmax}
         walletBalance={walletBalance}
+        cashbackBalance={cashbackBalance}
+        cashbackPercent={cashbackPercent}
       />
     </form>
   );

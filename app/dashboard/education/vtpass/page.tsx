@@ -107,6 +107,11 @@ export default function VtpassEducationPage() {
   const walletBalance = dashboardData
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
+  const cashbackBalance = dashboardData?.cashback_wallet?.current_balance;
+  const educationCbRate = dashboardData?.cashback_rates?.find(
+    (r) => r.service === "education" && r.is_active
+  );
+  const cashbackPercent = educationCbRate?.percentage;
 
   const handleSelectProduct = (product: EducationProduct) => {
     setSelectedProduct(product);
@@ -204,7 +209,7 @@ export default function VtpassEducationPage() {
     setShowConfirmation(true);
   };
 
-  const handleConfirmPurchase = async () => {
+  const handleConfirmPurchase = async (useCashback: boolean) => {
     if (!selectedProduct || !selectedVariation) return;
     setIsSubmitting(true);
     setShowConfirmation(false);
@@ -222,6 +227,7 @@ export default function VtpassEducationPage() {
         ...(selectedProduct.hasQuantity && quantity > 1 ? { quantity } : {}),
         ...(selectedProduct.hasVerify && profileId ? { billersCode: profileId } : {}),
         request_id: requestId,
+        ...(useCashback ? { use_cashback: true } : {}),
       });
 
       if (response.success) {
@@ -838,6 +844,8 @@ export default function VtpassEducationPage() {
                   profileId={selectedProduct.hasVerify ? profileId : undefined}
                   customerName={verifiedName || undefined}
                   walletBalance={walletBalance}
+                  cashbackBalance={cashbackBalance}
+                  cashbackPercent={cashbackPercent}
                   isLoading={isSubmitting}
                 />
               </div>

@@ -124,6 +124,11 @@ export default function VtpassElectricityPage() {
   const walletBalance = dashboardData
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
+  const cashbackBalance = dashboardData?.cashback_wallet?.current_balance;
+  const electricityCbRate = dashboardData?.cashback_rates?.find(
+    (r) => r.service === "electricity" && r.is_active
+  );
+  const cashbackPercent = electricityCbRate?.percentage;
 
   const selectedService = allServices.find((s) => s.serviceID === selectedServiceId);
   const selectedLogo = selectedServiceId
@@ -269,7 +274,7 @@ export default function VtpassElectricityPage() {
     setShowConfirmation(true);
   };
 
-  const handleConfirmPurchase = async () => {
+  const handleConfirmPurchase = async (useCashback: boolean) => {
     if (!selectedServiceId || !verificationData) return;
     setIsSubmitting(true);
     setShowConfirmation(false);
@@ -287,6 +292,7 @@ export default function VtpassElectricityPage() {
         amount: parseFloat(amount),
         phone: phoneNumber,
         request_id: requestId,
+        ...(useCashback ? { use_cashback: true } : {}),
       });
 
       if (response.success) {
@@ -906,6 +912,8 @@ export default function VtpassElectricityPage() {
           customerName={verificationData.Customer_Name}
           amount={parseFloat(amount) || 0}
           walletBalance={walletBalance}
+          cashbackBalance={cashbackBalance}
+          cashbackPercent={cashbackPercent}
           isLoading={isSubmitting}
         />
       )}

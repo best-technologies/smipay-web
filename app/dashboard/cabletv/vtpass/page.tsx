@@ -57,6 +57,11 @@ export default function VtpassCabletvPage() {
   const walletBalance = dashboardData
     ? parseFloat(dashboardData.wallet_card.current_balance.replace(/,/g, ""))
     : 0;
+  const cashbackBalance = dashboardData?.cashback_wallet?.current_balance;
+  const cableCbRate = dashboardData?.cashback_rates?.find(
+    (r) => (r.service === "cable" || r.service === "cabletv") && r.is_active
+  );
+  const cashbackPercent = cableCbRate?.percentage;
 
   const serviceIdLower = selectedServiceId?.toLowerCase() || "";
   const isDSTVOrGOTV = serviceIdLower === "dstv" || serviceIdLower === "gotv";
@@ -423,6 +428,8 @@ export default function VtpassCabletvPage() {
                 onSuccess={handleTransactionSuccess}
                 onError={handleTransactionError}
                 walletBalance={walletBalance}
+                cashbackBalance={cashbackBalance}
+                cashbackPercent={cashbackPercent}
               />
             </div>
           </motion.section>

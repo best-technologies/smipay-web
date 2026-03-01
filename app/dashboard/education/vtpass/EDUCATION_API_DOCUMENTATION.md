@@ -204,6 +204,7 @@ POST /api/v1/vtpass/education/purchase
 | `billersCode` | string | **JAMB only** | JAMB Profile ID (must be verified first) |
 | `amount` | number | No | **Ignored** — resolved from variation. Optional for reference. |
 | `request_id` | string | No | Idempotency key. Auto-generated if omitted. **Always store this — needed for query.** |
+| `use_cashback` | boolean | No | If `true`, the backend deducts what it can from the user's cashback wallet first, then the remainder from the main wallet. Defaults to `false` if not sent |
 
 ### Request Examples
 
@@ -384,10 +385,6 @@ POST /api/v1/vtpass/education/purchase
 
 ```json
 { "success": false, "message": "billersCode (JAMB Profile ID) is required for JAMB purchases" }
-```
-
-```json
-{ "success": false, "message": "Daily education purchase count limit reached" }
 ```
 
 ---
@@ -604,15 +601,15 @@ When fetching a single education transaction from `GET /api/v1/history/:id`, the
 
 ---
 
-## 8. Environment Variables
+## 8. Rate Limiting
+
+All endpoints are rate-limited per user and per IP to prevent abuse.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `EDUCATION_DAILY_COUNT_LIMIT` | `20` | Max education purchases per user per day |
-| `EDUCATION_DAILY_AMOUNT_LIMIT` | `500000` | Max total education spend per user per day (₦) |
 | `EDUCATION_RATE_WINDOW_SECONDS` | `60` | Rate limit window (seconds) |
-| `EDUCATION_RATE_MAX_REQUESTS` | `5` | Max requests per user in rate window |
-| `EDUCATION_IP_RATE_MAX_REQUESTS` | `10` | Max requests per IP in rate window |
+| `EDUCATION_RATE_MAX_REQUESTS` | `10` | Max requests per user in rate window |
+| `EDUCATION_IP_RATE_MAX_REQUESTS` | `30` | Max requests per IP in rate window |
 
 ---
 
@@ -622,7 +619,7 @@ When fetching a single education transaction from `GET /api/v1/history/:id`, the
 |--------|----------|-------------|--------|
 | GET | `/variations?serviceID=xxx` | Get plans/prices for a service | JWT + RateLimit |
 | POST | `/verify-jamb` | Verify JAMB Profile ID | JWT + RateLimit |
-| POST | `/purchase` | Buy education product | JWT + EducationLimits + RateLimit |
+| POST | `/purchase` | Buy education product | JWT + Validation + RateLimit |
 | POST | `/query` | Check transaction status | JWT + RateLimit |
 
 ---
@@ -634,3 +631,43 @@ When fetching a single education transaction from `GET /api/v1/history/:id`, the
 | `waec-registration` | WAEC Registration | `tokens[]`, `pin` | Single token returned per purchase |
 | `waec` | WAEC Result Checker | `cards[]` with `{Serial, Pin}` | Supports quantity > 1, returns array of cards |
 | `jamb` | JAMB PIN | `pin` | Requires Profile ID verification first |
+
+---
+
+## Wallet Balance & Rewards
+
+- Transactions are deducted from the user's wallet (and optionally cashback wallet when `use_cashback: true`)
+- The amount is determined by the fixed variation price × quantity — user does NOT enter an amount
+- If `use_cashback: true` is sent and the user has a cashback balance, the backend splits the payment: cashback wallet is charged first (up to its balance), the remainder from the main wallet
+- If the transaction fails or is reversed, both wallet and cashback (if any was used) are refunded automatically
+- On a successful purchase, the user also **earns** cashback (if admin has enabled it for education) — separate from spending cashback
+- Always check wallet balance (and optionally show cashback balance) before allowing purchase
+
+### Rewards on Successful Purchase
+
+On a successful education purchase, the backend automatically triggers these reward checks (all fire-and-forget — they never block or affect the purchase response):
+
+| Reward | What happens | Notes |
+|--------|-------------|-------|
+| **Cashback** | User earns a % of the purchase amount into their **cashback wallet** | Only if admin has enabled cashback for `education`. Percentage and caps are managed via admin cashback config. |
+| **Referral** | If the user was referred by someone, the referrer may earn a reward | Only triggers if referral program is active and conditions are met |
+| **First Transaction Bonus** | If this is the user's very first successful transaction, they may earn a welcome bonus | Only triggers once per user, ever. Only if admin has enabled the first-tx program. |
+
+These rewards also trigger on **cron requery** — if a pending education transaction is resolved to success by the background job, the same cashback/referral/first-tx checks fire at that point.
+
+**Frontend does NOT need to do anything special for these rewards.** They happen entirely on the backend. However, you may want to:
+- Show a toast/notification if the user earned cashback (listen for push notifications)
+- Display the user's cashback wallet balance somewhere in the app (use the cashback balance endpoint)
+
+---
+
+## Changelog
+
+- **2026-02-28**: Spend cashback support
+  - Purchase request now accepts optional `use_cashback: true`; payment is split between cashback wallet and main wallet when set. Refunds on failure (including query endpoint) return amounts to both wallets.
+- **2026-02-28**: Rewards integration
+  - Successful education purchases now earn cashback automatically (if admin has enabled it for `education`)
+  - Referral reward checks now trigger on successful education purchase
+  - First transaction bonus checks now trigger on successful education purchase
+  - Rewards also fire when pending transactions are resolved to success via cron requery
+- **2026-02-25**: Initial documentation
