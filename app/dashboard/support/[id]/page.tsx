@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
+import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { supportApi } from "@/services/support-api";
 import { useUserSupportStore } from "@/store/user-support-store";
 import {
@@ -88,6 +89,7 @@ export default function ConversationChatPage() {
 
   const { fetchDetail, invalidateDetail, invalidateList } =
     useUserSupportStore();
+  const viewportHeight = useVisualViewportHeight();
 
   const [conversation, setConversation] = useState<ConversationDetail | null>(
     null,
@@ -477,8 +479,15 @@ export default function ConversationChatPage() {
   }
 
   if (loading) {
+    const viewportStyle =
+      viewportHeight > 0
+        ? { height: `${viewportHeight}px`, minHeight: `${viewportHeight}px` }
+        : {};
     return (
-      <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+      <div
+        className="flex flex-col overflow-hidden bg-dashboard-bg"
+        style={viewportStyle}
+      >
         <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
           <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
             <Link
@@ -522,8 +531,15 @@ export default function ConversationChatPage() {
 
   // ─── Render: error ────────────────────────────────────────────────
   if (error && !conversation) {
+    const viewportStyle =
+      viewportHeight > 0
+        ? { height: `${viewportHeight}px`, minHeight: `${viewportHeight}px` }
+        : {};
     return (
-      <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+      <div
+        className="flex flex-col overflow-hidden bg-dashboard-bg"
+        style={viewportStyle}
+      >
         <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
           <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
             <Link
@@ -571,8 +587,16 @@ export default function ConversationChatPage() {
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "You";
 
+  const viewportStyle =
+    viewportHeight > 0
+      ? { height: `${viewportHeight}px`, minHeight: `${viewportHeight}px` }
+      : {};
+
   return (
-    <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+    <div
+      className="flex flex-col overflow-hidden bg-dashboard-bg"
+      style={viewportStyle}
+    >
       {/* Header */}
       <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
         <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">

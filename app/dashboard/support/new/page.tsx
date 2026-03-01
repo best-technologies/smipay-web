@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
+import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { supportApi } from "@/services/support-api";
 import { useUserSupportStore } from "@/store/user-support-store";
 import { getDeviceMetadataHeaders } from "@/lib/device-metadata";
@@ -15,6 +16,7 @@ export default function NewChatPage() {
   const { user } = useAuth();
   const { invalidateList } = useUserSupportStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const viewportHeight = useVisualViewportHeight();
 
   const [inputValue, setInputValue] = useState("");
   const [sending, setSending] = useState(false);
@@ -89,7 +91,13 @@ export default function NewChatPage() {
   };
 
   return (
-    <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+    <div
+      className="flex flex-col overflow-hidden bg-dashboard-bg"
+      style={{
+        height: viewportHeight > 0 ? `${viewportHeight}px` : "100dvh",
+        minHeight: viewportHeight > 0 ? `${viewportHeight}px` : "100dvh",
+      }}
+    >
       <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
         <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
           <Link
