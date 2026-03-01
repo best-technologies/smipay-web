@@ -478,8 +478,8 @@ export default function ConversationChatPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dashboard-bg flex flex-col">
-        <header className="bg-dashboard-surface border-b border-dashboard-border sticky top-0 z-10">
+      <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+        <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
           <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
             <Link
               href="/dashboard/support"
@@ -495,7 +495,7 @@ export default function ConversationChatPage() {
         </header>
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 space-y-4"
+          className="flex-1 min-h-0 overflow-y-auto px-3 py-4 sm:px-4 space-y-4"
         >
           {[true, false, true, false].map((right, i) => (
             <div
@@ -523,8 +523,8 @@ export default function ConversationChatPage() {
   // ─── Render: error ────────────────────────────────────────────────
   if (error && !conversation) {
     return (
-      <div className="min-h-screen bg-dashboard-bg flex flex-col">
-        <header className="bg-dashboard-surface border-b border-dashboard-border sticky top-0 z-10">
+      <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+        <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
           <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
             <Link
               href="/dashboard/support"
@@ -572,9 +572,9 @@ export default function ConversationChatPage() {
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "You";
 
   return (
-    <div className="min-h-screen bg-dashboard-bg flex flex-col">
+    <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
       {/* Header */}
-      <header className="bg-dashboard-surface border-b border-dashboard-border sticky top-0 z-10 shrink-0">
+      <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
         <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
           <Link
             href="/dashboard/support"

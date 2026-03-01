@@ -89,8 +89,8 @@ export default function NewChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dashboard-bg flex flex-col">
-      <header className="bg-dashboard-surface border-b border-dashboard-border sticky top-0 z-10 shrink-0">
+    <div className="h-dvh min-h-[100dvh] flex flex-col overflow-hidden bg-dashboard-bg">
+      <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
         <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4">
           <Link
             href="/dashboard/support"
@@ -104,7 +104,7 @@ export default function NewChatPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-4 py-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -120,15 +120,14 @@ export default function NewChatPage() {
             Send a message below and our support team will respond as soon as possible.
           </p>
         </motion.div>
+        {error && (
+          <div className="mt-4 mx-auto max-w-[280px] w-full rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs sm:text-sm text-red-700">
+            {error}
+          </div>
+        )}
       </div>
 
-      {error && (
-        <div className="mx-3 sm:mx-4 mb-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs sm:text-sm text-red-700">
-          {error}
-        </div>
-      )}
-
-      <div className="shrink-0 px-3 py-3 sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 bg-dashboard-surface border-t border-dashboard-border">
+      <div className="shrink-0 px-3 py-3 sm:px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 bg-dashboard-surface border-t border-dashboard-border">
         <form
           onSubmit={handleSend}
           className="flex gap-2 items-end max-w-2xl mx-auto"
