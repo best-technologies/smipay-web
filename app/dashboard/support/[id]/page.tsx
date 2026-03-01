@@ -485,7 +485,7 @@ export default function ConversationChatPage() {
         : {};
     return (
       <div
-        className="flex flex-col overflow-hidden bg-dashboard-bg"
+        className="fixed inset-x-0 top-0 z-50 flex flex-col overflow-hidden bg-dashboard-bg"
         style={viewportStyle}
       >
         <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
@@ -537,7 +537,7 @@ export default function ConversationChatPage() {
         : {};
     return (
       <div
-        className="flex flex-col overflow-hidden bg-dashboard-bg"
+        className="fixed inset-x-0 top-0 z-50 flex flex-col overflow-hidden bg-dashboard-bg"
         style={viewportStyle}
       >
         <header className="bg-dashboard-surface border-b border-dashboard-border shrink-0 z-10">
@@ -594,7 +594,7 @@ export default function ConversationChatPage() {
 
   return (
     <div
-      className="flex flex-col overflow-hidden bg-dashboard-bg"
+      className="fixed inset-x-0 top-0 z-50 flex flex-col overflow-hidden bg-dashboard-bg"
       style={viewportStyle}
     >
       {/* Header */}

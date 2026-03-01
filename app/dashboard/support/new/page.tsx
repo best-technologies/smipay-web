@@ -92,7 +92,7 @@ export default function NewChatPage() {
 
   return (
     <div
-      className="flex flex-col overflow-hidden bg-dashboard-bg"
+      className="fixed inset-x-0 top-0 z-50 flex flex-col overflow-hidden bg-dashboard-bg"
       style={{
         height: viewportHeight > 0 ? `${viewportHeight}px` : "100dvh",
         minHeight: viewportHeight > 0 ? `${viewportHeight}px` : "100dvh",
