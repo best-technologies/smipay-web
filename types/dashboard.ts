@@ -91,6 +91,13 @@ export interface CashbackRate {
   is_active: boolean;
 }
 
+export interface RewardBanner {
+  type: "referral" | "cashback" | "first_transaction";
+  title: string;
+  message: string;
+  data: Record<string, number>;
+}
+
 export interface DashboardData {
   user: DashboardUser;
   accounts: BankAccount[];
@@ -100,6 +107,7 @@ export interface DashboardData {
   transaction_history: Transaction[];
   kyc_verification: KycVerification;
   current_tier: AccountTier;
+  reward_banners?: RewardBanner[];
 }
 
 export interface DashboardResponse {

@@ -24,6 +24,8 @@ import {
   ScrollText,
   Gift,
   Coins,
+  BellRing,
+  Sparkles,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -78,6 +80,13 @@ const adminMenuItems: AdminMenuItem[] = [
     enabled: true,
   },
   {
+    id: "notifications",
+    label: "Notifications",
+    icon: BellRing,
+    href: "/unified-admin/notifications",
+    enabled: true,
+  },
+  {
     id: "kyc",
     label: "KYC Verification",
     icon: ShieldCheck,
@@ -102,6 +111,13 @@ const adminMenuItems: AdminMenuItem[] = [
         label: "Cashback",
         href: "/unified-admin/cashback",
         icon: Coins,
+        enabled: true,
+      },
+      {
+        id: "first-tx-reward",
+        label: "First Tx Reward",
+        href: "/unified-admin/first-tx-reward",
+        icon: Sparkles,
         enabled: true,
       },
     ],

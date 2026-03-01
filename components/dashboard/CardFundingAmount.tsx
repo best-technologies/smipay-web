@@ -144,7 +144,7 @@ export function CardFundingAmount({
       <div className="flex items-start gap-2 rounded-xl bg-blue-50/70 border border-blue-100 px-3 py-2.5">
         <ShieldCheck className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />
         <p className="text-[11px] text-blue-700 leading-relaxed">
-          Min ₦{MIN_AMOUNT.toLocaleString()} · Max ₦{MAX_AMOUNT.toLocaleString()} · Instant credit · Secured by Paystack
+          Min ₦{MIN_AMOUNT.toLocaleString()} · Max ₦{MAX_AMOUNT.toLocaleString()} · Instant credit · Secured
         </p>
       </div>
 

@@ -26,7 +26,8 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { OnboardingWalkthrough } from "@/components/dashboard/OnboardingWalkthrough";
 // import { WalletAnalysisCards } from "@/components/dashboard/WalletAnalysisCards";
-import type { Transaction as DashboardTransaction, CashbackRate } from "@/types/dashboard";
+import type { Transaction as DashboardTransaction } from "@/types/dashboard";
+import { RewardBanners } from "@/components/dashboard/RewardBanners";
 import { getNetworkLogo } from "@/lib/network-logos";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -64,15 +65,10 @@ const item = {
   },
 };
 
-function buildCashbackMap(rates?: CashbackRate[]): Map<string, CashbackRate> {
-  if (!rates) return new Map();
-  const map = new Map<string, CashbackRate>();
-  for (const rate of rates) {
-    const actionId = rate.service === "international_airtime" ? "intl-airtime" : rate.service;
-    map.set(actionId, rate);
-  }
-  return map;
-}
+const PROMO_LABELS: Record<string, string> = {
+  airtime: "Up to 9% off",
+  data: "Up to 7% off",
+};
 
 function DashboardSkeleton() {
   return (
@@ -136,6 +132,12 @@ function DashboardSkeleton() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Reward banners skeleton */}
+        <div className="flex gap-3 overflow-hidden">
+          <div className="flex-none w-[85%] sm:w-[320px] h-[62px] rounded-xl bg-dashboard-border/40 animate-pulse" />
+          <div className="flex-none w-[85%] sm:w-[320px] h-[62px] rounded-xl bg-dashboard-border/30 animate-pulse" />
         </div>
 
         {/* Service actions skeleton */}
@@ -263,7 +265,6 @@ function DashboardContent() {
   }
 
   const primaryAccount = dashboardData.accounts[0];
-  const cashbackRateMap = buildCashbackMap(dashboardData.cashback_rates);
   const isCashbackActive = dashboardData.cashback_rates?.some((r) => r.is_active) ?? false;
   const cashbackWallet = dashboardData.cashback_wallet;
 
@@ -386,6 +387,14 @@ function DashboardContent() {
           </motion.div>
         </div>
 
+        {/* Reward Banners — horizontally scrollable promos */}
+        {dashboardData.reward_banners && dashboardData.reward_banners.length > 0 && (
+          <RewardBanners
+            banners={dashboardData.reward_banners}
+            userTag={dashboardData.user.smipay_tag}
+          />
+        )}
+
         {/* Service Actions – quick links come right after wallet card */}
         <motion.section
           ref={quickLinksRef}
@@ -396,8 +405,7 @@ function DashboardContent() {
         >
           <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6">
             {SERVICE_ACTIONS.map((action) => {
-              const cbRate = cashbackRateMap.get(action.id);
-              const showCb = cbRate && cbRate.is_active && cbRate.percentage > 0;
+              const promoLabel = PROMO_LABELS[action.id];
               return (
                 <motion.div key={action.id} variants={item} className="flex flex-col items-center">
                   {action.comingSoon ? (
@@ -414,9 +422,9 @@ function DashboardContent() {
                     </div>
                   ) : (
                     <div className="relative">
-                      {showCb && (
-                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] sm:text-[10px] font-bold leading-none whitespace-nowrap shadow-sm">
-                          {cbRate.percentage}%
+                      {promoLabel && (
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[8px] sm:text-[9px] font-bold leading-none whitespace-nowrap shadow-sm">
+                          {promoLabel}
                         </span>
                       )}
                       <motion.button
