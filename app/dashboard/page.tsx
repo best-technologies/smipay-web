@@ -232,6 +232,21 @@ function DashboardContent() {
     setShowWelcomeBonusCongrats(true);
   }, [dashboardData?.transaction_history]);
 
+  // Fix: When user cancels on Paystack, browser may restore page from bfcache with stale
+  // state (modal open, card-funding step, "Processing..." stuck). Force reload to get clean state.
+  useEffect(() => {
+    const handler = (e: PageTransitionEvent) => {
+      if (e.persisted && typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("payment") === "callback") {
+          window.location.reload();
+        }
+      }
+    };
+    window.addEventListener("pageshow", handler);
+    return () => window.removeEventListener("pageshow", handler);
+  }, []);
+
   useEffect(() => {
     const payment = searchParams.get("payment");
     const urlReference = searchParams.get("reference") || searchParams.get("trxref");

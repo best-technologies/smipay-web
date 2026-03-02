@@ -47,6 +47,7 @@ export function FundWalletModal({
       queueMicrotask(() => {
         setPaymentReference(initialReference);
         setCurrentStep("card-verification");
+        setIsProcessing(false); // Coming back from Paystack — not "processing" anymore
       });
     }
   }, [initialReference, isOpen]);
