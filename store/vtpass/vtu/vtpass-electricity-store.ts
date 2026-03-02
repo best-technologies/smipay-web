@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { vtpassElectricityApi } from "@/services/vtpass/vtu/vtpass-electricity-api";
 import type { VtpassElectricityService } from "@/types/vtpass/vtu/vtpass-electricity";
 
@@ -15,9 +16,11 @@ interface VtpassElectricityState {
   setError: (error: string | null) => void;
 }
 
-const CACHE_DURATION = 5 * 60 * 1000;
+const CACHE_DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
-export const useVtpassElectricityStore = create<VtpassElectricityState>((set, get) => ({
+export const useVtpassElectricityStore = create<VtpassElectricityState>()(
+  persist(
+    (set, get) => ({
   serviceIds: null,
   isLoading: false,
   error: null,
@@ -30,7 +33,7 @@ export const useVtpassElectricityStore = create<VtpassElectricityState>((set, ge
 
     if (!forceRefresh && state.serviceIds && state.lastFetched) {
       const cacheAge = Date.now() - state.lastFetched;
-      if (cacheAge < CACHE_DURATION) return;
+      if (cacheAge < CACHE_DURATION_MS) return;
     }
 
     try {
@@ -78,4 +81,13 @@ export const useVtpassElectricityStore = create<VtpassElectricityState>((set, ge
   setLoading: (isLoading) => set({ isLoading }),
 
   setError: (error) => set({ error }),
-}));
+}),
+    {
+      name: "smipay-vtpass-electricity-service-ids",
+      partialize: (s) => ({
+        serviceIds: s.serviceIds,
+        lastFetched: s.lastFetched,
+      }),
+    }
+  )
+);

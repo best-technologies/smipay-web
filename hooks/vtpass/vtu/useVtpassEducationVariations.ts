@@ -1,97 +1,31 @@
-import { useState, useEffect, useRef } from "react";
-import { vtpassEducationApi } from "@/services/vtpass/vtu/vtpass-education-api";
-import type { VtpassEducationVariationsResponse } from "@/types/vtpass/vtu/vtpass-education";
+import { useEffect } from "react";
+import { useVtpassEducationVariationsStore } from "@/store/vtpass/vtu/vtpass-education-variations-store";
 
-interface UseVariationsState {
-  data: VtpassEducationVariationsResponse["data"] | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-const educationVariationCache = new Map<
-  string,
-  { data: VtpassEducationVariationsResponse["data"]; timestamp: number }
->();
-let activeFetch: string | null = null;
-
-const CACHE_DURATION = 10 * 60 * 1000;
-
+/**
+ * Hook to fetch and access VTPass education variations (WAEC, JAMB plans) for a service.
+ * Uses Zustand store with 3-day localStorage cache — education plans rarely change.
+ */
 export function useVtpassEducationVariations(serviceID: string | null) {
-  const [state, setState] = useState<UseVariationsState>(() => {
-    if (serviceID) {
-      const cached = educationVariationCache.get(serviceID);
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        return { data: cached.data, isLoading: false, error: null };
-      }
-    }
-    return { data: null, isLoading: false, error: null };
-  });
-
-  const mountedRef = useRef(true);
+  const {
+    loadingServiceId,
+    error,
+    fetchVariations,
+    getCached,
+  } = useVtpassEducationVariationsStore();
 
   useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
+    if (!serviceID) return;
+    if (getCached(serviceID)) return;
+    fetchVariations(serviceID);
+  }, [serviceID, getCached, fetchVariations]);
 
-  useEffect(() => {
-    if (!serviceID) {
-      setState({ data: null, isLoading: false, error: null });
-      return;
-    }
-
-    const cached = educationVariationCache.get(serviceID);
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      setState({ data: cached.data, isLoading: false, error: null });
-      return;
-    }
-
-    if (activeFetch === serviceID) return;
-
-    activeFetch = serviceID;
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-    vtpassEducationApi
-      .getVariations(serviceID)
-      .then((response) => {
-        if (response.success && response.data) {
-          educationVariationCache.set(serviceID, {
-            data: response.data,
-            timestamp: Date.now(),
-          });
-          if (mountedRef.current)
-            setState({ data: response.data, isLoading: false, error: null });
-        } else {
-          if (mountedRef.current)
-            setState({
-              data: null,
-              isLoading: false,
-              error: "Failed to load education plans",
-            });
-        }
-      })
-      .catch((err) => {
-        const msg = err instanceof Error ? err.message : "An error occurred";
-        if (mountedRef.current)
-          setState({ data: null, isLoading: false, error: msg });
-      })
-      .finally(() => {
-        activeFetch = null;
-      });
-  }, [serviceID]);
+  const variations = serviceID ? getCached(serviceID) : null;
+  const isLoading = serviceID ? loadingServiceId === serviceID : false;
 
   return {
-    variations: state.data,
-    isLoading: state.isLoading,
-    error: state.error,
-    refetch: () => {
-      if (serviceID) {
-        educationVariationCache.delete(serviceID);
-        activeFetch = null;
-        setState((prev) => ({ ...prev, isLoading: true }));
-      }
-    },
+    variations,
+    isLoading,
+    error,
+    refetch: () => serviceID && fetchVariations(serviceID, true),
   };
 }
