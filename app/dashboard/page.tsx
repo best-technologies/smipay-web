@@ -306,49 +306,51 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      <motion.header
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
-      >
-        <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
-          <div ref={menuButtonRef} className="shrink-0">
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new Event("open-mobile-sidebar"))}
-              className="lg:hidden active:scale-95 transition-transform touch-manipulation rounded-lg"
-              aria-label="Open menu"
-            >
+      {/* Fixed: header + wallet card — never scrolls, always visible */}
+      <div className="fixed top-0 left-0 right-0 z-10 bg-dashboard-bg pb-4 sm:pb-6">
+        <motion.header
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-dashboard-surface border-b border-dashboard-border/60"
+        >
+          <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+            <div ref={menuButtonRef} className="shrink-0">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("open-mobile-sidebar"))}
+                className="lg:hidden active:scale-95 transition-transform touch-manipulation rounded-lg"
+                aria-label="Open menu"
+              >
+                <Image
+                  src="/smipay-icon.jpg"
+                  alt="Smipay"
+                  width={36}
+                  height={36}
+                  className="rounded-lg"
+                  priority
+                />
+              </button>
               <Image
                 src="/smipay-icon.jpg"
                 alt="Smipay"
                 width={36}
                 height={36}
-                className="rounded-lg"
+                className="rounded-lg hidden lg:block"
                 priority
               />
-            </button>
-            <Image
-              src="/smipay-icon.jpg"
-              alt="Smipay"
-              width={36}
-              height={36}
-              className="rounded-lg hidden lg:block"
-              priority
-            />
+            </div>
+            <p className="text-base sm:text-lg font-semibold text-dashboard-heading tracking-tight truncate">
+              Hi, {dashboardData.user.first_name}
+            </p>
           </div>
-          <p className="text-base sm:text-lg font-semibold text-dashboard-heading tracking-tight truncate">
-            Hi, {dashboardData.user.first_name}
-          </p>
-        </div>
-      </motion.header>
+        </motion.header>
 
-      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Virtual Account Card - shown first on mobile */}
-          <div ref={walletCardRef} className="lg:col-span-2 order-1">
-            <WalletCard
+        <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Virtual Account Card - shown first on mobile */}
+            <div ref={walletCardRef} className="lg:col-span-2 order-1">
+              <WalletCard
               bankName={primaryAccount?.bank_name}
               accountNumber={primaryAccount?.account_number}
               accountHolderName={primaryAccount?.account_holder_name}
@@ -423,8 +425,15 @@ function DashboardContent() {
               </div>
             </div>
           </motion.div>
+          </div>
         </div>
+      </div>
 
+      {/* Spacer: reserves space so content doesn't hide under fixed block */}
+      <div className="h-[260px] sm:h-[280px] lg:h-[300px]" aria-hidden />
+
+      {/* Scrollable content */}
+      <div className="px-4 pt-3 pb-5 sm:px-6 sm:pt-4 sm:pb-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Reward Banners — horizontally scrollable promos */}
         {dashboardData.reward_banners && dashboardData.reward_banners.length > 0 && (
           <div ref={rewardBannersRef}>

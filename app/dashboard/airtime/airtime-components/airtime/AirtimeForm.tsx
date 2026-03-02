@@ -12,6 +12,10 @@ import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
 import { getLastUsed, saveRecentEntry } from "@/lib/recent-numbers";
 import { RecentNumbers } from "@/components/dashboard/RecentNumbers";
 import type { VtpassPurchaseResponse } from "@/services/vtpass/vtu/vtpass-airtime-api";
+import { doesPhoneMatchNigeriaService } from "@/lib/nigeria-network";
+
+const IS_NETWORK_CHECK_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_PHONE_NETWORK_CHECK === "true";
 
 interface AirtimeFormProps {
   onSuccess: (data: VtpassPurchaseResponse) => void;
@@ -77,54 +81,85 @@ export function AirtimeForm({ onSuccess, onError, walletBalance, cashbackBalance
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedServiceId, services]);
 
-  useEffect(() => {
-    if (servicesError) {
-      setServerError(servicesError);
-      onError(servicesError);
+useEffect(() => {
+  if (servicesError) {
+    setServerError(servicesError);
+    onError(servicesError);
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [servicesError]);
+
+const getPhoneError = (value: string): string | undefined => {
+  if (!value) {
+    return "Phone number is required";
+  }
+
+  if (value.length !== 11) {
+    return "Phone number must be 11 digits";
+  }
+
+  if (!value.startsWith("0")) {
+    return "Phone number must start with 0";
+  }
+
+  if (IS_NETWORK_CHECK_ENABLED && selectedServiceId && services.length > 0) {
+    const service = services.find((s) => s.serviceID === selectedServiceId);
+
+    if (service && !doesPhoneMatchNigeriaService(value, service.name || service.serviceID)) {
+      return "Phone number does not match the selected network";
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [servicesError]);
+  }
 
-  const validateForm = (): boolean => {
-    const newErrors: typeof errors = {};
+  return undefined;
+};
 
-    if (!selectedServiceId) {
-      newErrors.serviceId = "Please select a network provider";
-    }
+const validateForm = (): boolean => {
+  const newErrors: typeof errors = {};
 
-    if (!phoneNumber) {
-      newErrors.phoneNumber = "Phone number is required";
-    } else if (phoneNumber.length !== 11) {
-      newErrors.phoneNumber = "Phone number must be 11 digits";
-    } else if (!phoneNumber.startsWith("0")) {
-      newErrors.phoneNumber = "Phone number must start with 0";
-    }
+  if (!selectedServiceId) {
+    newErrors.serviceId = "Please select a network provider";
+  }
 
-    if (!amount) {
-      newErrors.amount = "Amount is required";
-    } else {
-      const numericAmount = parseFloat(amount);
-      if (isNaN(numericAmount) || numericAmount <= 0) {
-        newErrors.amount = "Please enter a valid amount";
-      } else if (services.length > 0) {
-        const service = services.find((s) => s.serviceID === selectedServiceId);
-        if (service) {
-          const minAmount = parseFloat(service.minimium_amount);
-          const maxAmount = parseFloat(service.maximum_amount);
-          if (numericAmount < minAmount) {
-            newErrors.amount = `Minimum ₦${minAmount.toLocaleString()}`;
-          } else if (numericAmount > maxAmount) {
-            newErrors.amount = `Maximum ₦${maxAmount.toLocaleString()}`;
-          } else if (numericAmount > walletBalance) {
-            newErrors.amount = "Insufficient balance";
-          }
+  const phoneError = getPhoneError(phoneNumber);
+  if (phoneError) {
+    newErrors.phoneNumber = phoneError;
+  }
+
+  if (!amount) {
+    newErrors.amount = "Amount is required";
+  } else {
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      newErrors.amount = "Please enter a valid amount";
+    } else if (services.length > 0) {
+      const service = services.find((s) => s.serviceID === selectedServiceId);
+      if (service) {
+        const minAmount = parseFloat(service.minimium_amount);
+        const maxAmount = parseFloat(service.maximum_amount);
+        if (numericAmount < minAmount) {
+          newErrors.amount = `Minimum ₦${minAmount.toLocaleString()}`;
+        } else if (numericAmount > maxAmount) {
+          newErrors.amount = `Maximum ₦${maxAmount.toLocaleString()}`;
+        } else if (numericAmount > walletBalance) {
+          newErrors.amount = "Insufficient balance";
         }
       }
     }
+  }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+  useEffect(() => {
+    if (!phoneNumber) {
+      return;
+    }
+
+    const phoneError = getPhoneError(phoneNumber);
+    setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedServiceId, services, phoneNumber]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,7 +214,17 @@ export function AirtimeForm({ onSuccess, onError, walletBalance, cashbackBalance
   const minAmount = selectedService ? parseFloat(selectedService.minimium_amount) : 50;
   const maxAmount = selectedService ? parseFloat(selectedService.maximum_amount) : 100000;
 
-  const isFormReady = selectedServiceId && phoneNumber && amount && !isSubmitting && !loadingServices;
+  const hasPhoneError = Boolean(errors.phoneNumber);
+  const hasAmountError = Boolean(errors.amount);
+
+  const isFormReady =
+    selectedServiceId &&
+    phoneNumber &&
+    amount &&
+    !isSubmitting &&
+    !loadingServices &&
+    !hasPhoneError &&
+    !hasAmountError;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -189,7 +234,10 @@ export function AirtimeForm({ onSuccess, onError, walletBalance, cashbackBalance
 
       {/* Row 1: Network dropdown + Phone number */}
       <div>
-        <div className="flex items-end gap-3">
+        <label className="text-[11px] font-medium text-dashboard-muted uppercase tracking-wider mb-1 block">
+          Phone number
+        </label>
+        <div className="flex items-center gap-3">
           <NetworkSelector
             services={services}
             selectedServiceId={selectedServiceId}
@@ -197,12 +245,20 @@ export function AirtimeForm({ onSuccess, onError, walletBalance, cashbackBalance
             isLoading={loadingServices}
           />
           <PhoneNumberInput
+            inline
             value={phoneNumber}
-            onChange={setPhoneNumber}
+            onChange={(value) => {
+              setPhoneNumber(value);
+              const phoneError = getPhoneError(value);
+              setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+            }}
             error={errors.phoneNumber}
             disabled={isSubmitting || loadingServices}
           />
         </div>
+        {errors.phoneNumber && (
+          <p className="text-[12px] text-red-500 font-medium mt-1.5">{errors.phoneNumber}</p>
+        )}
         {errors.serviceId && (
           <p className="text-[12px] text-red-500 font-medium mt-1.5">{errors.serviceId}</p>
         )}

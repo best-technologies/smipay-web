@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PhoneNumberInput } from "@/app/dashboard/airtime/airtime-components/airtime/PhoneNumberInput";
 import { FormError } from "@/components/auth/FormError";
@@ -10,6 +10,10 @@ import { saveRecentEntry } from "@/lib/recent-numbers";
 import { RecentNumbers } from "@/components/dashboard/RecentNumbers";
 import type { VtpassDataVariation, VtpassDataPurchaseResponse } from "@/types/vtpass/vtu/vtpass-data";
 import { PurchaseConfirmationModal } from "./PurchaseConfirmationModal";
+import { doesPhoneMatchNigeriaService } from "@/lib/nigeria-network";
+
+const IS_NETWORK_CHECK_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_PHONE_NETWORK_CHECK === "true";
 
 interface DataPurchaseFormProps {
   selectedServiceId: string;
@@ -44,22 +48,51 @@ export function DataPurchaseForm({
   const cashbackBalanceNum = parseFloat((cashbackBalance || "0").replace(/[₦,]/g, "")) || 0;
   const maxPayable = walletBalance + cashbackBalanceNum;
 
+  const getPhoneError = (value: string): string | undefined => {
+    if (!value) {
+      return "Phone number is required";
+    }
+
+    if (value.length !== 11) {
+      return "Phone number must be 11 digits";
+    }
+
+    if (!value.startsWith("0")) {
+      return "Phone number must start with 0";
+    }
+
+    if (IS_NETWORK_CHECK_ENABLED && !doesPhoneMatchNigeriaService(value, serviceName)) {
+      return "Phone number does not match the selected network";
+    }
+
+    return undefined;
+  };
+
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
-    if (!phoneNumber) {
-      newErrors.phoneNumber = "Phone number is required";
-    } else if (phoneNumber.length !== 11) {
-      newErrors.phoneNumber = "Phone number must be 11 digits";
-    } else if (!phoneNumber.startsWith("0")) {
-      newErrors.phoneNumber = "Phone number must start with 0";
+
+    const phoneError = getPhoneError(phoneNumber);
+    if (phoneError) {
+      newErrors.phoneNumber = phoneError;
     }
+
     if (amount > maxPayable) {
       setServerError("Insufficient wallet and cashback balance");
       return false;
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  useEffect(() => {
+    if (!phoneNumber) {
+      return;
+    }
+
+    const phoneError = getPhoneError(phoneNumber);
+    setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+  }, [serviceName, phoneNumber]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +144,11 @@ export function DataPurchaseForm({
 
       <PhoneNumberInput
         value={phoneNumber}
-        onChange={setPhoneNumber}
+        onChange={(value) => {
+          setPhoneNumber(value);
+          const phoneError = getPhoneError(value);
+          setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+        }}
         error={errors.phoneNumber}
         disabled={isSubmitting}
       />
@@ -134,7 +171,12 @@ export function DataPurchaseForm({
 
       <Button
         type="submit"
-        disabled={isSubmitting || !phoneNumber || phoneNumber.length !== 11}
+        disabled={
+          isSubmitting ||
+          !phoneNumber ||
+          phoneNumber.length !== 11 ||
+          Boolean(errors.phoneNumber)
+        }
         className="w-full min-h-12 h-12 sm:min-h-[52px] sm:h-[52px] rounded-xl bg-brand-bg-primary hover:bg-brand-bg-primary/90 text-white text-base sm:text-lg font-semibold shadow-sm transition-all active:scale-[0.99] touch-manipulation"
       >
         {isSubmitting ? (

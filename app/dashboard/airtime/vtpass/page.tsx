@@ -81,53 +81,57 @@ export default function VtpassAirtimePage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Header – matches dashboard: sticky, same padding and tokens */}
-      <motion.header
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
-      >
-        <div className="flex items-center gap-3 sm:gap-4 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/dashboard")}
-            className="h-9 w-9 shrink-0 rounded-xl text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-border/50 sm:h-10 sm:w-10"
-            aria-label="Back to dashboard"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight flex items-center gap-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-quick-action-3-bg text-quick-action-3 sm:h-9 sm:w-9">
-                <Phone className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.75} />
-              </span>
-              Buy Airtime
-            </h1>
-            <p className="text-xs sm:text-sm text-dashboard-muted mt-0.5 truncate">
-              Top up any network instantly
-            </p>
+      {/* Sticky: header + wallet card — stays fixed while scrolling */}
+      <div className="sticky top-0 z-10 bg-dashboard-bg pb-4 sm:pb-5">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-dashboard-surface border-b border-dashboard-border/60"
+        >
+          <div className="flex items-center gap-3 sm:gap-4 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/dashboard")}
+              className="h-9 w-9 shrink-0 rounded-xl text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-border/50 sm:h-10 sm:w-10"
+              aria-label="Back to dashboard"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight flex items-center gap-2">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-quick-action-3-bg text-quick-action-3 sm:h-9 sm:w-9">
+                  <Phone className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.75} />
+                </span>
+                Buy Airtime
+              </h1>
+              <p className="text-xs sm:text-sm text-dashboard-muted mt-0.5 truncate">
+                Top up any network instantly
+              </p>
+            </div>
           </div>
-        </div>
-      </motion.header>
+        </motion.header>
 
-      {/* Content – same padding as dashboard main, safe-area for mobile */}
-      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
-        {/* Compact wallet card — always visible */}
+        {/* Compact wallet card — always visible in sticky area */}
         {dashboardData && (
-          <section className="max-w-xl w-full min-w-0">
-            <WalletCard
-              bankName={dashboardData.accounts[0]?.bank_name}
-              accountNumber={dashboardData.accounts[0]?.account_number}
-              accountHolderName={dashboardData.accounts[0]?.account_holder_name}
-              balance={walletBalance}
-              isActive={dashboardData.accounts[0]?.isActive ?? true}
-              compact
-            />
-          </section>
+          <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+            <section className="max-w-xl w-full min-w-0">
+              <WalletCard
+                bankName={dashboardData.accounts[0]?.bank_name}
+                accountNumber={dashboardData.accounts[0]?.account_number}
+                accountHolderName={dashboardData.accounts[0]?.account_holder_name}
+                balance={walletBalance}
+                isActive={dashboardData.accounts[0]?.isActive ?? true}
+                compact
+              />
+            </section>
+          </div>
         )}
+      </div>
 
+      {/* Scrollable content */}
+      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
         <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>

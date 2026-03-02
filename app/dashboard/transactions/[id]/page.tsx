@@ -195,7 +195,7 @@ export default function TransactionDetailPage() {
       </header>
 
       {/* ── Scrollable content ─────────────── */}
-      <div className="pb-28">
+      <div className="pb-24">
         <div className="max-w-lg mx-auto">
 
           {/* ── Hero ───────────────────────── */}
@@ -442,8 +442,8 @@ export default function TransactionDetailPage() {
         </div>
       </div>
 
-      {/* ── Sticky bottom actions ──────────── */}
-      <div className="sticky bottom-0 z-20 bg-dashboard-surface border-t border-dashboard-border/50 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      {/* ── Fixed bottom actions ──────────── */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-dashboard-surface border-t border-dashboard-border/50 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="max-w-lg mx-auto flex gap-3">
           <button
             onClick={() => router.push("/dashboard/transactions")}
