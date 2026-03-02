@@ -81,8 +81,8 @@ export default function VtpassAirtimePage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Sticky: header + wallet card — stays fixed while scrolling */}
-      <div className="sticky top-0 z-10 bg-dashboard-bg pb-4 sm:pb-5">
+      {/* Fixed: header + wallet card — never scrolls, always visible */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-dashboard-bg pb-4 sm:pb-5">
         <motion.header
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -113,7 +113,7 @@ export default function VtpassAirtimePage() {
           </div>
         </motion.header>
 
-        {/* Compact wallet card — always visible in sticky area */}
+        {/* Compact wallet card — always visible in fixed area */}
         {dashboardData && (
           <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
             <section className="max-w-xl w-full min-w-0">
@@ -130,8 +130,11 @@ export default function VtpassAirtimePage() {
         )}
       </div>
 
+      {/* Spacer: reserves space so content doesn't hide under fixed block */}
+      <div className="h-[220px] sm:h-[240px]" aria-hidden />
+
       {/* Scrollable content */}
-      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
+      <div className="px-4 pt-3 pb-5 sm:px-6 sm:pt-4 sm:pb-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
         <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>

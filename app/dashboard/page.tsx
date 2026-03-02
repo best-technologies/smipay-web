@@ -307,7 +307,7 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-dashboard-bg">
       {/* Fixed: header + wallet card — never scrolls, always visible */}
-      <div className="fixed top-0 left-0 right-0 z-10 bg-dashboard-bg pb-4 sm:pb-6">
+      <div className="fixed top-0 left-0 right-0 z-20 bg-dashboard-bg pb-4 sm:pb-6">
         <motion.header
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -472,7 +472,7 @@ function DashboardContent() {
                   ) : (
                     <div className="relative">
                       {promoLabel && (
-                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[8px] sm:text-[9px] font-bold leading-none whitespace-nowrap shadow-sm">
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 z-0 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[8px] sm:text-[9px] font-bold leading-none whitespace-nowrap shadow-sm">
                           {promoLabel}
                         </span>
                       )}
