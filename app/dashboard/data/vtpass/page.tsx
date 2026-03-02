@@ -132,7 +132,7 @@ export default function VtpassDataPage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Fixed: header + wallet card + select network — never scrolls */}
+      {/* Fixed: header + wallet card only — keeps more space for plans on small screens */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-dashboard-bg pb-4 sm:pb-5">
         <motion.header
           initial={{ opacity: 0, y: -8 }}
@@ -164,7 +164,7 @@ export default function VtpassDataPage() {
           </div>
         </motion.header>
 
-        <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8 space-y-5 sm:space-y-6">
+        <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
           {dashboardData && (
             <section className="max-w-xl w-full min-w-0">
               <WalletCard
@@ -177,31 +177,12 @@ export default function VtpassDataPage() {
               />
             </section>
           )}
-
-          {!showPurchaseView && (
-            <div className="rounded-2xl border border-dashboard-border/80 bg-dashboard-surface shadow-sm overflow-hidden p-4 sm:p-6 lg:p-8 max-w-xl">
-              <label className="label-auth mb-3 block text-dashboard-heading">
-                Select network
-              </label>
-              {servicesError && (
-                <div className="mb-4">
-                  <FormError message={servicesError} />
-                </div>
-              )}
-              <NetworkSelector
-                services={services}
-                selectedServiceId={selectedServiceId}
-                onSelect={setSelectedServiceId}
-                isLoading={loadingServices}
-              />
-            </div>
-          )}
         </div>
       </div>
 
       {/* Spacer: reserves space so content doesn't hide under fixed block */}
       <div
-        className={`shrink-0 ${showPurchaseView ? "h-[200px] sm:h-[220px]" : "h-[350px] sm:h-[400px]"}`}
+        className={`shrink-0 ${showPurchaseView ? "h-[200px] sm:h-[220px]" : "h-[220px] sm:h-[240px]"}`}
         aria-hidden
       />
 
@@ -218,6 +199,24 @@ export default function VtpassDataPage() {
             transition={{ duration: 0.35, delay: 0.05 }}
             className="max-w-xl w-full min-w-0 space-y-4 sm:space-y-5"
           >
+            {/* Select network — now scrolls with plans for more browsing space on mobile */}
+            <div className="rounded-2xl border border-dashboard-border/80 bg-dashboard-surface shadow-sm overflow-hidden p-4 sm:p-6 lg:p-8">
+              <label className="label-auth mb-3 block text-dashboard-heading">
+                Select network
+              </label>
+              {servicesError && (
+                <div className="mb-4">
+                  <FormError message={servicesError} />
+                </div>
+              )}
+              <NetworkSelector
+                services={services}
+                selectedServiceId={selectedServiceId}
+                onSelect={setSelectedServiceId}
+                isLoading={loadingServices}
+              />
+            </div>
+
             {/* Data Plans */}
             {selectedServiceId && (
               <div className="rounded-2xl border border-dashboard-border/80 bg-dashboard-surface shadow-sm overflow-hidden p-4 sm:p-6 lg:p-8">

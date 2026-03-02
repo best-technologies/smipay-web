@@ -295,52 +295,60 @@ export default function VtpassInternationalAirtimePage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
-      >
-        <div className="flex items-center gap-3 sm:gap-4 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleBack}
-            className="h-9 w-9 shrink-0 rounded-xl text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-border/50 sm:h-10 sm:w-10"
-            aria-label="Back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight flex items-center gap-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-quick-action-2-bg text-quick-action-2 sm:h-9 sm:w-9">
-                <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.75} />
-              </span>
-              International Airtime
-            </h1>
-            <p className="text-xs sm:text-sm text-dashboard-muted mt-0.5 truncate">
-              {getHeaderSubtitle()}
-            </p>
+      {/* Fixed: header + wallet card — never scrolls, always visible */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-dashboard-bg pb-4 sm:pb-5">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-dashboard-surface border-b border-dashboard-border/60"
+        >
+          <div className="flex items-center gap-3 sm:gap-4 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="h-9 w-9 shrink-0 rounded-xl text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-border/50 sm:h-10 sm:w-10"
+              aria-label="Back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight flex items-center gap-2">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-quick-action-2-bg text-quick-action-2 sm:h-9 sm:w-9">
+                  <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.75} />
+                </span>
+                {getHeaderTitle()}
+              </h1>
+              <p className="text-xs sm:text-sm text-dashboard-muted mt-0.5 truncate">
+                {getHeaderSubtitle()}
+              </p>
+            </div>
           </div>
-        </div>
-      </motion.header>
+        </motion.header>
 
-      {/* Content */}
-      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
+        {/* Wallet card — always visible in fixed area */}
         {dashboardData && (
-          <section className="max-w-xl w-full min-w-0">
-            <WalletCard
-              bankName={primaryAccount?.bank_name}
-              accountNumber={primaryAccount?.account_number}
-              accountHolderName={primaryAccount?.account_holder_name}
-              balance={walletBalance}
-              isActive={primaryAccount?.isActive ?? true}
-              compact
-            />
-          </section>
+          <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+            <section className="max-w-xl w-full min-w-0">
+              <WalletCard
+                bankName={primaryAccount?.bank_name}
+                accountNumber={primaryAccount?.account_number}
+                accountHolderName={primaryAccount?.account_holder_name}
+                balance={walletBalance}
+                isActive={primaryAccount?.isActive ?? true}
+                compact
+              />
+            </section>
+          </div>
         )}
+      </div>
 
+      {/* Spacer: reserves space so content doesn't hide under fixed block */}
+      <div className="h-[220px] sm:h-[240px]" aria-hidden />
+
+      {/* Scrollable content */}
+      <div className="px-4 pt-3 pb-5 sm:px-6 sm:pt-4 sm:pb-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">
         <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>

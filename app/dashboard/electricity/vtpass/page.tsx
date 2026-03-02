@@ -356,45 +356,52 @@ export default function VtpassElectricityPage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
-      >
-        <div className="flex items-center gap-2.5 sm:gap-4 px-3.5 py-2.5 sm:px-6 sm:py-3.5 lg:px-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/dashboard")}
-            className="h-8 w-8 shrink-0 rounded-lg text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-border/50 sm:h-9 sm:w-9"
-            aria-label="Back"
-          >
-            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-          <h1 className="text-sm sm:text-base font-semibold text-dashboard-heading tracking-tight">
-            Electricity
-          </h1>
-        </div>
-      </motion.header>
+      {/* Fixed: header + wallet card — never scrolls, always visible */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-dashboard-bg pb-4 sm:pb-5">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-dashboard-surface border-b border-dashboard-border/60"
+        >
+          <div className="flex items-center gap-2.5 sm:gap-4 px-3.5 py-2.5 sm:px-6 sm:py-3.5 lg:px-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/dashboard")}
+              className="h-8 w-8 shrink-0 rounded-lg text-dashboard-muted hover:text-dashboard-heading hover:bg-dashboard-border/50 sm:h-9 sm:w-9"
+              aria-label="Back"
+            >
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+            <h1 className="text-sm sm:text-base font-semibold text-dashboard-heading tracking-tight">
+              Electricity
+            </h1>
+          </div>
+        </motion.header>
 
-      {/* Content */}
-      <div className="px-3.5 py-4 sm:px-6 sm:py-5 lg:px-8 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-3.5 sm:space-y-5 overflow-x-hidden">
-        {/* Wallet card */}
+        {/* Wallet card — always visible in fixed area */}
         {dashboardData && (
-          <section className="max-w-xl w-full min-w-0">
-            <WalletCard
-              bankName={primaryAccount?.bank_name}
-              accountNumber={primaryAccount?.account_number}
-              accountHolderName={primaryAccount?.account_holder_name}
-              balance={walletBalance}
-              isActive={primaryAccount?.isActive ?? true}
-              compact
-            />
-          </section>
+          <div className="px-3.5 pt-4 sm:px-6 sm:pt-5 lg:px-8">
+            <section className="max-w-xl w-full min-w-0">
+              <WalletCard
+                bankName={primaryAccount?.bank_name}
+                accountNumber={primaryAccount?.account_number}
+                accountHolderName={primaryAccount?.account_holder_name}
+                balance={walletBalance}
+                isActive={primaryAccount?.isActive ?? true}
+                compact
+              />
+            </section>
+          </div>
         )}
+      </div>
 
+      {/* Spacer: reserves space so content doesn't hide under fixed block */}
+      <div className="h-[200px] sm:h-[220px]" aria-hidden />
+
+      {/* Scrollable content */}
+      <div className="px-3.5 pt-3 pb-4 sm:px-6 sm:pt-4 sm:pb-5 lg:px-8 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-3.5 sm:space-y-5 overflow-x-hidden">
         <section className="hidden sm:block max-w-4xl w-full min-w-0">
           <WalletAnalysisCards />
         </section>
