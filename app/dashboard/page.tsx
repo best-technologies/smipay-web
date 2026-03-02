@@ -29,6 +29,7 @@ import {
   getPaymentReference,
   clearPaymentReference,
   clearPaymentInProgress,
+  isPaymentInProgress,
 } from "@/lib/auth-storage";
 import {
   getWelcomeBonusCongratsShownTxId,
@@ -232,14 +233,23 @@ function DashboardContent() {
     setShowWelcomeBonusCongrats(true);
   }, [dashboardData?.transaction_history]);
 
-  // Fix: When user cancels on Paystack, browser may restore page from bfcache with stale
-  // state (modal open, card-funding step, "Processing..." stuck). Force reload to get clean state.
   useEffect(() => {
     const handler = (e: PageTransitionEvent) => {
       if (e.persisted && typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         if (params.get("payment") === "callback") {
           window.location.reload();
+          return;
+        }
+        if (isPaymentInProgress()) {
+          const ref = getPaymentReference();
+          if (ref) {
+            window.location.href = `${window.location.origin}/dashboard?payment=callback`;
+          } else {
+            clearPaymentInProgress();
+            clearPaymentReference();
+            window.location.reload();
+          }
         }
       }
     };
@@ -273,6 +283,25 @@ function DashboardContent() {
       }, 500);
     }
   }, [searchParams, router]);
+
+  // Safety net: if user navigated back from Paystack without bfcache (fresh load)
+  // and a payment was still in progress, open the verification modal.
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (!payment && isPaymentInProgress()) {
+      const ref = getPaymentReference();
+      if (ref) {
+        queueMicrotask(() => {
+          setPaymentReference(ref);
+          setIsFundWalletModalOpen(true);
+        });
+      } else {
+        clearPaymentInProgress();
+        clearPaymentReference();
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const parseBalance = (balance: string): number => {
     return parseFloat(balance.replace(/,/g, ""));
