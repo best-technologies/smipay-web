@@ -155,8 +155,8 @@ function DashboardSkeleton() {
         </div>
 
         {/* Service actions skeleton */}
-        <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4 animate-pulse">
-          <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6">
+        <div className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4 lg:px-6 lg:pt-6 lg:pb-6 animate-pulse">
+          <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6 lg:grid-cols-8 lg:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center">
                 <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-dashboard-border/50" />
@@ -349,16 +349,16 @@ function DashboardContent() {
   const cashbackWallet = dashboardData.cashback_wallet;
 
   return (
-    <div className="min-h-screen bg-dashboard-bg">
-      {/* Fixed: header + wallet card — never scrolls, always visible */}
-      <div className="fixed top-0 left-0 right-0 z-20 bg-dashboard-bg pb-4 sm:pb-6">
+    <div className="min-h-screen bg-dashboard-bg min-w-0 w-full">
+      {/* Fixed: header + wallet card. On desktop (lg), starts at sidebar edge (left-72) */}
+      <div className="fixed top-0 left-0 right-0 lg:left-72 z-20 bg-dashboard-bg pb-4 sm:pb-6">
         <motion.header
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="bg-dashboard-surface border-b border-dashboard-border/60"
         >
-          <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+          <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:pl-5 lg:pr-6">
             <div ref={menuButtonRef} className="shrink-0">
               <button
                 type="button"
@@ -390,8 +390,8 @@ function DashboardContent() {
           </div>
         </motion.header>
 
-        <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="px-4 pt-5 sm:px-6 sm:pt-6 lg:pl-5 lg:pr-6 w-full min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-5">
             {/* Virtual Account Card - shown first on mobile */}
             <div ref={walletCardRef} className="lg:col-span-2 order-1">
               <WalletCard
@@ -474,13 +474,16 @@ function DashboardContent() {
       </div>
 
       {/* Spacer: reserves space so content doesn't hide under fixed block */}
-      <div className="h-[260px] sm:h-[280px] lg:h-[300px]" aria-hidden />
+      <div className="h-[260px] sm:h-[280px] lg:h-[340px]" aria-hidden />
 
-      {/* Scrollable content */}
-      <div className="px-4 pt-3 pb-5 sm:px-6 sm:pt-4 sm:pb-6 lg:px-8 space-y-6 sm:space-y-8">
-        {/* Reward Banners — horizontally scrollable promos */}
+      {/* Scrollable content — full width of main area, tight to sidebar */}
+      <div className="px-4 pt-3 pb-5 sm:px-6 sm:pt-4 sm:pb-6 lg:pl-5 lg:pr-6 w-full min-w-0 space-y-6 sm:space-y-8">
+        {/* Reward Banners — first in scrollable content, under wallet card */}
         {dashboardData.reward_banners && dashboardData.reward_banners.length > 0 && (
-          <div ref={rewardBannersRef}>
+          <div
+            ref={rewardBannersRef}
+            className="min-w-0 overflow-visible lg:pt-3"
+          >
             <RewardBanners
               banners={dashboardData.reward_banners}
               userTag={dashboardData.user.smipay_tag}
@@ -488,26 +491,23 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Service Actions – quick links come right after wallet card */}
-        <motion.section
+        {/* Service Actions – quick links */}
+        <section
           ref={quickLinksRef}
-          variants={container}
-          initial="hidden"
-          animate="visible"
-          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4"
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-2 pt-5 pb-3 sm:px-4 sm:pt-5 sm:pb-4 lg:px-6 lg:pt-6 lg:pb-6"
         >
-          <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6">
+          <div className="grid grid-cols-4 gap-y-5 sm:gap-y-6 lg:grid-cols-8 lg:gap-6">
             {SERVICE_ACTIONS.map((action) => {
               const promoLabel = PROMO_LABELS[action.id];
               return (
-                <motion.div key={action.id} variants={item} className="flex flex-col items-center">
+                <div key={action.id} className="flex flex-col items-center">
                   {action.comingSoon ? (
                     <div className="relative">
                       <div
-                        className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full opacity-75 cursor-not-allowed"
+                        className="flex h-10 w-10 sm:h-11 sm:w-11 lg:h-14 lg:w-14 items-center justify-center rounded-full opacity-75 cursor-not-allowed"
                         style={{ backgroundColor: action.bg, color: action.color }}
                       >
-                        <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
+                        <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px] lg:h-[22px] lg:w-[22px]" strokeWidth={1.8} />
                       </div>
                       <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
                         Soon
@@ -520,45 +520,40 @@ function DashboardContent() {
                           {promoLabel}
                         </span>
                       )}
-                      <motion.button
+                      <button
                         type="button"
                         onClick={() => router.push(action.href)}
-                        whileHover={{ scale: 1.06 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
+                        className="flex h-10 w-10 sm:h-11 sm:w-11 lg:h-14 lg:w-14 items-center justify-center rounded-full transition-shadow hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent touch-manipulation"
                         style={{ backgroundColor: action.bg, color: action.color }}
                       >
-                        <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px]" strokeWidth={1.8} />
-                      </motion.button>
+                        <action.icon className="h-[17px] w-[17px] sm:h-[19px] sm:w-[19px] lg:h-[22px] lg:w-[22px]" strokeWidth={1.8} />
+                      </button>
                     </div>
                   )}
                   <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
                     {action.name}
                   </span>
-                </motion.div>
+                </div>
               );
             })}
           </div>
-        </motion.section>
+        </section>
 
         {/* Transfer Actions – 3 across, circular icons, no header */}
-        <motion.section
-          variants={container}
-          initial="hidden"
-          animate="visible"
-          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 pt-5 pb-3 sm:p-4 sm:pt-5"
+        <section
+          className="rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 pt-5 pb-3 sm:p-4 sm:pt-5 lg:p-6 lg:pt-6"
         >
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-3 lg:gap-4">
             {TRANSFER_ACTIONS.map((action) => (
-              <motion.div key={action.id} variants={item} className="flex flex-col items-center">
+              <div key={action.id} className="flex flex-col items-center">
                 <div className="relative">
                   <button
                     type="button"
                     disabled
-                    className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full opacity-75 cursor-not-allowed transition-transform"
+                    className="flex h-11 w-11 sm:h-12 sm:w-12 lg:h-14 lg:w-14 items-center justify-center rounded-full opacity-75 cursor-not-allowed transition-transform"
                     style={{ backgroundColor: action.bg, color: action.color }}
                   >
-                    <action.icon className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.8} />
+                    <action.icon className="h-[18px] w-[18px] sm:h-5 sm:w-5 lg:h-6 lg:w-6" strokeWidth={1.8} />
                   </button>
                   <span className="absolute -top-1.5 -right-1.5 px-1 py-px rounded-full bg-amber-500 text-white text-[7px] sm:text-[8px] font-bold uppercase leading-none tracking-wide">
                     Soon
@@ -567,10 +562,10 @@ function DashboardContent() {
                 <span className="mt-1.5 text-xs sm:text-sm font-medium text-dashboard-heading leading-tight text-center">
                   {action.name}
                 </span>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.section>
+        </section>
 
         {/* Recent Transactions */}
         <section>

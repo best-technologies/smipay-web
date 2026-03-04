@@ -81,8 +81,8 @@ export default function VtpassAirtimePage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Fixed: header + wallet card — never scrolls, always visible */}
-      <div className="fixed top-0 left-0 right-0 z-20 bg-dashboard-bg pb-4 sm:pb-5">
+      {/* Fixed on mobile, normal flow on desktop */}
+      <div className="fixed lg:static top-0 left-0 right-0 lg:inset-auto z-20 bg-dashboard-bg pb-4 sm:pb-5 lg:pb-0">
         <motion.header
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -130,8 +130,8 @@ export default function VtpassAirtimePage() {
         )}
       </div>
 
-      {/* Spacer: reserves space so content doesn't hide under fixed block */}
-      <div className="h-[220px] sm:h-[240px]" aria-hidden />
+      {/* Spacer for fixed header on mobile only */}
+      <div className="h-[220px] sm:h-[240px] lg:hidden" aria-hidden />
 
       {/* Scrollable content */}
       <div className="px-4 pt-3 pb-5 sm:px-6 sm:pt-4 sm:pb-6 lg:px-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 sm:space-y-6 overflow-x-hidden">

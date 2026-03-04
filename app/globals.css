@@ -186,6 +186,8 @@ body {
 /* Smooth scroll for dashboard and main content */
 html {
   scroll-behavior: smooth;
+  /* Explicit base prevents layout shift when media queries apply */
+  font-size: 16px;
 }
 
 /*

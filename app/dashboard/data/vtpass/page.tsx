@@ -132,8 +132,8 @@ export default function VtpassDataPage() {
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
-      {/* Fixed: header + wallet card only — keeps more space for plans on small screens */}
-      <div className="fixed top-0 left-0 right-0 z-10 bg-dashboard-bg pb-4 sm:pb-5">
+      {/* Fixed on mobile, normal flow on desktop */}
+      <div className="fixed lg:static top-0 left-0 right-0 lg:inset-auto z-10 bg-dashboard-bg pb-4 sm:pb-5 lg:pb-0">
         <motion.header
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -180,9 +180,9 @@ export default function VtpassDataPage() {
         </div>
       </div>
 
-      {/* Spacer: reserves space so content doesn't hide under fixed block */}
+      {/* Spacer for fixed header on mobile only */}
       <div
-        className={`shrink-0 ${showPurchaseView ? "h-[200px] sm:h-[220px]" : "h-[220px] sm:h-[240px]"}`}
+        className={`shrink-0 lg:hidden ${showPurchaseView ? "h-[200px] sm:h-[220px]" : "h-[220px] sm:h-[240px]"}`}
         aria-hidden
       />
 

@@ -299,7 +299,7 @@ export default function AdminConversationDetailPage() {
   const user = conversation.user;
 
   return (
-    <div className="min-h-screen bg-dashboard-bg flex flex-col">
+    <div className="h-screen bg-dashboard-bg flex flex-col overflow-hidden">
       {/* Header */}
       <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
         <div className="flex items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">

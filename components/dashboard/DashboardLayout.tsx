@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <DashboardAuthGuard sessionExpired={sessionExpired}>
         <div className="flex min-h-screen bg-dashboard-bg">
           <Sidebar />
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 min-w-0 w-full overflow-auto">
             {children}
           </main>
         </div>

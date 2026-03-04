@@ -241,8 +241,8 @@ export default function Sidebar() {
       </div>
 
       {/* Main Menu — scrollable */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3">
-        <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 lg:p-4">
+        <h3 className="text-[10px] lg:text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
           Main Menu
         </h3>
         <nav className="space-y-0.5">
@@ -252,10 +252,10 @@ export default function Sidebar() {
                 <div>
                   <button
                     onClick={() => toggleMenu(item.id)}
-                    className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg hover:bg-dashboard-bg text-dashboard-heading transition-colors"
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg hover:bg-dashboard-bg text-dashboard-heading transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
-                      <item.icon className="h-4 w-4 text-dashboard-muted" />
+                      <item.icon className="h-4 w-4 lg:h-4.5 lg:w-4.5 text-dashboard-muted" />
                       <span className="font-medium">{item.label}</span>
                     </div>
                     {openMenus.includes(item.id) ? (
@@ -311,19 +311,19 @@ export default function Sidebar() {
                 <Link
                   href={item.href!}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors ${
+                  className={`flex items-center gap-2.5 px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg transition-colors ${
                     pathname === item.href
                       ? "bg-brand-bg-primary text-white font-medium shadow-sm"
                       : "text-dashboard-heading hover:bg-dashboard-bg"
                   }`}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-4 w-4 lg:h-4.5 lg:w-4.5" />
                   <span className="font-medium">{item.label}</span>
                 </Link>
               ) : (
                 <div className="relative group">
-                  <div className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg text-dashboard-muted cursor-not-allowed">
-                    <item.icon className="h-4 w-4" />
+                  <div className="flex items-center gap-2.5 px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg text-dashboard-muted cursor-not-allowed">
+                    <item.icon className="h-4 w-4 lg:h-4.5 lg:w-4.5" />
                     <span className="font-medium">{item.label}</span>
                   </div>
                   <div className="absolute left-0 top-0 hidden group-hover:block bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
@@ -337,8 +337,8 @@ export default function Sidebar() {
       </div>
 
       {/* Other Menu — fixed at bottom */}
-      <div className="shrink-0 p-3 border-t border-dashboard-border bg-dashboard-surface">
-        <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
+      <div className="shrink-0 p-3 lg:p-4 border-t border-dashboard-border bg-dashboard-surface">
+        <h3 className="text-[10px] lg:text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
           Other Menu
         </h3>
         <nav className="space-y-0.5">
@@ -348,10 +348,10 @@ export default function Sidebar() {
                 <div>
                   <button
                     onClick={() => toggleMenu(item.id)}
-                    className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg hover:bg-dashboard-bg text-dashboard-heading transition-colors"
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg hover:bg-dashboard-bg text-dashboard-heading transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
-                      <item.icon className="h-4 w-4 text-dashboard-muted" />
+                      <item.icon className="h-4 w-4 lg:h-4.5 lg:w-4.5 text-dashboard-muted" />
                       <span className="font-medium">{item.label}</span>
                     </div>
                     {openMenus.includes(item.id) ? (
@@ -404,18 +404,18 @@ export default function Sidebar() {
                   )}
                 </div>
               ) : item.href === "/" ? (
-                <Link
+                  <Link
                   href={item.href!}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg text-dashboard-heading hover:bg-dashboard-bg transition-colors"
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg text-dashboard-heading hover:bg-dashboard-bg transition-colors"
                 >
-                  <item.icon className="h-4 w-4 text-dashboard-muted" />
+                  <item.icon className="h-4 w-4 lg:h-4.5 lg:w-4.5 text-dashboard-muted" />
                   <span className="font-medium">{item.label}</span>
                 </Link>
               ) : (
                 <div className="relative group">
-                  <div className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg text-dashboard-muted cursor-not-allowed">
-                    <item.icon className="h-4 w-4 text-dashboard-muted" />
+                  <div className="flex items-center gap-2.5 px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg text-dashboard-muted cursor-not-allowed">
+                    <item.icon className="h-4 w-4 lg:h-4.5 lg:w-4.5 text-dashboard-muted" />
                     <span className="font-medium">{item.label}</span>
                   </div>
                   <div className="absolute left-0 top-0 hidden group-hover:block bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 ml-2">
@@ -429,9 +429,9 @@ export default function Sidebar() {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm rounded-lg text-red-600 hover:bg-red-50 transition-colors"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 lg:h-4.5 lg:w-4.5" />
             <span className="font-medium">Logout</span>
           </button>
         </nav>
@@ -450,8 +450,8 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 bg-dashboard-surface border-r border-dashboard-border h-screen sticky top-0 overflow-hidden">
+      {/* Desktop Sidebar — shrink-0 prevents flex from squishing it */}
+      <aside className="hidden lg:block lg:shrink-0 w-72 bg-dashboard-surface border-r border-dashboard-border h-screen sticky top-0 overflow-hidden">
         {sidebarContent}
       </aside>
 
