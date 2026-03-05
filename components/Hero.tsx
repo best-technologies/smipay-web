@@ -16,7 +16,7 @@ export default function Hero() {
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-brand-text-secondary max-w-xl">
             Experience seamless digital transactions, instant airtime & data
-            top-ups, bill payments, and virtual cards—all in one powerful
+            top-ups, bill payments, all in one powerful
             platform.
           </p>
           <div className="pt-1 sm:pt-2">

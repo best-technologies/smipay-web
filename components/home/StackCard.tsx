@@ -48,14 +48,14 @@ const cards = [
       "Book and pay for flights, hotels, and travel services right from the app. Local or international — fast, secure, and fully tracked.",
     image: "/imgs/stack-card-05.png",
   },
-  {
-    bgColor: "bg-[#F0F7F6]",
-    badge: "Betting Wallet Funding",
-    title: "Quick Betting Top-Ups",
-    description:
-      "Fund your betting accounts instantly from one place. No delays, no failed payments — just fast, reliable top-ups.",
-    image: "/imgs/stack-card-06.png",
-  },
+  // {
+  //   bgColor: "bg-[#F0F7F6]",
+  //   badge: "Betting Wallet Funding",
+  //   title: "Quick Betting Top-Ups",
+  //   description:
+  //     "Fund your betting accounts instantly from one place. No delays, no failed payments — just fast, reliable top-ups.",
+  //   image: "/imgs/stack-card-06.png",
+  // },
 ];
 
 export default function StackCard() {

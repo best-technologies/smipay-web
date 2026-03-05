@@ -105,7 +105,7 @@ export default function TermsOfServicePage() {
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed">
               Smipay is a digital platform that allows users to make everyday
               payments such as airtime, data, electricity bills, cable
-              subscriptions, education payments, betting funding, travel and
+              subscriptions, education payments, travel and
               homes agencies payments. Smipay is operated by Best Technologies
               Ltd., registered in Nigeria.
             </p>
@@ -217,7 +217,7 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
+            {/* <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               Virtual Card Services
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
@@ -236,7 +236,7 @@ export default function TermsOfServicePage() {
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
               International transactions may attract additional fees or exchange
               rates determined by the card issuer.
-            </p>
+            </p> */}
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               Service Availability
