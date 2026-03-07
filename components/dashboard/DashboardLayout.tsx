@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { SessionWarning } from "@/components/auth/SessionWarning";
 import { SessionExpired } from "@/components/auth/SessionExpired";
-import { isPaymentInProgress } from "@/lib/auth-storage";
+import { isPaymentInProgress, getToken } from "@/lib/auth-storage";
 import Sidebar from "./Sidebar";
 import SupportFAB from "./SupportFAB";
 import { Loader2 } from "lucide-react";
@@ -24,7 +24,8 @@ function DashboardAuthGuard({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, initializeAuth } = useAuth();
+  const hasAttemptedReinit = useRef(false);
 
   const isPaymentCallback = searchParams.get("payment") === "callback";
 
@@ -33,9 +34,18 @@ function DashboardAuthGuard({
     if (isPaymentCallback || isPaymentInProgress()) return;
 
     if (!isLoading && !isAuthenticated) {
+      // On pull-to-refresh (especially mobile), localStorage may be briefly unavailable.
+      // If a token exists, re-run auth init instead of redirecting.
+      if (typeof window !== "undefined" && getToken()) {
+        if (!hasAttemptedReinit.current) {
+          hasAttemptedReinit.current = true;
+          initializeAuth();
+        }
+        return;
+      }
       router.push("/auth/signin?callbackUrl=/dashboard");
     }
-  }, [isLoading, isAuthenticated, router, isPaymentCallback, sessionExpired]);
+  }, [isLoading, isAuthenticated, router, isPaymentCallback, sessionExpired, initializeAuth]);
 
   if (sessionExpired) {
     return <>{children}</>;
@@ -50,6 +60,14 @@ function DashboardAuthGuard({
   }
 
   if (!isAuthenticated) {
+    // Token exists but store not yet hydrated — show loading instead of redirecting
+    if (typeof window !== "undefined" && getToken()) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-dashboard-bg">
+          <Loader2 className="h-8 w-8 animate-spin text-dashboard-accent" />
+        </div>
+      );
+    }
     return null;
   }
 
