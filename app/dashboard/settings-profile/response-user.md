@@ -156,7 +156,7 @@ Returns everything the app homepage needs: user info, wallet, accounts (DVA), re
 **GET** `/user/fetch-user-profile`
 *(Also available at `/user/app-user-profile-page` — same response)*
 
-Returns user profile, address, KYC, wallet, **current tier**, and **all available tiers** so the user can see upgrade paths.
+Returns user profile, address, KYC, wallet, **current tier**, **all available tiers**, **referral code**, **smipay tag**, and **full referral analysis** (referrals given, rewards issued, status breakdown, etc.).
 
 ### Response
 
@@ -179,7 +179,9 @@ Returns user profile, address, KYC, wallet, **current tier**, and **all availabl
       "joined": "15 Jan 2026",
       "totalCards": 2,
       "totalAccounts": 1,
-      "wallet_balance": 5000
+      "wallet_balance": 5000,
+      "referral_code": "JOHN7ABC",
+      "smipay_tag": "johndoe"
     },
 
     "address": {
@@ -228,6 +230,31 @@ Returns user profile, address, KYC, wallet, **current tier**, and **all availabl
         "airtimeDaily": 50000
       },
       "is_active": true
+    },
+
+    "referral_analysis": {
+      "total_referred": 5,
+      "by_status": {
+        "pending": 2,
+        "eligible": 0,
+        "rewarded": 3,
+        "partially_rewarded": 0,
+        "expired": 0,
+        "rejected": 0
+      },
+      "referrer_rewards_issued": 3,
+      "referrer_rewards_total_amount": 600,
+      "referee_rewards_issued": 3,
+      "referee_rewards_total_amount": 300,
+      "slots_remaining": 45,
+      "program_config": {
+        "is_active": true,
+        "referrer_reward_amount": 200,
+        "referee_reward_amount": 100,
+        "reward_trigger": "first_transaction",
+        "max_referrals_per_user": 50,
+        "min_transaction_amount": 100
+      }
     },
 
     "available_tiers": [
@@ -297,6 +324,28 @@ Returns user profile, address, KYC, wallet, **current tier**, and **all availabl
   }
 }
 ```
+
+### User profile fields (fetch-user-profile)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `user.referral_code` | string | User's referral code for sharing (e.g. `JOHN7ABC`). Use `smipay_tag` if this is empty. |
+| `user.smipay_tag` | string | Unique SmiPay tag (e.g. `johndoe`). Often used as the shareable referral identifier. |
+
+### Referral analysis fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `referral_analysis.total_referred` | number | Total number of people the user has referred. |
+| `referral_analysis.by_status` | object | Counts per status: `pending`, `eligible`, `rewarded`, `partially_rewarded`, `expired`, `rejected`. |
+| `referral_analysis.referrer_rewards_issued` | number | How many referral rewards the user has received (as referrer). |
+| `referral_analysis.referrer_rewards_total_amount` | number | Total amount (NGN) the user has earned from referrals. |
+| `referral_analysis.referee_rewards_issued` | number | How many of the user's referred friends have received their bonus. |
+| `referral_analysis.referee_rewards_total_amount` | number | Total amount (NGN) given to referred friends. |
+| `referral_analysis.slots_remaining` | number | How many more referrals the user can make (max minus total). |
+| `referral_analysis.program_config` | object | Current program settings: `referrer_reward_amount`, `referee_reward_amount`, `reward_trigger`, `max_referrals_per_user`, `min_transaction_amount`. |
+
+**Status meanings:** `pending` = friend signed up, awaiting first transaction; `eligible` = conditions met, reward ready; `rewarded` = both sides paid; `expired` = no first tx within expiry; `rejected` = admin rejected.
 
 ### Error Response
 

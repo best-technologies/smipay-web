@@ -188,15 +188,15 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
       </div>
 
       {/* ── Row 2: Category + Severity + Fraud side-by-side ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 items-start">
         {/* Category breakdown */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.12 }}
-          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3"
+          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3 max-h-64 overflow-y-auto flex flex-col"
         >
-          <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
+          <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2 shrink-0">
             Category Breakdown
           </h3>
           <CategoryBars byCategory={analytics.by_category} />
@@ -207,9 +207,9 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.16 }}
-          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3"
+          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3 max-h-64 overflow-y-auto flex flex-col"
         >
-          <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
+          <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-2 shrink-0">
             Severity Breakdown
           </h3>
           <SeverityStackedBar bySeverity={analytics.by_severity} />
@@ -220,12 +220,12 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.2 }}
-          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3 overflow-hidden"
+          className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 px-3.5 py-3 max-h-64 overflow-hidden flex flex-col"
         >
           <button
             type="button"
             onClick={() => setFraudOpen((v) => !v)}
-            className="flex items-center justify-between w-full"
+            className="flex items-center justify-between w-full shrink-0"
           >
             <h3 className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
               Fraud Indicators
@@ -238,7 +238,7 @@ export function AuditAnalytics({ analytics }: AuditAnalyticsProps) {
           </button>
 
           {fraudOpen && (
-            <div className="mt-3 space-y-3">
+            <div className="mt-3 space-y-3 min-h-0 flex-1 overflow-y-auto max-h-48">
               {fraud_indicators.top_failed_actions.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider mb-1.5">

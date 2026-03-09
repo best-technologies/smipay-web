@@ -27,6 +27,31 @@ export interface AvailableTier {
   is_current: boolean;
 }
 
+export interface ReferralAnalysis {
+  total_referred: number;
+  by_status: {
+    pending?: number;
+    eligible?: number;
+    rewarded?: number;
+    partially_rewarded?: number;
+    expired?: number;
+    rejected?: number;
+  };
+  referrer_rewards_issued: number;
+  referrer_rewards_total_amount: number;
+  referee_rewards_issued: number;
+  referee_rewards_total_amount: number;
+  slots_remaining: number;
+  program_config?: {
+    is_active?: boolean;
+    referrer_reward_amount?: number;
+    referee_reward_amount?: number;
+    reward_trigger?: string;
+    max_referrals_per_user?: number;
+    min_transaction_amount?: number;
+  };
+}
+
 export interface UserProfile {
   user: {
     id: string;
@@ -47,6 +72,7 @@ export interface UserProfile {
     totalAccounts: number;
     wallet_balance: number;
     smipay_tag: string;
+    referral_code?: string;
     role?: string;
     isTransactionPinSetup?: boolean;
   };
@@ -77,6 +103,7 @@ export interface UserProfile {
   };
   current_tier?: CurrentTier;
   available_tiers?: AvailableTier[];
+  referral_analysis?: ReferralAnalysis;
 }
 
 export interface UserProfileResponse {

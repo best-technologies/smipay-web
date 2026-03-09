@@ -22,6 +22,8 @@ import {
   TrendingUp,
   Check,
   X,
+  Gift,
+  Copy,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -121,9 +123,8 @@ function ProfileSkeleton() {
 
 const TABS = [
   { id: "personal", label: "Personal Info" },
-  // { id: "verification", label: "Verification" },
   { id: "wallet", label: "Wallet" },
-  // { id: "tiers", label: "Tiers & Limits" },
+  { id: "referral", label: "Referral" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -152,7 +153,7 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
-  const { user, address, kyc_verification, wallet_card, current_tier, available_tiers } = profile;
+  const { user, address, kyc_verification, wallet_card, current_tier, available_tiers, referral_analysis } = profile;
 
   const sortedTiers = available_tiers
     ? [...available_tiers].sort((a, b) => a.order - b.order)
@@ -328,6 +329,109 @@ export default function ProfilePage() {
         )}
         */}
 
+        {activeTab === "referral" && (
+          <div className="space-y-4">
+            {/* Referral Code Card */}
+            <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
+              <div className="px-4 py-3 sm:px-5 border-b border-dashboard-border/40">
+                <h3 className="text-sm sm:text-base font-semibold text-dashboard-heading">Your Referral Code</h3>
+                <p className="text-[10px] sm:text-xs text-dashboard-muted mt-0.5">
+                  Share this code with friends — you both earn when they sign up and transact
+                </p>
+              </div>
+              <div className="p-4 sm:p-5">
+                <ReferralCodeDisplay
+                  code={user.referral_code || user.smipay_tag || ""}
+                />
+              </div>
+            </div>
+
+            {/* Referral Analysis */}
+            {referral_analysis && (
+              <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface overflow-hidden">
+                <div className="px-4 py-3 sm:px-5 border-b border-dashboard-border/40">
+                  <div className="flex items-center gap-2">
+                    <Gift className="h-4 w-4 text-brand-bg-primary shrink-0" />
+                    <h3 className="text-sm sm:text-base font-semibold text-dashboard-heading">Referral Stats</h3>
+                  </div>
+                </div>
+                <div className="p-4 sm:p-5 space-y-4">
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <StatCard
+                      label="Total Referred"
+                      value={String(referral_analysis.total_referred)}
+                      bg="bg-brand-bg-primary/10"
+                      color="text-brand-bg-primary"
+                    />
+                    <StatCard
+                      label="Slots Remaining"
+                      value={String(referral_analysis.slots_remaining)}
+                      bg="bg-emerald-50"
+                      color="text-emerald-600"
+                    />
+                    <StatCard
+                      label="You Earned"
+                      value={`₦${referral_analysis.referrer_rewards_total_amount.toLocaleString()}`}
+                      bg="bg-amber-50"
+                      color="text-amber-700"
+                    />
+                    <StatCard
+                      label="Friends Earned"
+                      value={`₦${referral_analysis.referee_rewards_total_amount.toLocaleString()}`}
+                      bg="bg-blue-50"
+                      color="text-blue-600"
+                    />
+                  </div>
+
+                  {referral_analysis.by_status && Object.keys(referral_analysis.by_status).length > 0 && (
+                    <div>
+                      <p className="text-[10px] sm:text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
+                        Status Breakdown
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {Object.entries(referral_analysis.by_status).map(([status, count]) =>
+                          (count ?? 0) > 0 ? (
+                            <span
+                              key={status}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-dashboard-bg text-[11px] font-medium text-dashboard-heading"
+                            >
+                              {status.charAt(0).toUpperCase() + status.slice(1)}: {count}
+                            </span>
+                          ) : null
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {referral_analysis.program_config && (
+                    <div className="pt-3 border-t border-dashboard-border/40">
+                      <p className="text-[10px] sm:text-xs font-semibold text-dashboard-muted uppercase tracking-wider mb-2">
+                        Program Details
+                      </p>
+                      <div className="space-y-1.5 text-xs sm:text-sm text-dashboard-muted">
+                        <p>
+                          You earn ₦{referral_analysis.program_config.referrer_reward_amount?.toLocaleString() ?? "—"} per referral;
+                          friends earn ₦{referral_analysis.program_config.referee_reward_amount?.toLocaleString() ?? "—"}.
+                        </p>
+                        <p>
+                          Trigger: {referral_analysis.program_config.reward_trigger?.replace(/_/g, " ") ?? "—"} · Max{" "}
+                          {referral_analysis.program_config.max_referrals_per_user ?? "—"} referrals per user.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!referral_analysis && (
+              <div className="rounded-2xl border border-dashboard-border/60 bg-dashboard-surface p-6 text-center">
+                <p className="text-sm text-dashboard-muted">Referral stats will appear here once you start referring friends.</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === "wallet" && (
           <div className="space-y-4">
             {/* Wallet Summary */}
@@ -458,6 +562,49 @@ export default function ProfilePage() {
 /* ------------------------------------------------------------------ */
 /* Sub-components                                                      */
 /* ------------------------------------------------------------------ */
+
+function ReferralCodeDisplay({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  if (!code) {
+    return (
+      <p className="text-sm text-dashboard-muted">No referral code available</p>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-dashboard-bg/60 border border-dashboard-border/40">
+      <span className="text-lg sm:text-xl font-bold font-mono text-dashboard-heading tracking-wider flex-1 truncate">
+        {code}
+      </span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-brand-bg-primary hover:bg-brand-bg-primary/90 rounded-lg transition-colors shrink-0"
+      >
+        {copied ? (
+          <>
+            <CheckCircle className="h-4 w-4" />
+            Copied
+          </>
+        ) : (
+          <>
+            <Copy className="h-4 w-4" />
+            Copy
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
 
 function InfoRow({
   icon: Icon,
