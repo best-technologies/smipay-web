@@ -16,7 +16,7 @@ import { motion } from "motion/react";
 import { useAdminDashboard } from "@/hooks/admin/useAdminDashboard";
 import { StatsCard } from "./_components/StatsCard";
 import { SectionCard } from "./_components/SectionCard";
-import { ActionItems } from "./_components/ActionItems";
+// import { ActionItems } from "./_components/ActionItems";
 import { TierDistribution } from "./_components/TierDistribution";
 import { DashboardSkeleton } from "./_components/DashboardSkeleton";
 import { Button } from "@/components/ui/button";
@@ -87,7 +87,7 @@ export default function AdminDashboardPage() {
 
       <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Action Items */}
-        <ActionItems items={data.action_items} />
+        {/* <ActionItems items={data.action_items} /> */}
 
         {/* Primary Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
