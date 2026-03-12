@@ -154,7 +154,25 @@ export default function PrivacyPolicyPage() {
             </ul>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
-              4. Cookies and Tracking Technologies
+              4. Contacts & Address Book (Mobile App)
+            </h3>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
+              <li>
+                With your explicit permission, the Smipay mobile app may access the contacts stored on your device.
+              </li>
+              <li>
+                We use this only to help you find people you know on Smipay (for example, to send money, share referral codes, or invite friends).
+              </li>
+              <li>
+                You can control this permission at any time through your device settings. If you turn it off, Smipay will no longer be able to read your contacts.
+              </li>
+              <li>
+                We do not use your address book to spam your contacts, and we do not sell or rent your contact list to third parties.
+              </li>
+            </ul>
+
+            <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
+              5. Cookies and Tracking Technologies
             </h3>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed">
               We use cookies, pixels, and analytics tools to understand usage
@@ -179,13 +197,33 @@ export default function PrivacyPolicyPage() {
               <li>Respond to customer support inquiries</li>
               <li>Prevent fraud, unauthorized activity, or misuse</li>
               <li>
-                Communicate updates, promotional messages, and important notices
+                Communicate updates, product changes, and important service notices
+              </li>
+              <li>
+                Where permitted, send you marketing messages about new features, rewards, or promotions you can benefit from (you can opt out at any time).
               </li>
             </ul>
-            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
-              We will only process your data for lawful purposes as permitted by
-              the Nigeria Data Protection Regulation (NDPR).
+
+            <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
+              Legal Basis for Processing
+            </h3>
+            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
+              We only process your personal data where we have a valid legal basis to do so under the Nigeria Data Protection Regulation (NDPR) and any other applicable laws. Depending on the context, this may include:
             </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
+              <li>
+                <strong>Contractual necessity</strong> – to provide the Smipay services you sign up for (for example, processing transactions or maintaining your account).
+              </li>
+              <li>
+                <strong>Legal obligations</strong> – to comply with KYC/AML regulations, tax, anti‑fraud, and other regulatory requirements.
+              </li>
+              <li>
+                <strong>Legitimate interests</strong> – to secure our platform, prevent fraud, improve our products, and protect Smipay, our users, and the public, provided these interests are not overridden by your rights and freedoms.
+              </li>
+              <li>
+                <strong>Your consent</strong> – for specific optional features such as accessing your contacts, sending certain marketing communications, or using cookies beyond what is strictly necessary. Where we rely on consent, you can withdraw it at any time.
+              </li>
+            </ul>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               How We Share Your Information
@@ -198,7 +236,7 @@ export default function PrivacyPolicyPage() {
               1. Third-Party Service Providers
             </h3>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
-              Such as:
+              We rely on carefully selected partners to help us deliver Smipay. This may include:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
               <li>Payment processors</li>
@@ -209,8 +247,13 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
               These providers only receive the data needed to perform their
-              duties.
+              duties. They are required to:
             </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
+              <li>Use your information only in line with our documented instructions</li>
+              <li>Keep your information confidential and implement appropriate security safeguards</li>
+              <li>Comply with applicable data‑protection laws and contractual obligations</li>
+            </ul>
 
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
               2. Regulatory Authorities
@@ -228,24 +271,30 @@ export default function PrivacyPolicyPage() {
             <h3 className="text-lg md:text-xl font-semibold text-brand-text-primary mt-6 mb-3">
               3. Business Transfers
             </h3>
-            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed">
-              If Smipay undergoes a merger, acquisition, or restructuring, your
-              data may be transferred as part of the transaction.
+            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
+              If Smipay undergoes a merger, acquisition, investment, restructuring, or sale of assets, your
+              information may be transferred as part of that transaction. In such cases we will ensure that:
             </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
+              <li>Any new organisation takes on the same or equivalent privacy obligations</li>
+              <li>You are informed of any material changes where required by law</li>
+            </ul>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               How We Protect Your Information
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mb-3">
-              We use industry-standard security measures to protect your data,
+              We use a combination of technical and organisational measures to protect your data,
               including:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary">
-              <li>Encryption</li>
-              <li>Secure data storage</li>
-              <li>Firewalls</li>
-              <li>Multi-factor authentication</li>
-              <li>Strict access controls</li>
+              <li>Encryption of data in transit and at rest where appropriate</li>
+              <li>Secure data storage and regular backups</li>
+              <li>Firewalls and network security controls</li>
+              <li>Multi-factor authentication for sensitive operations</li>
+              <li>Strict access controls based on job role and need‑to‑know</li>
+              <li>Logging and monitoring of critical systems to detect suspicious activity</li>
+              <li>Staff training and internal policies on data protection and confidentiality</li>
             </ul>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
               While we strive to protect your data, no system is completely
@@ -293,7 +342,10 @@ export default function PrivacyPolicyPage() {
               <li>Detecting fraud</li>
             </ul>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
-              After this period, your data is securely deleted or anonymized.
+              For example, transaction records may be kept for several years to comply with
+              financial‑services regulations, while certain technical logs may be retained for
+              shorter periods for security and troubleshooting. After the relevant retention period
+              expires, your data is securely deleted or irreversibly anonymized.
             </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
@@ -318,6 +370,11 @@ export default function PrivacyPolicyPage() {
               requests within a reasonable period and in line with NDPR and any
               other applicable regulations.
             </p>
+            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-2">
+              We may need to verify your identity before acting on your request to protect your account.
+              Where we cannot fully comply with a request (for example, because we must retain some
+              records for legal reasons), we will explain this clearly.
+            </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               Children&apos;s Privacy
@@ -332,18 +389,34 @@ export default function PrivacyPolicyPage() {
               International Transfers
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed">
-              If your data is transferred outside Nigeria, Smipay ensures that
-              appropriate safeguards are in place in accordance with NDPR
-              requirements.
+              If your data is transferred outside Nigeria (for example, where our service providers
+              or cloud infrastructure are located in another country), Smipay ensures that
+              appropriate safeguards are in place in accordance with NDPR requirements. These may
+              include:
             </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary mt-2">
+              <li>Contractual clauses that require equivalent data‑protection standards</li>
+              <li>Transfers to countries that have been recognised as providing adequate protection</li>
+              <li>Additional technical and organisational measures to keep your data secure</li>
+            </ul>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">
               Updates to This Policy
             </h2>
             <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed">
-              We may update this policy occasionally. Changes will be posted on
-              the app or website. Continued use means acceptance of the updated
-              policy.
+              We may update this policy occasionally to reflect changes in our services, legal
+              requirements, or how we handle your data. When we make material changes, we will:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm md:text-base text-brand-text-secondary mt-2">
+              <li>Update the &quot;Last updated&quot; date at the top of this page</li>
+              <li>Post the revised policy in the app and/or on our website</li>
+              <li>
+                Where appropriate, notify you via in‑app message, email, or other prominent notice
+              </li>
+            </ul>
+            <p className="text-sm md:text-base text-brand-text-secondary leading-relaxed mt-3">
+              Continued use of Smipay after such changes become effective means you accept the
+              updated policy.
             </p>
 
             <h2 className="text-xl md:text-2xl font-bold text-brand-text-primary mt-8 mb-4">

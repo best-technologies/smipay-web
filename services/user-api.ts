@@ -92,4 +92,32 @@ export const userApi = {
       throw new Error(formatErrorMessage(error));
     }
   },
+
+  /**
+   * Request permanent account deletion
+   * @param reason - Optional feedback from the user (max 500 characters)
+   */
+  requestAccountDeletion: async (reason?: string) => {
+    try {
+      const payload = reason?.trim()
+        ? { reason: reason.trim().slice(0, 500) }
+        : undefined;
+      const response = await backendApi.post("/user/request-account-deletion", payload);
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
+
+  /**
+   * Cancel a pending account deletion request
+   */
+  cancelAccountDeletionRequest: async () => {
+    try {
+      const response = await backendApi.post("/user/cancel-account-deletion-request");
+      return response.data;
+    } catch (error) {
+      throw new Error(formatErrorMessage(error));
+    }
+  },
 };

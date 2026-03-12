@@ -73,6 +73,7 @@ export interface UserProfile {
     wallet_balance: number;
     smipay_tag: string;
     referral_code?: string;
+    requested_account_deletion: boolean;
     role?: string;
     isTransactionPinSetup?: boolean;
   };

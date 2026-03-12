@@ -29,7 +29,8 @@ Returns everything the app homepage needs: user info, wallet, accounts (DVA), re
       "email": "john@example.com",
       "role": "user",
       "profile_image": "https://res.cloudinary.com/...",
-      "is_email_verified": true
+      "is_email_verified": true,
+      "requested_account_deletion": false
     },
 
     "accounts": [
@@ -181,7 +182,8 @@ Returns user profile, address, KYC, wallet, **current tier**, **all available ti
       "totalAccounts": 1,
       "wallet_balance": 5000,
       "referral_code": "JOHN7ABC",
-      "smipay_tag": "johndoe"
+      "smipay_tag": "johndoe",
+      "requested_account_deletion": false
     },
 
     "address": {
@@ -375,6 +377,62 @@ Updates user profile fields (name, gender, date of birth, etc.).
 
 ---
 
+## 5. Account Deletion
+
+### Request account deletion
+
+**POST** `/user/request-account-deletion`
+
+Submits a request to delete the user's account. The user receives a confirmation email. Actual deletion is processed manually or via a scheduled job (typically within 7 business days).
+
+**Request body (optional):**
+```json
+{
+  "reason": "Optional feedback (max 500 chars)"
+}
+```
+
+**Success response (200):**
+```json
+{
+  "success": true,
+  "message": "Your account deletion request has been received. You will be notified via email once your account is deleted. This may take up to 7 business days.",
+  "data": {
+    "requested_account_deletion": true
+  }
+}
+```
+
+If the user has already requested deletion, the same message is returned (idempotent).
+
+### Cancel account deletion request
+
+**POST** `/user/cancel-account-deletion-request`
+
+Cancels a pending account deletion request. No body required.
+
+**Success response (200):**
+```json
+{
+  "success": true,
+  "message": "Your account deletion request has been cancelled.",
+  "data": {
+    "requested_account_deletion": false
+  }
+}
+```
+
+If there is no pending request, returns: `"You have no pending account deletion request."`
+
+### Frontend UI guidance
+
+- **`requested_account_deletion`** is returned in `user` from `fetch-user-profile` and `fetch-app-homepage-details`.
+- When `requested_account_deletion === false`: Show "Request account deletion" or "Delete my account" button.
+- When `requested_account_deletion === true`: Show "Account deletion pending" message and a "Cancel deletion request" button.
+- After a successful request, refetch user data to update the UI.
+
+---
+
 ## Field Notes
 
 ### User
@@ -386,6 +444,7 @@ Updates user profile fields (name, gender, date of birth, etc.).
 | `is_email_verified` | boolean | Email verification status |
 | `profile_image` | string | Cloudinary URL or `""` |
 | `wallet_balance` | number | Raw balance (profile endpoint only) |
+| `requested_account_deletion` | boolean | `true` if user has requested account deletion; use to show "Cancel deletion request" vs "Request deletion" |
 
 ### Current Tier
 | Field | Type | Notes |

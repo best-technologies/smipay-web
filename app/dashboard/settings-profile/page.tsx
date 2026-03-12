@@ -246,6 +246,17 @@ export default function ProfilePage() {
           ))}
         </div>
 
+        {/* Danger zone entry point */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => router.push("/profile/delete-account")}
+            className="text-[11px] sm:text-xs font-medium text-red-600 hover:text-red-700 hover:underline underline-offset-4"
+          >
+            Delete my account
+          </button>
+        </div>
+
         {/* Tab Content */}
         {activeTab === "personal" && (
           <div className="space-y-4">

@@ -12,6 +12,7 @@ export interface DashboardUser {
   role: string;
   profile_image: string;
   is_email_verified: boolean;
+  requested_account_deletion: boolean;
 }
 
 export interface BankAccount {
