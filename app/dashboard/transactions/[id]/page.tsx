@@ -175,6 +175,10 @@ export default function TransactionDetailPage() {
   const isEducation = transaction.type === "education";
 
   const hasToken = isElectricity && "electricity_token" in meta && !!(meta as ElectricityMeta).electricity_token;
+  const shouldShowTokenFallback =
+    isElectricity &&
+    transaction.status === "success" &&
+    !hasToken;
 
   return (
     <div className="min-h-screen bg-dashboard-bg">
@@ -330,6 +334,30 @@ export default function TransactionDetailPage() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Token fallback (electricity, success but no token) ── */}
+          {shouldShowTokenFallback && (
+            <div className="mx-4 mt-3">
+              <div className="bg-dashboard-surface rounded-xl border border-amber-200/80 px-4 py-3.5 space-y-2">
+                <p className="text-sm font-semibold text-amber-800">
+                  Token not available
+                </p>
+                <p className="text-[11px] sm:text-xs text-amber-900 leading-relaxed">
+                  This electricity purchase was marked as successful, but we couldn&apos;t retrieve your
+                  token automatically. Please contact support with your transaction number so we can
+                  help you resolve this.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/support/new")}
+                  className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-brand-bg-primary hover:text-brand-bg-primary/90 hover:underline underline-offset-4"
+                >
+                  Contact support
+                  <ChevronRight className="h-3 w-3" />
+                </button>
               </div>
             </div>
           )}

@@ -18,6 +18,7 @@ import {
   User,
   Gauge,
   Ban,
+  RotateCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -81,6 +82,7 @@ export default function VtpassElectricityPage() {
     serviceIds: allServices,
     isLoading: loadingServices,
     error: servicesError,
+    refetch: refetchServices,
   } = useVtpassElectricityServiceIds();
 
   // Provider state — initialize synchronously from cached store to avoid flash
@@ -407,7 +409,22 @@ export default function VtpassElectricityPage() {
         </section>
 
         {servicesError && (
-          <div className="max-w-xl"><FormError message={servicesError} /></div>
+          <div className="max-w-xl">
+            <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-xl">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
+              <p className="flex-1">
+                {servicesError}
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchServices()}
+                className="p-1.5 rounded-full hover:bg-red-100 text-red-700 flex-shrink-0 touch-manipulation"
+                aria-label="Retry loading providers"
+              >
+                <RotateCw className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         )}
 
         {/* ── Main form card ── */}

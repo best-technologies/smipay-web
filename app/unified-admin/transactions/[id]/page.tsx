@@ -22,6 +22,7 @@ import {
   ChevronUp,
   RefreshCw,
   Shield,
+  Zap,
 } from "lucide-react";
 import { adminTransactionsApi } from "@/services/admin/transactions-api";
 import type { TransactionDetail } from "@/types/admin/transactions";
@@ -142,6 +143,39 @@ export default function TransactionDetailPage() {
   const sStyle = statusStyles[tx.status ?? ""] ?? statusStyles.pending;
   const userName = tx.user
     ? [tx.user.first_name, tx.user.last_name].filter(Boolean).join(" ") || tx.user.email || tx.user.phone_number
+    : null;
+
+  const isElectricityTx = tx.transaction_type === "electricity";
+  const rawMeta = tx.meta_data && typeof tx.meta_data === "object" ? (tx.meta_data as any) : null;
+  const vtpassResponse = rawMeta?.vtpass_response as any | undefined;
+  const vtpassTx = vtpassResponse?.content?.transactions as any | undefined;
+
+  const electricityToken: string | null = isElectricityTx
+    ? (
+        tx.electricity_token ??
+        rawMeta?.electricity_token ??
+        vtpassResponse?.Token ??
+        vtpassResponse?.token ??
+        (typeof vtpassResponse?.purchased_code === "string"
+          ? vtpassResponse.purchased_code.replace(/^Token\s*:\s*/i, "")
+          : null)
+      ) ?? null
+    : null;
+
+  const electricityMeta: {
+    units: string | null;
+    meterNumber: string | null;
+    customerName: string | null;
+    customerAddress: string | null;
+    disco: string | null;
+  } | null = isElectricityTx && rawMeta
+    ? {
+        units: (rawMeta.units ?? vtpassResponse?.units ?? null) as string | null,
+        meterNumber: (rawMeta.meterNumber ?? rawMeta.billersCode ?? vtpassResponse?.meterNumber ?? null) as string | null,
+        customerName: (rawMeta.customerName ?? vtpassResponse?.customerName ?? null) as string | null,
+        customerAddress: (rawMeta.customerAddress ?? vtpassResponse?.customerAddress ?? null) as string | null,
+        disco: (rawMeta.disco ?? vtpassTx?.product_name ?? null) as string | null,
+      }
     : null;
 
   return (
@@ -292,6 +326,40 @@ export default function TransactionDetailPage() {
             />
           )}
         </motion.section>
+
+        {/* Electricity Details (for electricity VTU) */}
+        {isElectricityTx && electricityMeta && (
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="bg-dashboard-surface rounded-xl border border-dashboard-border/40 p-5"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="h-4 w-4 text-amber-600" />
+              <h2 className="text-sm font-bold text-dashboard-heading">Electricity Details</h2>
+            </div>
+            <InfoRow
+              label="Token"
+              value={
+                electricityToken ? <CopyText value={electricityToken} /> : "—"
+              }
+            />
+            {electricityMeta.units && (
+              <InfoRow label="Units" value={electricityMeta.units} />
+            )}
+            {electricityMeta.meterNumber && (
+              <InfoRow label="Meter Number" value={electricityMeta.meterNumber} mono />
+            )}
+            {electricityMeta.customerName && (
+              <InfoRow label="Customer Name" value={electricityMeta.customerName} />
+            )}
+            {electricityMeta.customerAddress && (
+              <InfoRow label="Service Address" value={electricityMeta.customerAddress} />
+            )}
+            {electricityMeta.disco && <InfoRow label="Disco" value={electricityMeta.disco} />}
+          </motion.section>
+        )}
 
         {/* Counterpart (P2P transfers) */}
         {tx.counterpart && (

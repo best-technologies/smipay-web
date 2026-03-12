@@ -40,6 +40,7 @@ export function DataPurchaseForm({
 }: DataPurchaseFormProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [errors, setErrors] = useState<{ phoneNumber?: string }>({});
+  const [phoneNetworkWarning, setPhoneNetworkWarning] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -61,8 +62,21 @@ export function DataPurchaseForm({
       return "Phone number must start with 0";
     }
 
-    if (IS_NETWORK_CHECK_ENABLED && !doesPhoneMatchNigeriaService(value, serviceName)) {
-      return "Phone number does not match the selected network";
+    return undefined;
+  };
+
+  const getPhoneNetworkWarning = (value: string): string | undefined => {
+    if (!IS_NETWORK_CHECK_ENABLED) {
+      return undefined;
+    }
+
+    // Only run network check when number is structurally valid
+    if (value.length !== 11 || !value.startsWith("0")) {
+      return undefined;
+    }
+
+    if (!doesPhoneMatchNigeriaService(value, serviceName)) {
+      return "This number may not belong to the selected network. You can still continue.";
     }
 
     return undefined;
@@ -87,11 +101,15 @@ export function DataPurchaseForm({
 
   useEffect(() => {
     if (!phoneNumber) {
+      setPhoneNetworkWarning(null);
       return;
     }
 
     const phoneError = getPhoneError(phoneNumber);
+    const warning = !phoneError ? getPhoneNetworkWarning(phoneNumber) : undefined;
+
     setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+    setPhoneNetworkWarning(warning || null);
   }, [serviceName, phoneNumber]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,11 +165,19 @@ export function DataPurchaseForm({
         onChange={(value) => {
           setPhoneNumber(value);
           const phoneError = getPhoneError(value);
+          const warning = !phoneError ? getPhoneNetworkWarning(value) : undefined;
           setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+          setPhoneNetworkWarning(warning || null);
         }}
         error={errors.phoneNumber}
         disabled={isSubmitting}
       />
+
+      {!errors.phoneNumber && phoneNetworkWarning && (
+        <p className="text-[11px] text-amber-600 font-medium -mt-3">
+          {phoneNetworkWarning}
+        </p>
+      )}
 
       {serverError && <FormError message={serverError} />}
 

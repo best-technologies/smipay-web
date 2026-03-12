@@ -148,6 +148,7 @@ export interface TransactionDetail extends Omit<TransactionItem, "user"> {
   smipay_amount: number | null;
   markup_percent: number | null;
   authorization_url: string | null;
+  electricity_token: string | null;
   meta_data: Record<string, unknown> | null;
   user: TransactionDetailUser | null;
   counterpart: TransactionCounterpart | null;

@@ -43,6 +43,7 @@ export function AirtimeForm({ onSuccess, onError, walletBalance, cashbackBalance
     phoneNumber?: string;
     amount?: string;
   }>({});
+  const [phoneNetworkWarning, setPhoneNetworkWarning] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -102,12 +103,22 @@ const getPhoneError = (value: string): string | undefined => {
     return "Phone number must start with 0";
   }
 
-  if (IS_NETWORK_CHECK_ENABLED && selectedServiceId && services.length > 0) {
-    const service = services.find((s) => s.serviceID === selectedServiceId);
+  return undefined;
+};
 
-    if (service && !doesPhoneMatchNigeriaService(value, service.name || service.serviceID)) {
-      return "Phone number does not match the selected network";
-    }
+const getPhoneNetworkWarning = (value: string): string | undefined => {
+  if (!IS_NETWORK_CHECK_ENABLED || !selectedServiceId || services.length === 0) {
+    return undefined;
+  }
+
+  // Only run network check when number is structurally valid
+  if (value.length !== 11 || !value.startsWith("0")) {
+    return undefined;
+  }
+
+  const service = services.find((s) => s.serviceID === selectedServiceId);
+  if (service && !doesPhoneMatchNigeriaService(value, service.name || service.serviceID)) {
+    return "This number may not belong to the selected network. You can still continue.";
   }
 
   return undefined;
@@ -153,11 +164,15 @@ const validateForm = (): boolean => {
 
   useEffect(() => {
     if (!phoneNumber) {
+      setPhoneNetworkWarning(null);
       return;
     }
 
     const phoneError = getPhoneError(phoneNumber);
+    const warning = !phoneError ? getPhoneNetworkWarning(phoneNumber) : undefined;
+
     setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+    setPhoneNetworkWarning(warning || null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedServiceId, services, phoneNumber]);
 
@@ -250,7 +265,9 @@ const validateForm = (): boolean => {
             onChange={(value) => {
               setPhoneNumber(value);
               const phoneError = getPhoneError(value);
+              const warning = !phoneError ? getPhoneNetworkWarning(value) : undefined;
               setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
+              setPhoneNetworkWarning(warning || null);
             }}
             error={errors.phoneNumber}
             disabled={isSubmitting || loadingServices}
@@ -258,6 +275,11 @@ const validateForm = (): boolean => {
         </div>
         {errors.phoneNumber && (
           <p className="text-[12px] text-red-500 font-medium mt-1.5">{errors.phoneNumber}</p>
+        )}
+        {!errors.phoneNumber && phoneNetworkWarning && (
+          <p className="text-[11px] text-amber-600 font-medium mt-1.5">
+            {phoneNetworkWarning}
+          </p>
         )}
         {errors.serviceId && (
           <p className="text-[12px] text-red-500 font-medium mt-1.5">{errors.serviceId}</p>
