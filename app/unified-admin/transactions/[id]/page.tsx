@@ -284,6 +284,12 @@ export default function TransactionDetailPage() {
           </div>
           <InfoRow label="Amount" value={<span className="font-semibold">{formatNGN(tx.amount)}</span>} />
           <InfoRow label="Fee" value={formatNGN(tx.fee)} />
+          {(tx.commission_smipay_earned != null || tx.commission != null) && (
+            <InfoRow
+              label="Commission (Smipay earned)"
+              value={formatNGN(tx.commission_smipay_earned ?? tx.commission ?? 0)}
+            />
+          )}
           <InfoRow label="Currency" value={tx.currency_type?.toUpperCase() ?? "NGN"} />
           <InfoRow label="Balance Before" value={formatNGN(tx.balance_before)} />
           <InfoRow label="Balance After" value={formatNGN(tx.balance_after)} />

@@ -97,6 +97,7 @@ export function TransactionsTable({ transactions }: Props) {
               <th className="text-center px-4 py-2.5 font-medium text-dashboard-muted">Dir</th>
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">Channel</th>
               <th className="text-right px-4 py-2.5 font-medium text-dashboard-muted">Revenue</th>
+              <th className="text-right px-4 py-2.5 font-medium text-dashboard-muted" title="Commission (Smipay earned)">Commission</th>
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">Reference</th>
               <th className="text-right px-4 py-2.5 font-medium text-dashboard-muted">Date</th>
             </tr>
@@ -164,6 +165,15 @@ export function TransactionsTable({ transactions }: Props) {
                   <td className="px-4 py-2.5 text-right whitespace-nowrap">
                     {tx.markup_value != null ? (
                       <span className="text-emerald-600 font-medium">{formatNGN(tx.markup_value)}</span>
+                    ) : (
+                      <span className="text-dashboard-muted">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5 text-right whitespace-nowrap">
+                    {(tx.commission_smipay_earned != null || tx.commission != null) ? (
+                      <span className="text-dashboard-heading font-medium">
+                        {formatNGN(tx.commission_smipay_earned ?? tx.commission ?? 0)}
+                      </span>
                     ) : (
                       <span className="text-dashboard-muted">—</span>
                     )}

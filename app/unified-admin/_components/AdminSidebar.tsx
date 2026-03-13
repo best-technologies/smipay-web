@@ -24,9 +24,13 @@ import {
   ScrollText,
   Gift,
   Coins,
+  Percent,
   BellRing,
   Sparkles,
 } from "lucide-react";
+
+// Show "New" badge until this date (ISO). Used for recently added features (e.g. 7 days).
+const MARKUP_NEW_BADGE_UNTIL = "2026-03-20"; // 7 days from feature add
 
 interface AdminMenuItem {
   id: string;
@@ -34,6 +38,8 @@ interface AdminMenuItem {
   icon: LucideIcon;
   href?: string;
   enabled: boolean;
+  /** If set (ISO date string), show "New" badge until this date (inclusive). */
+  showNewBadgeUntil?: string;
   submenu?: {
     id: string;
     label: string;
@@ -85,6 +91,14 @@ const adminMenuItems: AdminMenuItem[] = [
     icon: BellRing,
     href: "/unified-admin/notifications",
     enabled: true,
+  },
+  {
+    id: "markup",
+    label: "Markup",
+    icon: Percent,
+    href: "/unified-admin/markup",
+    enabled: true,
+    showNewBadgeUntil: MARKUP_NEW_BADGE_UNTIL,
   },
   {
     id: "kyc",
@@ -261,6 +275,10 @@ export default function AdminSidebar() {
       );
     }
 
+    const showNewBadge =
+      item.showNewBadgeUntil &&
+      new Date() <= new Date(item.showNewBadgeUntil + "T23:59:59");
+
     return (
       <Link
         key={item.id}
@@ -274,6 +292,17 @@ export default function AdminSidebar() {
       >
         <item.icon className="h-5 w-5" />
         <span className="font-medium">{item.label}</span>
+        {showNewBadge && (
+          <span
+            className={`ml-auto shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded ${
+              isActive(item.href!)
+                ? "bg-white/25 text-white"
+                : "bg-emerald-500 text-white"
+            }`}
+          >
+            New
+          </span>
+        )}
       </Link>
     );
   };

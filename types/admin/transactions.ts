@@ -104,6 +104,8 @@ export interface TransactionItem {
   currency_type: string | null;
   payment_method: string | null;
   payment_channel: string | null;
+  commission: number | null;
+  commission_smipay_earned: number | null;
   fee: number | null;
   balance_before: number;
   balance_after: number;
