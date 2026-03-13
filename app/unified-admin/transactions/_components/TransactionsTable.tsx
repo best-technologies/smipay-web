@@ -54,9 +54,18 @@ function CopyRef({ value }: { value: string }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <button type="button" onClick={handleCopy} className="inline-flex items-center gap-1 group" title={value}>
-      <span className="truncate max-w-[100px]">{value}</span>
-      {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity" />}
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1 group"
+      title={value}
+    >
+      <span className="font-mono whitespace-nowrap">{value}</span>
+      {copied ? (
+        <Check className="h-3 w-3 text-emerald-500" />
+      ) : (
+        <Copy className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+      )}
     </button>
   );
 }
@@ -83,6 +92,7 @@ export function TransactionsTable({ transactions }: Props) {
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">User</th>
               <th className="text-right px-4 py-2.5 font-medium text-dashboard-muted">Amount</th>
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">Type</th>
+              <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">Plan</th>
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">Status</th>
               <th className="text-center px-4 py-2.5 font-medium text-dashboard-muted">Dir</th>
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">Channel</th>
@@ -114,7 +124,9 @@ export function TransactionsTable({ transactions }: Props) {
                           {avatar}
                         </div>
                       )}
-                      <span className="text-dashboard-heading font-medium truncate max-w-[120px]">{userName}</span>
+                      <span className="text-dashboard-heading font-medium whitespace-nowrap">
+                        {userName}
+                      </span>
                     </Link>
                   </td>
                   <td className="px-4 py-2.5 text-right font-semibold text-dashboard-heading whitespace-nowrap">
@@ -126,6 +138,9 @@ export function TransactionsTable({ transactions }: Props) {
                         {tx.transaction_type}
                       </span>
                     )}
+                  </td>
+                  <td className="px-4 py-2.5 text-dashboard-heading max-w-[140px]">
+                    {tx.data_plan_name?.trim() ?? "—"}
                   </td>
                   <td className="px-4 py-2.5">
                     {tx.status && (

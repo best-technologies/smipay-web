@@ -48,6 +48,9 @@ interface AdminTransactionsState {
   isLoading: boolean;
   error: string | null;
   cache: Map<string, CacheEntry>;
+  /** Last full-list result (search="") — used for instant restore when clearing search */
+  baselineCache: CacheEntry | null;
+  baselineKey: string | null;
 
   fetchTransactions: (force?: boolean) => Promise<void>;
   setFilters: (patch: Partial<TransactionFilters>) => void;
@@ -63,10 +66,13 @@ export const useAdminTransactionsStore = create<AdminTransactionsState>((set, ge
   isLoading: false,
   error: null,
   cache: new Map(),
+  baselineCache: null,
+  baselineKey: null,
 
   fetchTransactions: async (force = false) => {
-    const { filters, cache } = get();
+    const { filters, cache, baselineCache, baselineKey } = get();
     const key = filtersKey(filters);
+    const isNoSearch = !filters.search?.trim();
 
     if (!force) {
       const cached = cache.get(key);
@@ -77,6 +83,44 @@ export const useAdminTransactionsStore = create<AdminTransactionsState>((set, ge
           meta: cached.data.meta,
           error: null,
         });
+        return;
+      }
+      // When clearing search: restore from baseline immediately if same filter key (no loading)
+      if (
+        isNoSearch &&
+        baselineCache &&
+        baselineKey === key &&
+        Date.now() - baselineCache.ts < CACHE_TTL
+      ) {
+        set({
+          transactions: baselineCache.data.transactions,
+          analytics: baselineCache.data.analytics,
+          meta: baselineCache.data.meta,
+          error: null,
+        });
+        // Refresh in background (no loading state)
+        try {
+          const res = await adminTransactionsApi.list(filters);
+          if (res.success && res.data) {
+            const entry: CacheEntry = { data: res.data, ts: Date.now() };
+            const newCache = new Map(get().cache);
+            newCache.set(key, entry);
+            if (newCache.size > MAX_CACHE) {
+              const oldest = newCache.keys().next().value;
+              if (oldest) newCache.delete(oldest);
+            }
+            set({
+              transactions: res.data.transactions,
+              analytics: res.data.analytics,
+              meta: res.data.meta,
+              cache: newCache,
+              baselineCache: entry,
+              baselineKey: key,
+            });
+          }
+        } catch {
+          // Keep baseline data on background refresh failure
+        }
         return;
       }
     }
@@ -97,6 +141,8 @@ export const useAdminTransactionsStore = create<AdminTransactionsState>((set, ge
           analytics: res.data.analytics,
           meta: res.data.meta,
           cache: newCache,
+          baselineCache: isNoSearch ? entry : get().baselineCache,
+          baselineKey: isNoSearch ? key : get().baselineKey,
           error: null,
         });
       } else {

@@ -338,6 +338,57 @@ export default function TransactionDetailPage() {
             </div>
           )}
 
+          {/* ── Cashback (VTpass: used or earned) ── */}
+          {(transaction.cashback_balance_before != null ||
+            transaction.cashback_used != null ||
+            transaction.cashback_balance_after != null ||
+            transaction.cashback_earned != null) && (
+            <div className="mx-4 mt-3">
+              <div className="bg-dashboard-surface rounded-xl border border-dashboard-border/50 px-4 py-3.5 space-y-3">
+                <h3 className="text-[13px] font-semibold text-dashboard-heading">Cashback</h3>
+                {transaction.cashback_used != null && transaction.cashback_used > 0 && (
+                  <p className="text-xs text-dashboard-muted">
+                    Used ₦{parseAmount(transaction.cashback_used)} cashback on this purchase.
+                    {transaction.balance_before != null && transaction.balance_after != null && (
+                      <> Wallet: ₦{parseAmount(transaction.balance_before)} → ₦{parseAmount(transaction.balance_after)}</>
+                    )}
+                  </p>
+                )}
+                {transaction.cashback_earned != null && transaction.cashback_earned > 0 && (
+                  <p className="text-xs text-emerald-600 font-medium">
+                    Earned ₦{parseAmount(transaction.cashback_earned)} cashback on this transaction.
+                  </p>
+                )}
+                <div className="divide-y divide-dashboard-border/40 pt-1 space-y-0">
+                  {transaction.cashback_balance_before != null && (
+                    <Row
+                      label="Cashback balance before"
+                      value={`₦${parseAmount(transaction.cashback_balance_before)}`}
+                    />
+                  )}
+                  {transaction.cashback_used != null && (
+                    <Row
+                      label="Cashback used"
+                      value={`₦${parseAmount(transaction.cashback_used)}`}
+                    />
+                  )}
+                  {transaction.cashback_balance_after != null && (
+                    <Row
+                      label="Cashback balance after"
+                      value={`₦${parseAmount(transaction.cashback_balance_after)}`}
+                    />
+                  )}
+                  {transaction.cashback_earned != null && (
+                    <Row
+                      label="Cashback earned"
+                      value={`₦${parseAmount(transaction.cashback_earned)}`}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Token fallback (electricity, success but no token) ── */}
           {shouldShowTokenFallback && (
             <div className="mx-4 mt-3">
@@ -405,11 +456,15 @@ export default function TransactionDetailPage() {
                   <Row label="Subscription Type" value={(meta as CableMeta).subscription_type} capitalize />
                 )}
 
+                {/* Data / VTU plan name (from API) */}
+                {transaction.data_plan_name?.trim() && (
+                  <Row label="Plan" value={transaction.data_plan_name} />
+                )}
                 {/* Data */}
                 {isData && "phone" in meta && (
                   <Row label="Recipient Mobile" value={(meta as DataMeta).phone} mono />
                 )}
-                {isData && "plan" in meta && (
+                {isData && "plan" in meta && (meta as DataMeta).plan && (
                   <Row label="Data Bundle" value={(meta as DataMeta).plan} />
                 )}
 

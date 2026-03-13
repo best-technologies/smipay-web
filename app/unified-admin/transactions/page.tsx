@@ -107,6 +107,7 @@ export default function TransactionsPage() {
           onFilterChange={updateFilters}
           onReset={resetFilters}
           total={meta?.total ?? 0}
+          isLoading={isLoading}
         />
 
         {meta && <TransactionsPagination meta={meta} onPageChange={setPage} />}

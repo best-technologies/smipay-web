@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, X, SlidersHorizontal, RotateCcw, Loader2 } from "lucide-react";
 import {
   TRANSACTION_TYPES,
   CREDIT_DEBIT,
@@ -15,11 +15,16 @@ interface Props {
   onFilterChange: (patch: Partial<TransactionFilters>) => void;
   onReset: () => void;
   total: number;
+  isLoading?: boolean;
 }
 
-export function TransactionsFilters({ filters, onSearch, onFilterChange, onReset, total }: Props) {
+export function TransactionsFilters({ filters, onSearch, onFilterChange, onReset, total, isLoading }: Props) {
   const [searchValue, setSearchValue] = useState(filters.search);
   const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    setSearchValue(filters.search);
+  }, [filters.search]);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -47,7 +52,10 @@ export function TransactionsFilters({ filters, onSearch, onFilterChange, onReset
             placeholder="Search reference, description, mobile..."
             className="w-full pl-9 pr-8 py-2 text-xs bg-dashboard-bg border border-dashboard-border/60 rounded-lg text-dashboard-heading placeholder:text-dashboard-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-bg-primary/20"
           />
-          {searchValue && (
+          {isLoading && (
+            <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-bg-primary animate-spin" />
+          )}
+          {!isLoading && searchValue && (
             <button
               type="button"
               onClick={() => handleSearch("")}

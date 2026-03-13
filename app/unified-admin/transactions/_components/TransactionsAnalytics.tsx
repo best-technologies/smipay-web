@@ -49,8 +49,22 @@ export function TransactionsAnalytics({ analytics }: Props) {
     },
     {
       label: "Total Revenue",
-      value: formatNGN(overview.total_revenue),
-      sub: "from markups",
+      value: formatNGN(overview.total_revenue_including_commission ?? overview.total_revenue),
+      sub:
+        overview.vtpass_commission != null || overview.total_revenue_including_commission != null ? (
+          <span className="block mt-0.5">
+            <span className="text-dashboard-muted">markup </span>
+            <span className="font-medium text-dashboard-heading">{formatNGN(overview.total_revenue)}</span>
+            {overview.vtpass_commission != null && (
+              <>
+                <span className="text-dashboard-muted"> · commission </span>
+                <span className="font-medium text-dashboard-heading">{formatNGN(overview.vtpass_commission)}</span>
+              </>
+            )}
+          </span>
+        ) : (
+          "from markups"
+        ),
       icon: BarChart3,
       iconBg: "bg-purple-50",
       iconColor: "text-purple-600",

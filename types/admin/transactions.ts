@@ -44,6 +44,8 @@ export interface TransactionOverview {
   total_transactions: number;
   total_volume: number;
   total_revenue: number;
+  vtpass_commission?: number;
+  total_revenue_including_commission?: number;
   avg_amount: number;
   min_amount: number;
   max_amount: number;
@@ -93,6 +95,7 @@ export interface TransactionItem {
   user_id: string;
   amount: number | null;
   provider: string | null;
+  data_plan_name?: string | null;
   transaction_type: string | null;
   credit_debit: string | null;
   description: string | null;
@@ -150,6 +153,10 @@ export interface TransactionDetail extends Omit<TransactionItem, "user"> {
   authorization_url: string | null;
   electricity_token: string | null;
   meta_data: Record<string, unknown> | null;
+  cashback_balance_before: number | null;
+  cashback_used: number | null;
+  cashback_balance_after: number | null;
+  cashback_earned: number | null;
   user: TransactionDetailUser | null;
   counterpart: TransactionCounterpart | null;
 }

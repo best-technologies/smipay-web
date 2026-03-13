@@ -47,9 +47,22 @@ export interface AdminDashboardReferrals {
   this_week: number;
 }
 
+export interface AdminDashboardRevenuePeriod {
+  markup: number;
+  vtpass_commission: number;
+  total: number;
+}
+
 export interface AdminDashboardRevenue {
   markup_today: number;
   markup_this_week: number;
+  vtpass_commission_today?: number;
+  vtpass_commission_this_week?: number;
+  total_revenue_today?: number;
+  total_revenue_this_week?: number;
+  this_month?: AdminDashboardRevenuePeriod;
+  last_month?: AdminDashboardRevenuePeriod;
+  all_time?: AdminDashboardRevenuePeriod;
 }
 
 export type AdminActionItemType =

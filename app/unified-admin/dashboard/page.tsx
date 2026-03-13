@@ -18,6 +18,7 @@ import { StatsCard } from "./_components/StatsCard";
 import { SectionCard } from "./_components/SectionCard";
 // import { ActionItems } from "./_components/ActionItems";
 import { TierDistribution } from "./_components/TierDistribution";
+import { RevenueBreakdown } from "./_components/RevenueBreakdown";
 import { DashboardSkeleton } from "./_components/DashboardSkeleton";
 import { Button } from "@/components/ui/button";
 
@@ -123,11 +124,17 @@ export default function AdminDashboardPage() {
           />
           <StatsCard
             title="Revenue Today"
-            value={formatNaira(data.revenue.markup_today)}
+            value={formatNaira(
+              data.revenue.total_revenue_today ?? data.revenue.markup_today
+            )}
             icon={TrendingUp}
             iconBg="var(--quick-action-3-bg)"
             iconColor="var(--quick-action-3)"
-            subtitle={`${formatNaira(data.revenue.markup_this_week)} this week`}
+            subtitle={
+              data.revenue.vtpass_commission_today != null
+                ? `Markup ${formatNaira(data.revenue.markup_today)} · Commission ${formatNaira(data.revenue.vtpass_commission_today)}`
+                : `${formatNaira(data.revenue.markup_this_week)} this week`
+            }
             subtitleColor="text-dashboard-muted"
             index={3}
           />
@@ -338,6 +345,7 @@ export default function AdminDashboardPage() {
           />
 
           <TierDistribution tiers={data.tier_distribution} />
+          <RevenueBreakdown revenue={data.revenue} index={5} />
         </div>
       </div>
     </div>

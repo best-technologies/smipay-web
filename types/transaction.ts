@@ -28,6 +28,7 @@ export interface Transaction {
   transaction_type: TransactionType;
   description: string;
   status: TransactionStatus;
+  data_plan_name?: string | null;
   date: string;
   reference: string;
   sender: string | null;
@@ -100,6 +101,7 @@ export interface TransactionDetail {
   credit_debit: CreditDebit;
   description: string;
   status: TransactionStatus;
+  data_plan_name?: string | null;
   recipient_mobile: string | null;
   tx_reference: string;
   transaction_number?: string;
@@ -108,6 +110,10 @@ export interface TransactionDetail {
   fee?: number;
   balance_before?: number;
   balance_after?: number;
+  cashback_balance_before?: number | null;
+  cashback_used?: number | null;
+  cashback_balance_after?: number | null;
+  cashback_earned?: number | null;
   created_on: string;
   updated_on: string;
   sender: string | null;

@@ -23,6 +23,7 @@ import {
   RefreshCw,
   Shield,
   Zap,
+  Gift,
 } from "lucide-react";
 import { adminTransactionsApi } from "@/services/admin/transactions-api";
 import type { TransactionDetail } from "@/types/admin/transactions";
@@ -299,6 +300,37 @@ export default function TransactionDetailPage() {
           )}
         </motion.section>
 
+        {/* Cashback (VTpass purchases) */}
+        {(tx.cashback_balance_before != null ||
+          tx.cashback_used != null ||
+          tx.cashback_balance_after != null ||
+          tx.cashback_earned != null) && (
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="bg-dashboard-surface rounded-xl border border-dashboard-border/40 p-5"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Gift className="h-4 w-4 text-amber-500" />
+              <h2 className="text-sm font-bold text-dashboard-heading">Cashback</h2>
+            </div>
+            <InfoRow label="Balance before" value={formatNGN(tx.cashback_balance_before)} />
+            <InfoRow label="Used on purchase" value={formatNGN(tx.cashback_used)} />
+            <InfoRow label="Balance after" value={formatNGN(tx.cashback_balance_after)} />
+            <InfoRow
+              label="Earned"
+              value={
+                tx.cashback_earned != null ? (
+                  <span className="text-emerald-600 font-medium">{formatNGN(tx.cashback_earned)}</span>
+                ) : (
+                  "—"
+                )
+              }
+            />
+          </motion.section>
+        )}
+
         {/* Provider Details */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-dashboard-surface rounded-xl border border-dashboard-border/40 p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -306,6 +338,9 @@ export default function TransactionDetailPage() {
             <h2 className="text-sm font-bold text-dashboard-heading">Provider Details</h2>
           </div>
           <InfoRow label="Provider" value={<span className="capitalize">{tx.provider ?? "—"}</span>} />
+          {tx.data_plan_name != null && tx.data_plan_name !== "" && (
+            <InfoRow label="Plan" value={tx.data_plan_name} />
+          )}
           <InfoRow label="Transaction Number" value={tx.transaction_number ? <CopyText value={tx.transaction_number} /> : "—"} />
           <InfoRow label="Recipient Mobile" value={tx.recipient_mobile} />
           {tx.sender_details && (

@@ -302,6 +302,11 @@ export default function TransactionsPage() {
                     <p className="text-[13px] font-medium text-dashboard-heading truncate leading-tight">
                       {tx.description}
                     </p>
+                    {tx.data_plan_name?.trim() ? (
+                      <p className="text-[11px] text-brand-bg-primary/90 mt-0.5 leading-tight truncate">
+                        {tx.data_plan_name}
+                      </p>
+                    ) : null}
                     <p className="text-[11px] text-dashboard-muted mt-0.5 leading-tight">
                       {tx.date}
                     </p>

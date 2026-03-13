@@ -33,6 +33,7 @@ export function useAdminTransactions() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filters.page,
+    filters.search,
     filters.status,
     filters.transaction_type,
     filters.credit_debit,
@@ -48,7 +49,14 @@ export function useAdminTransactions() {
   const debouncedSearch = useCallback(
     (value: string) => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
+      // Clear search immediately so we restore from store/baseline without delay
+      if (!value.trim()) {
+        setFilters({ search: "" });
+        return;
+      }
       debounceTimer.current = setTimeout(() => {
+        debounceTimer.current = null;
         setFilters({ search: value });
       }, DEBOUNCE_MS);
     },
