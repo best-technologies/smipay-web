@@ -511,7 +511,7 @@ export function MarkupSettings({
                         </button>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                       <MiniInput
                         label="%"
                         value={edited.percentage}
@@ -685,7 +685,7 @@ export function MarkupSettings({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-sm p-5"
+              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-sm p-5"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
@@ -731,7 +731,7 @@ export function MarkupSettings({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-sm p-5"
+              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-sm p-5"
             >
               <h3 className="text-sm font-bold text-dashboard-heading mb-1">
                 Delete Rule

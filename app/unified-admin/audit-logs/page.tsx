@@ -85,9 +85,9 @@ export default function AuditLogsPage() {
   return (
     <div className="min-h-screen bg-dashboard-bg">
       {/* Sticky header */}
-      <div className="sticky top-0 z-30 bg-dashboard-surface border-b border-dashboard-border/60 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-dashboard-surface border-b border-dashboard-border/60 px-4 py-3.5 sm:px-6 sm:py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="h-9 w-9 rounded-lg bg-brand-bg-primary flex items-center justify-center">
               <ScrollText className="h-4.5 w-4.5 text-white" />
             </div>
@@ -114,7 +114,7 @@ export default function AuditLogsPage() {
         </div>
       </div>
 
-      <div className="px-6 py-5 space-y-5">
+      <div className="px-4 py-4 sm:px-6 sm:py-5 space-y-5">
         {/* Error banner */}
         {error && (
           <motion.div

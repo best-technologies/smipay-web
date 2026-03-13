@@ -292,3 +292,9 @@ html {
 .admin-content-area {
   zoom: var(--admin-zoom);
 }
+
+@media (max-width: 768px) {
+  .admin-content-area {
+    zoom: 1;
+  }
+}

@@ -213,87 +213,55 @@ export function CashbackHistory({
             </p>
           </div>
         ) : (
-          <>
-            {/* Desktop table */}
-            <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-dashboard-bg/50 text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
-                    <th className="text-left px-3.5 py-2.5">Date</th>
-                    <th className="text-left px-3.5 py-2.5">User</th>
-                    <th className="text-left px-3.5 py-2.5">Service</th>
-                    <th className="text-right px-3.5 py-2.5">Purchase</th>
-                    <th className="text-right px-3.5 py-2.5">%</th>
-                    <th className="text-right px-3.5 py-2.5">Cashback</th>
-                    <th className="text-left px-3.5 py-2.5">Tx Ref</th>
-                    <th className="text-left px-3.5 py-2.5">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-dashboard-border/40">
-                  {history.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-dashboard-bg/30 transition-colors"
-                    >
-                      <td className="px-3.5 py-2.5 text-dashboard-muted whitespace-nowrap">
-                        {formatDate(item.createdAt)}
-                      </td>
-                      <td className="px-3.5 py-2.5 font-mono text-dashboard-heading truncate max-w-[120px]">
-                        {item.user_id.slice(0, 8)}…
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <ServiceBadge type={item.service_type} />
-                      </td>
-                      <td className="px-3.5 py-2.5 text-right tabular-nums text-dashboard-heading">
-                        {formatCurrency(item.source_amount)}
-                      </td>
-                      <td className="px-3.5 py-2.5 text-right tabular-nums text-dashboard-muted">
-                        {item.percentage_applied}%
-                      </td>
-                      <td className="px-3.5 py-2.5 text-right tabular-nums font-semibold text-emerald-600">
-                        {formatCurrency(item.amount)}
-                      </td>
-                      <td className="px-3.5 py-2.5 font-mono text-dashboard-muted truncate max-w-[140px]">
-                        {item.transaction_ref}
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <StatusBadge status={item.status} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="lg:hidden divide-y divide-dashboard-border/40">
-              {history.map((item) => (
-                <div key={item.id} className="px-3.5 py-3 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <ServiceBadge type={item.service_type} />
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-dashboard-muted">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-xs">
+              <thead>
+                <tr className="bg-dashboard-bg/50 text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
+                  <th className="text-left px-3.5 py-2.5">Date</th>
+                  <th className="text-left px-3.5 py-2.5">User</th>
+                  <th className="text-left px-3.5 py-2.5">Service</th>
+                  <th className="text-right px-3.5 py-2.5">Purchase</th>
+                  <th className="text-right px-3.5 py-2.5">%</th>
+                  <th className="text-right px-3.5 py-2.5">Cashback</th>
+                  <th className="text-left px-3.5 py-2.5">Tx Ref</th>
+                  <th className="text-left px-3.5 py-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dashboard-border/40">
+                {history.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-dashboard-bg/30 transition-colors"
+                  >
+                    <td className="px-3.5 py-2.5 text-dashboard-muted whitespace-nowrap">
                       {formatDate(item.createdAt)}
-                    </span>
-                    <span className="text-xs font-semibold text-emerald-600 tabular-nums">
-                      +{formatCurrency(item.amount)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-dashboard-muted">
-                      Purchase: {formatCurrency(item.source_amount)} ×{" "}
-                      {item.percentage_applied}%
-                    </span>
-                    <span className="font-mono text-dashboard-muted truncate max-w-[120px]">
+                    </td>
+                    <td className="px-3.5 py-2.5 font-mono text-dashboard-heading truncate max-w-[120px]">
                       {item.user_id.slice(0, 8)}…
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <ServiceBadge type={item.service_type} />
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right tabular-nums text-dashboard-heading">
+                      {formatCurrency(item.source_amount)}
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right tabular-nums text-dashboard-muted">
+                      {item.percentage_applied}%
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right tabular-nums font-semibold text-emerald-600">
+                      {formatCurrency(item.amount)}
+                    </td>
+                    <td className="px-3.5 py-2.5 font-mono text-dashboard-muted truncate max-w-[140px]">
+                      {item.transaction_ref}
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <StatusBadge status={item.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </motion.div>
 

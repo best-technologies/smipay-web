@@ -33,7 +33,7 @@ export function UsersFilters({ filters, onSearch, onFilterChange, onReset, total
   return (
     <div className="bg-dashboard-surface rounded-xl border border-dashboard-border/40 overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 p-3">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dashboard-muted" />
           <input
             type="text"
@@ -79,7 +79,7 @@ export function UsersFilters({ filters, onSearch, onFilterChange, onReset, total
       </div>
 
       {expanded && (
-        <div className="border-t border-dashboard-border/40 p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div className="border-t border-dashboard-border/40 p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
           <select
             value={filters.role}
             onChange={(e) => onFilterChange({ role: e.target.value })}

@@ -18,7 +18,7 @@ export function ReferralsPagination({ meta, onPageChange }: ReferralsPaginationP
   const pages = getPageNumbers(page, total_pages);
 
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-wrap items-center justify-between gap-2">
       <p className="text-[10px] text-dashboard-muted tabular-nums">
         Showing {from}–{to} of {total.toLocaleString()}
       </p>

@@ -94,7 +94,7 @@ export function FirstTxRewardHowItWorksModal({ open, onClose }: FirstTxRewardHow
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="bg-dashboard-surface rounded-2xl border border-dashboard-border/60 shadow-2xl w-full max-w-2xl my-4 sm:my-8 overflow-hidden"
+        className="bg-dashboard-surface rounded-2xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-2xl my-4 sm:my-8 overflow-hidden max-h-[85vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-dashboard-surface border-b border-dashboard-border/60 px-4 sm:px-6 py-4 flex items-center justify-between">

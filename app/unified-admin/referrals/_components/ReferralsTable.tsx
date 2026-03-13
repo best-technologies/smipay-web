@@ -61,7 +61,7 @@ export function ReferralsTable({
       className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 overflow-hidden"
     >
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full min-w-[900px] text-xs">
           <thead>
             <tr className="border-b border-dashboard-border/60">
               {[

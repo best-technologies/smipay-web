@@ -182,7 +182,7 @@ export function ConversationsQueue() {
     <div className="space-y-3">
       {/* Analytics cards */}
       {analytics && (
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           <div className="bg-dashboard-surface border border-dashboard-border/60 rounded-xl px-3 py-3 sm:px-4">
             <p className="text-[10px] font-medium text-dashboard-muted uppercase tracking-wider">Active</p>
             <p className="text-lg sm:text-xl font-bold text-dashboard-heading mt-0.5">

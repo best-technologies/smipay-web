@@ -55,7 +55,7 @@ export function ReferralConfigModal({ config, open, onClose, onSaved }: Referral
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-lg"
+        className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-lg"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-dashboard-border/60">
           <div className="flex items-center gap-2.5">
@@ -116,7 +116,7 @@ export function ReferralConfigModal({ config, open, onClose, onSaved }: Referral
             </select>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <NumberField
               label="Max / User"
               value={form.max_referrals_per_user}

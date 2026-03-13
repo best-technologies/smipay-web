@@ -96,8 +96,8 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen bg-dashboard-bg">
       <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="h-9 w-9 rounded-lg bg-brand-bg-primary flex items-center justify-center">
               <Headphones className="h-5 w-5 text-white" />
             </div>

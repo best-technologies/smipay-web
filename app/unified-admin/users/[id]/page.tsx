@@ -61,9 +61,9 @@ function relativeTime(iso: string): string {
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-2 border-b border-dashboard-border/20 last:border-0">
+    <div className="flex items-start justify-between gap-4 py-2 border-b border-dashboard-border/20 last:border-0 min-w-0">
       <span className="text-xs text-dashboard-muted shrink-0">{label}</span>
-      <span className="text-xs text-dashboard-heading text-right">{value ?? "—"}</span>
+      <span className="text-xs text-dashboard-heading text-right min-w-0 break-all">{value ?? "—"}</span>
     </div>
   );
 }
@@ -182,8 +182,8 @@ export default function UserDetailPage() {
   return (
     <div className="min-h-screen bg-dashboard-bg">
       <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+          <div className="flex items-center gap-3 min-w-0">
             <button type="button" onClick={() => router.back()} className="p-1.5 rounded-lg hover:bg-dashboard-bg transition-colors">
               <ArrowLeft className="h-4 w-4 text-dashboard-muted" />
             </button>

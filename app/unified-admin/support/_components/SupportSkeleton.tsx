@@ -25,7 +25,7 @@ export function SupportSkeleton() {
 
       <div className="px-4 py-4 sm:px-6 sm:py-5 lg:px-8 space-y-3">
         {/* Analytics cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
           {Array.from({ length: 5 }).map((_, i) => (
             <motion.div
               key={i}

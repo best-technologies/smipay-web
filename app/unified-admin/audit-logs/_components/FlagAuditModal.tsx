@@ -57,7 +57,7 @@ export function FlagAuditModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="relative w-full max-w-md mx-4 bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-xl"
+            className="relative w-full max-w-full sm:max-w-md mx-4 bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3">

@@ -129,7 +129,7 @@ export function AuditTable({ logs, onFlag }: AuditTableProps) {
   return (
     <div className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[900px] text-sm">
           <thead>
             <tr className="border-b border-dashboard-border/50 bg-dashboard-bg/50">
               {columns.map((col) => (

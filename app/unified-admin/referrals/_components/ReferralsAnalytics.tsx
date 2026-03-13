@@ -39,7 +39,7 @@ export function ReferralsAnalytics({ analytics }: ReferralsAnalyticsProps) {
   return (
     <div className="space-y-3">
       {/* Row 1: Overview cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
         <OverviewCard
           title="Total Referrals"
           value={overview.total_referrals}

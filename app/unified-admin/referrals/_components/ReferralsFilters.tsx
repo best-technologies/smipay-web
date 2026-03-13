@@ -71,7 +71,7 @@ export function ReferralsFilters({
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 pt-1 border-t border-dashboard-border/60">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-[10px] font-medium text-dashboard-muted mb-1">
                     From

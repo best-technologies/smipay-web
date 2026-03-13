@@ -16,7 +16,7 @@ export function DashboardSkeleton() {
 
       <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6">
         {/* Top stats row skeleton */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
@@ -35,7 +35,7 @@ export function DashboardSkeleton() {
         </div>
 
         {/* Second stats row skeleton */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}

@@ -15,7 +15,7 @@ export function NotificationsPagination({
   const nextDisabled = page >= pages;
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 py-2.5">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-dashboard-border/60 bg-dashboard-surface px-3 py-2.5">
       <button
         type="button"
         disabled={prevDisabled}

@@ -51,7 +51,7 @@ export function UserTierModal({ user, open, onClose, onUpdated }: Props) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-md p-6"
+        className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-md p-6"
       >
         <div className="flex items-center gap-2 mb-3">
           <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center">

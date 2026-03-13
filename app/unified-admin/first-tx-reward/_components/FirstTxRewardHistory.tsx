@@ -216,103 +216,70 @@ export function FirstTxRewardHistory({
             </p>
           </div>
         ) : (
-          <>
-            {/* Desktop table */}
-            <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-dashboard-bg/50 text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
-                    <th className="text-left px-3.5 py-2.5">Date</th>
-                    <th className="text-left px-3.5 py-2.5">User</th>
-                    <th className="text-left px-3.5 py-2.5">Trigger Type</th>
-                    <th className="text-right px-3.5 py-2.5">Purchase Amt</th>
-                    <th className="text-right px-3.5 py-2.5">Bonus Given</th>
-                    <th className="text-left px-3.5 py-2.5">Bonus Tx Ref</th>
-                    <th className="text-left px-3.5 py-2.5">Source Tx Ref</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-dashboard-border/40">
-                  {history.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-dashboard-bg/30 transition-colors"
-                    >
-                      <td className="px-3.5 py-2.5 text-dashboard-muted whitespace-nowrap">
-                        {formatDate(item.createdAt)}
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <Link
-                          href={`/unified-admin/users/${item.user_id}`}
-                          className="font-mono text-dashboard-heading hover:text-brand-bg-primary truncate max-w-[120px] block transition-colors"
-                        >
-                          {item.user_id.slice(0, 8)}…
-                        </Link>
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <TxTypeBadge type={item.source_transaction_type} />
-                      </td>
-                      <td className="px-3.5 py-2.5 text-right tabular-nums text-dashboard-heading">
-                        {formatCurrency(item.source_amount)}
-                      </td>
-                      <td className="px-3.5 py-2.5 text-right tabular-nums font-semibold text-emerald-600">
-                        {formatCurrency(item.reward_amount)}
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <Link
-                          href={`/unified-admin/transactions/${item.transaction_ref}`}
-                          className="font-mono text-dashboard-muted hover:text-brand-bg-primary truncate max-w-[140px] block transition-colors"
-                        >
-                          {item.transaction_ref.length > 20
-                            ? item.transaction_ref.slice(0, 20) + "…"
-                            : item.transaction_ref}
-                        </Link>
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <Link
-                          href={`/unified-admin/transactions/${item.source_transaction_ref}`}
-                          className="font-mono text-dashboard-muted hover:text-brand-bg-primary truncate max-w-[140px] block transition-colors"
-                        >
-                          {item.source_transaction_ref.length > 20
-                            ? item.source_transaction_ref.slice(0, 20) + "…"
-                            : item.source_transaction_ref}
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="lg:hidden divide-y divide-dashboard-border/40">
-              {history.map((item) => (
-                <div key={item.id} className="px-3.5 py-3 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <TxTypeBadge type={item.source_transaction_type} />
-                    <span className="text-xs font-semibold text-emerald-600 tabular-nums">
-                      +{formatCurrency(item.reward_amount)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-dashboard-muted">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-xs">
+              <thead>
+                <tr className="bg-dashboard-bg/50 text-[10px] font-semibold text-dashboard-muted uppercase tracking-wider">
+                  <th className="text-left px-3.5 py-2.5">Date</th>
+                  <th className="text-left px-3.5 py-2.5">User</th>
+                  <th className="text-left px-3.5 py-2.5">Trigger Type</th>
+                  <th className="text-right px-3.5 py-2.5">Purchase Amt</th>
+                  <th className="text-right px-3.5 py-2.5">Bonus Given</th>
+                  <th className="text-left px-3.5 py-2.5">Bonus Tx Ref</th>
+                  <th className="text-left px-3.5 py-2.5">Source Tx Ref</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dashboard-border/40">
+                {history.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-dashboard-bg/30 transition-colors"
+                  >
+                    <td className="px-3.5 py-2.5 text-dashboard-muted whitespace-nowrap">
                       {formatDate(item.createdAt)}
-                    </span>
-                    <span className="text-[10px] text-dashboard-heading tabular-nums">
-                      Purchase: {formatCurrency(item.source_amount)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px]">
-                    <Link
-                      href={`/unified-admin/users/${item.user_id}`}
-                      className="font-mono text-dashboard-muted hover:text-brand-bg-primary transition-colors"
-                    >
-                      User: {item.user_id.slice(0, 8)}…
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <Link
+                        href={`/unified-admin/users/${item.user_id}`}
+                        className="font-mono text-dashboard-heading hover:text-brand-bg-primary truncate max-w-[120px] block transition-colors"
+                      >
+                        {item.user_id.slice(0, 8)}…
+                      </Link>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <TxTypeBadge type={item.source_transaction_type} />
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right tabular-nums text-dashboard-heading">
+                      {formatCurrency(item.source_amount)}
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right tabular-nums font-semibold text-emerald-600">
+                      {formatCurrency(item.reward_amount)}
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <Link
+                        href={`/unified-admin/transactions/${item.transaction_ref}`}
+                        className="font-mono text-dashboard-muted hover:text-brand-bg-primary truncate max-w-[140px] block transition-colors"
+                      >
+                        {item.transaction_ref.length > 20
+                          ? item.transaction_ref.slice(0, 20) + "…"
+                          : item.transaction_ref}
+                      </Link>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <Link
+                        href={`/unified-admin/transactions/${item.source_transaction_ref}`}
+                        className="font-mono text-dashboard-muted hover:text-brand-bg-primary truncate max-w-[140px] block transition-colors"
+                      >
+                        {item.source_transaction_ref.length > 20
+                          ? item.source_transaction_ref.slice(0, 20) + "…"
+                          : item.source_transaction_ref}
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </motion.div>
 

@@ -96,8 +96,8 @@ export default function ReferralsPage() {
   return (
     <div className="min-h-screen bg-dashboard-bg">
       <header className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="h-9 w-9 rounded-lg bg-brand-bg-primary flex items-center justify-center">
               <UserPlus className="h-5 w-5 text-white" />
             </div>
@@ -276,7 +276,7 @@ export default function ReferralsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-md p-6"
+            className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-md p-6"
           >
             <h3 className="text-sm font-bold text-dashboard-heading mb-2">Reject Referral</h3>
             <p className="text-xs text-dashboard-muted mb-4">
@@ -318,7 +318,7 @@ export default function ReferralsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-sm p-5"
+              className="bg-dashboard-surface rounded-xl border border-dashboard-border/60 shadow-2xl w-full max-w-full sm:max-w-sm p-5"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">

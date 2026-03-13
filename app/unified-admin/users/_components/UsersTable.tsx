@@ -47,7 +47,7 @@ export function UsersTable({ users, onEditRole, onEditStatus, onEditTier }: Prop
   return (
     <div className="bg-dashboard-surface rounded-xl border border-dashboard-border/40 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full min-w-[800px] text-xs">
           <thead>
             <tr className="border-b border-dashboard-border/40 bg-dashboard-bg/50">
               <th className="text-left px-4 py-2.5 font-medium text-dashboard-muted">User</th>

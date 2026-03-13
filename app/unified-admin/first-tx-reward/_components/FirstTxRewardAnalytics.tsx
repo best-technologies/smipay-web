@@ -73,7 +73,7 @@ export function FirstTxRewardAnalytics({
   return (
     <div className="space-y-3">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <StatCard
           title="Total Recipients"
           value={overview.total_recipients.toLocaleString()}
@@ -122,7 +122,7 @@ export function FirstTxRewardAnalytics({
       </div>
 
       {/* Period Stats */}
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
         transition={{ duration: 0.4 }}
         className="bg-dashboard-surface border-b border-dashboard-border/60 sticky top-0 z-10"
       >
-        <div className="flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:px-8">
           <div className="min-w-0 pr-12 lg:pr-0">
             <h1 className="text-lg sm:text-xl font-semibold text-dashboard-heading tracking-tight">
               Admin Dashboard
@@ -91,7 +91,7 @@ export default function AdminDashboardPage() {
         {/* <ActionItems items={data.action_items} /> */}
 
         {/* Primary Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatsCard
             title="Total Users"
             value={data.users.total.toLocaleString()}
@@ -141,7 +141,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Secondary Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatsCard
             title="Pending KYC"
             value={data.kyc.pending.toLocaleString()}
